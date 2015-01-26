@@ -6,7 +6,7 @@
 
 					Do Not SCAM/Sell script. If Scammed, then it will lead to ban in forum.sa-mp.com
 
-					COD_RWWII™ - - - TDM - - - V10.9.2 - - - xenon-extreme.com
+					COD_RWWII™ - - - TDM - - - V10.9.2 - - - xpsamp.com
 					------===== [R]aM[P]aGe Rocks =====------
 					Version V10.9.6 by Rampage aka Srijan(DAAAAAAAAAARK) Abhay.Sv aka [XP]Perfect_Boy
 
@@ -26,12 +26,12 @@
 									   OOOOOOOOOOOOOOOOO
 									   YOOOOOOOOOOOOOOOP
 									   `OOOOOOOOOOOOOOO'
-									    `OOOOOOOOOOOOO
+									    `OOOOOOOOOOOOO"
 									     `OOOOOOOOOOO'
 									       `~OOOOO~'
                     ««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
                     »»                                                                        ««
-                    »» Scripter 			       : Abhay SV (Perfect_Boy) , Mex_Ivanov      ««
+                    »» Scripter 			       : Perfect_Boy                              ««
                     »» Edite                      : Perfect_Boy                               ««
                     »» Maps Editor 		          :  Rampage , Perfect_Boy , Kitty            ««
                     »» Admins System New          : Perfect_Boy                               ««
@@ -1032,8 +1032,8 @@ public OnGameModeInit()
 
  	LoadBox(-45);
 	UsePlayerPedAnims();
-	SetGameModeText("•XE•COD•RWW2™•V10.9.6•TDM•");
-	SendRconCommand("mapname •SA/LS/TDM•XE•");
+	SetGameModeText("•XP•COD•RWW2™•V10.9.6•TDM•");
+	SendRconCommand("mapname •SA/LS/TDM•XP•");
 	for(new i; i<MAX_PLAYERS; i++)
 	{
 		if(IsPlayerConnected(i) && !IsPlayerNPC(i))
@@ -1331,7 +1331,7 @@ TextDrawSetShadow(PSTATS2, 0);
 	TextDrawSetOutline(welcometo1, 1);
 	TextDrawSetProportional(welcometo1, 1);
 
-	welcometo2 = TextDrawCreate(211.000000, 353.000000, "xenon-extreme.com");
+	welcometo2 = TextDrawCreate(211.000000, 353.000000, "xpsamp.com");
 	TextDrawBackgroundColor(welcometo2, -1);
 	TextDrawFont(welcometo2, 3);
 	TextDrawLetterSize(welcometo2, 0.500000, 2.000000);
@@ -1340,7 +1340,7 @@ TextDrawSetShadow(PSTATS2, 0);
 	TextDrawSetProportional(welcometo2, 1);
 
 
-	Web = TextDrawCreate(485.000000, 10.000000, "~b~xenon-extreme.com");
+	Web = TextDrawCreate(485.000000, 10.000000, "~b~xpsamp.com");
 	TextDrawBackgroundColor(Web, 255);
 	TextDrawFont(Web, 1);
 	TextDrawLetterSize(Web, 0.330000, 1.200000);
@@ -2440,16 +2440,12 @@ public OnPlayerConnect(playerid)
 	warnmsg[playerid] = 0;
 
     PlayersOnline++;
-	new name[MAX_PLAYER_NAME], str[192];
+	new name[MAX_PLAYER_NAME], string1[40+MAX_PLAYER_NAME];
 	GetPlayerName(playerid, name, sizeof(name));
-	format(str, sizeof(str), "~y~~h~[JOIN]~b~%s has ~g~~h~joined ~p~~h~the server!", name);
-    SendBoxMessage(str);
-    format(str,sizeof(str),"{009090}%s(%d) {FFFFFF}Has connected to the {009090} server[%d]", name,playerid,PlayersOnline );
-	SendClientMessageToAll(C_GREY,str);
-	#if defined IRCENABLED
-    format(str, sizeof(str), "10[JOIN] %s[%d] has joined the server.4[%d]", name,playerid,PlayersOnline);
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
+	format(string1, sizeof(string1), "~y~~h~[JOIN]~b~%s has ~g~~h~joined ~p~~h~the server!", name);
+    SendBoxMessage(string1);
+    format(string1, sizeof(string1), "[JOIN]Player %s has joined [XP]Call Of Duty[%d]", name,PlayersOnline);
+    SendClientMessageToAll(C_GREY, string1);
 
 //	 VBanCheck(playerid);
 
@@ -2459,7 +2455,7 @@ public OnPlayerConnect(playerid)
 	 SendClientMessage(playerid,C_PINK,"Welcome To Real World At War 2™ Team Death Match!");
 	 SendClientMessage(playerid,C_PINK,"Dont Forget To Read /rules Before Playing!");
 	 SendClientMessage(playerid,C_PINK,"Roses Are Red Violets Are Blue, Bots Are Here, Watching You !");
-	 SendClientMessage(playerid,C_PINK,"For Your Objectives Type /objectives And Dont Forget To Visit Us On xenon-extreme.com");
+	 SendClientMessage(playerid,C_PINK,"For Your Objectives Type /objectives And Dont Forget To Visit Us On xpsamp.com");
 	 SendClientMessage(playerid,red,"Use /cmds To View Normal Player Commands");
      GetPlayerName(playerid, name, sizeof(name));
 //     PlayAudioStreamForPlayer(playerid,"http://s320.ve.vc/data/320/32265/One_Bottle_Down_-_www.DjPunjab.Com.mp3");
@@ -2814,32 +2810,14 @@ public OnPlayerDisconnect(playerid, reason)
         //No need to store a result for a update string
 	}
 	new byebye[100];
-if(reason == 2)
-{
-
-    format(byebye,sizeof byebye,"~r~~h~[Kicked / Banned]~y~~h~%s has ~r~~h~left ~p~~h~the server!",GetName(playerid),playerid);
-    SendBoxMessage(byebye);
-}
-else if(reason == 0)
+	switch(reason)
 	{
-    format(byebye,sizeof byebye,"~r~~h~[CRASHED]~y~~h~%s has ~r~~h~left ~p~~h~the server!",GetName(playerid),playerid);
-    SendBoxMessage(byebye);
+		case 2: format(byebye,sizeof byebye,"~r~~h~[Kicked / Banned]~y~~h~%s has ~r~~h~left ~p~~h~the server!",GetName(playerid),playerid);
 	}
-#if defined IRCENABLED
-{
-        new leaveMsg[128], name[MAX_PLAYER_NAME], reasonMsg[20];
-        switch(reason)
-        {
-                case 0: reasonMsg = "Timeout";
-                case 1: reasonMsg = "Leaving";
-                case 2: reasonMsg = "Kicked/Banned";
-        }
-        GetPlayerName(playerid, name, sizeof(name));
-        format(leaveMsg, sizeof(leaveMsg), "10[PART]%s (%d) Has Left The Server. -(%s)", name, playerid, reasonMsg);
-        IRC_GroupSay(gGroupID, IRC_CHANNEL, leaveMsg);
 
-}
-#endif
+	SendBoxMessage(byebye);
+	format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Total Players In Server: %d",GetName(playerid),PlayersOnline);
+
    	if(grider[playerid][0])
    	{
     	DestroyObject(grider[playerid][0]);
@@ -3848,11 +3826,6 @@ public OnPlayerDeath(playerid, killerid, reason)
               //	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/db765608b05afc72e0a8a2965f82f8f5/triplekill.mp3");
                 SendBoxMessage(text);
                 SendClientMessageToAll(C_PINK, text);
-                #if defined IRCENABLED
-                format(text, sizeof(text), "13[SPREE]1%s is on a killing spree of 4[31 kills!",PlayerName2(killerid));
-                IRC_GroupSay(gGroupID, IRC_CHANNEL, text);
-                #endif
-                format(text, sizeof(text), "%s is on a killing spree of 3 kills!", PlayerName2(killerid));
                 SendClientMessage(killerid, lightblue, "You get $1000 and 1 score! (killing spree bonus)");
                 GivePlayerMoney(killerid, 1000);
                 GivePlayerScore(killerid, 1);
@@ -3864,10 +3837,6 @@ public OnPlayerDeath(playerid, killerid, reason)
                    //	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/07ceb2f3ce93be7bfbe0a7cc3de09d64/dominating.mp3");
                 SendBoxMessage(text);
                 SendClientMessageToAll(C_PINK, text);
-                #if defined IRCENABLED
-                format(text, sizeof(text), "13[SPREE]1%s is on a killing spree of 4[%d]1 kills!",PlayerName2(killerid), Streak[killerid]);
-                IRC_GroupSay(gGroupID, IRC_CHANNEL, text);
-                #endif
                 format(pmes, sizeof(pmes), "You get $%d and %d score! (killing spree bonus)", 2000*Streak[killerid] / 5, 2*Streak[killerid] / 5);
                 SendClientMessage(killerid, lightblue, pmes);
 				GivePlayerMoney(killerid, 2000*(Streak[killerid] / 5));
@@ -3880,10 +3849,6 @@ public OnPlayerDeath(playerid, killerid, reason)
                    //	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/07ceb2f3ce93be7bfbe0a7cc3de09d64/dominating.mp3");
                 SendBoxMessage(text);
                 SendClientMessageToAll(C_PINK, text);
-                #if defined IRCENABLED
-                format(text, sizeof(text), "13[SPREE]1%s is on a killing spree of 4[%d]1 kills!",PlayerName2(killerid), Streak[killerid]);
-                IRC_GroupSay(gGroupID, IRC_CHANNEL, text);
-                #endif
             	format(pmes, sizeof(pmes), "You get $%d and %d score! (killing spree bonus)", 5000*Streak[killerid] / 25, 5*Streak[killerid] / 25);
                 SendClientMessage(killerid, lightblue, pmes);
                 GivePlayerMoney(killerid, 5000*(Streak[killerid] / 25));
@@ -3896,10 +3861,6 @@ public OnPlayerDeath(playerid, killerid, reason)
                    //	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/07ceb2f3ce93be7bfbe0a7cc3de09d64/dominating.mp3");
                 SendBoxMessage(text);
                 SendClientMessageToAll(C_PINK, text);
-                #if defined IRCENABLED
-                format(text, sizeof(text), "13[SPREE]1%s is on a killing spree of 4[150]1 kills!",PlayerName2(killerid));
-                IRC_GroupSay(gGroupID, IRC_CHANNEL, text);
-                #endif
                 SendClientMessage(killerid, lightblue, "You get $40000 and 40 score! (killing spree bonus)");
                 GivePlayerMoney(killerid, 40000);
                 GivePlayerScore(killerid, 40);
@@ -4187,10 +4148,6 @@ stock SnakeFarmCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"~y~[ZONE]%s has captured ~b~Snakes Farm ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Snakes Farm 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
 	return 1;
 }
 stock LeavingSnakeFarm(playerid)
@@ -4360,10 +4317,6 @@ stock BayCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"~y~[ZONE]%s has captured ~b~Bay ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Bay 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-	#endif
 	return 1;
 }
 stock LeavingBay(playerid)
@@ -4532,10 +4485,6 @@ stock Area51Captured(playerid)
     new str[128];
     format(str, sizeof(str),"~y~[ZONE]%s has captured ~b~Area51 ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Area 51 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
 	return 1;
 }
 stock LeavingArea51(playerid)
@@ -4703,10 +4652,6 @@ stock ArmyCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"~y~[ZONE]%s has captured ~b~Army Restaurant ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Army Restaurant 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
 	return 1;
 }
 stock LeavingArmy(playerid)
@@ -4874,10 +4819,6 @@ stock PetrolCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"~y~[ZONE]%s has captured ~b~Army Petrol Bunk ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Army Petrol Bunk 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
 	return 1;
 }
 stock LeavingPetrol(playerid)
@@ -5046,11 +4987,6 @@ stock OilCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"~y~[ZONE]%s has captured ~b~Qil Factory ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Oil Factory 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
-
 	return 1;
 }
 stock LeavingOil(playerid)
@@ -5222,10 +5158,6 @@ stock DesertCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"y~[ZONE]%s has captured ~b~Gas Factory ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Gas Factory 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
 	return 1;
 }
 stock LeavingDesert(playerid)
@@ -5393,10 +5325,6 @@ stock QuarryCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"y~[ZONE]%s has captured ~b~Quarry ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Quarry 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
     return 1;
 }
 stock LeavingQuarry(playerid)
@@ -5564,10 +5492,6 @@ stock GuestCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"y~[ZONE]%s has captured ~b~Army Guest House ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Army Guest House 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
     return 1;
 }
 stock LeavingGuest(playerid)
@@ -5736,10 +5660,6 @@ stock EarCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"y~[ZONE]%s has captured ~b~Big Ear ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Big Ear 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
 	return 1;
 }
 stock LeavingEar(playerid)
@@ -5894,10 +5814,6 @@ stock BridgeCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"y~[ZONE]%s has captured ~b~Bridge ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Bridge 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
 	return 1;
 }
 stock LeavingBridge(playerid)
@@ -6054,10 +5970,6 @@ stock CityCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"y~[ZONE]%s has captured ~b~Abandoned City ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Arbandoned City 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
 	return 1;
 }
 stock LeavingCity(playerid)
@@ -6212,10 +6124,6 @@ stock CluckinCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"%s has captured Fast Food Station for team %s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Fast Food 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
 	return 1;
 }
 stock LeavingCluckin(playerid)
@@ -6386,11 +6294,6 @@ stock SubsCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"~y~[ZONE]%s has captured ~b~Submarines ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    #if defined IRCENABLED
-    format(str, sizeof(str),"3[ZONE]4%s has captured 9Submarines 4 for team %s", pName(playerid), GetTeamName(playerid));
-    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-    #endif
-    
 	return 1;
 }
 stock LeavingSubs(playerid)
@@ -8410,7 +8313,7 @@ INI_Open(file);
 INI_ReadString(aname,"Admin",256);
 INI_ReadString(pname,"Player", 256);
 INI_ReadString(reason,"Reason",256);
-format(string, sizeof(string),""cwhite"AdminName: "cyellow"%s\n \n"cwhite"YourName: "cyellow"%s\n \n"cwhite"Reason of ban: "cred"%s\n \n"cred"if this is a mistake you can kindly take picture of this and post at our forums\n \n"cred"xenon-extreme.com",aname, pname, reason);
+format(string, sizeof(string),""cwhite"AdminName: "cyellow"%s\n \n"cwhite"YourName: "cyellow"%s\n \n"cwhite"Reason of ban: "cred"%s\n \n"cred"if this is a mistake you can kindly take picture of this and post at our forums\n \n"cred"xpsamp.com",aname, pname, reason);
 ShowPlayerDialog(playerid, 1500, DIALOG_STYLE_MSGBOX,""cred"You are Banned from COD-RWW2!",string,"Close","");
 Kick(playerid);
 INI_Close();
@@ -8429,7 +8332,7 @@ INI_Open(file);
 INI_ReadString(aname,"Admin",256);
 INI_ReadString(pname,"Player", 256);
 INI_ReadString(reason,"Reason",256);
-format(string, sizeof(string),""cwhite"AdminName: "cyellow"%s\n \n"cwhite"YourName: "cyellow"%s\n \n"cwhite"Reason of ban: "cred"%s\n \n"cred"if this is a mistake you can kindly take picture of this and post at our forums\n \n"cred"xenon-extreme.com",aname, pname, reason);
+format(string, sizeof(string),""cwhite"AdminName: "cyellow"%s\n \n"cwhite"YourName: "cyellow"%s\n \n"cwhite"Reason of ban: "cred"%s\n \n"cred"if this is a mistake you can kindly take picture of this and post at our forums\n \n"cred"xpsamp.com",aname, pname, reason);
 ShowPlayerDialog(playerid, 1500, DIALOG_STYLE_MSGBOX,""cred"You are Banned from COD-RWW2!",string,"Close","");
 Kick(playerid);
 INI_Close();
@@ -8586,40 +8489,6 @@ stock GetTeamCount(teamid)
     return playercount;//Return the total players counted in the specified team..
 }
 ////////////////////////////////////////////////////////////////////////
-CMD:irc(playerid, params[])
-{
-	new string[128];
-	new endid;
-	if(!strlen(params))
-	{
-	    IRC_GroupSay(gGroupID, IRC_CHANNEL,"USAGE: /ircpm (Message)");
-	    return 1;
-	}
-    format(string, sizeof(string), "10,1[IRC PM] %s(%d): %s",PlayerName2(playerid),playerid,params);
-    IRC_GroupSay(gGroupID, IRC_CHANNEL,string);
-
-	format(string, sizeof(string), "[IRC PM] %s(%d): %s",PlayerName2(playerid),endid,params);
- 	SendClientMessage(playerid,C_PINK,string);
-    return 1;
-}
-CMD:getbots(playerid, params[])
-{
- 	if(PlayerInfo[playerid][LoggedIn] == 1)
-	{
-		if(PlayerInfo[playerid][Level] >= 6)
-		{
-	        gBotID[0] = IRC_Connect(IRC_SERVER, IRC_PORT, BOT_1_NICKNAME, BOT_1_REALNAME, BOT_1_USERNAME);
-            IRC_SetIntData(gBotID[0], E_IRC_CONNECT_DELAY, 20);
-			gBotID[1] = IRC_Connect(IRC_SERVER, IRC_PORT, BOT_2_NICKNAME, BOT_2_REALNAME, BOT_2_USERNAME);
-			IRC_SetIntData(gBotID[1], E_IRC_CONNECT_DELAY, 30);
-			gBotID[2] = IRC_Connect(IRC_SERVER, IRC_PORT, BOT_3_NICKNAME, BOT_3_REALNAME, BOT_3_USERNAME);
-			IRC_SetIntData(gBotID[2], E_IRC_CONNECT_DELAY, 30);
-			gGroupID = IRC_CreateGroup();
-
- 	    }
- 	
- 	}
-}
 
 CMD:teams(playerid, params[])
 {
@@ -10027,8 +9896,8 @@ return 1;
 
 CMD:forum(playerid, params[])
 {
-SendClientMessage(playerid, RED, "Server Forum : xenon-extreme.com");
-GameTextForPlayer(playerid, "~w~Server Forum:~r~xenon-extreme.com", 3500, 3);
+SendClientMessage(playerid, RED, "Server Forum : xpsamp.com");
+GameTextForPlayer(playerid, "~w~Server Forum:~r~xpsamp.com", 3500, 3);
 return 1;
 }
 
@@ -10092,14 +9961,14 @@ CMD:rules2(playerid, params[])
 	SendClientMessage(playerid, COLOR_ORANGE, "Don't Ask For Score or cash..etc from admins.");
 	SendClientMessage(playerid, COLOR_ORANGE, "Don't Team Attack/Kill.");
 	SendClientMessage(playerid, COLOR_ORANGE, "Don't Team Car Jack.");
-	SendClientMessage(playerid, COLOR_ORANGE, "Visit Our Website: xenon-extreme.com and be part of the Community.");
+	SendClientMessage(playerid, COLOR_ORANGE, "Visit Our Website: xpsamp.com and be part of the Community.");
 	return 1;
 }
 
 
 CMD:updates(playerid, params[])
 {
-	ShowPlayerDialog(playerid,110,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 Update Notes:","\n\n"cgreen"Scripted By Perfect_Boy\nNew Radio System With New Channels\nBrand New Maps by CJS and Jake a.k.a MeGaTroN\nAnti cheat and Destructable Objects by Mex_Ivanov\nHeadshot System Fixed\nOptimisation Tweaks = Reduced Lags\nMany major/minor Bugfixes\n\n"cwhite"Visit us at xenon-extreme.com\n\nXenon Pro Gaming\n\nCall Of Duty - Real World At War 2","Ok","Cancel");
+	ShowPlayerDialog(playerid,110,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 Update Notes:","\n\n"cgreen"Scripted By Perfect_Boy\nNew Radio System With New Channels\nBrand New Maps by CJS and Jake a.k.a MeGaTroN\nAnti cheat and Destructable Objects by Mex_Ivanov\nHeadshot System Fixed\nOptimisation Tweaks = Reduced Lags\nMany major/minor Bugfixes\n\n"cwhite"Visit us at xpsamp.com\n\nXenon Pro Gaming\n\nCall Of Duty - Real World At War 2","Ok","Cancel");
 	return 1;
 }
 CMD:license(playerid, params[])
@@ -10109,7 +9978,7 @@ CMD:license(playerid, params[])
 	if(License[playerid] == 1)
 	ShowPlayerDialog(playerid,1102,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 License Notes:","\n\n"cgreen"Congradulations!!!\nYou Now Own A Heavy Vehicle License\nYou can Now Drive Heavy Vehicles\nBeware Do Not Break Rules And BAse Rape\nYour License Could Be Revoked For Base Raping\nBase Rape Means Attacking BAses With Heavy Vehicles\n\n"cwhite"License Status "cgreen" [YES]","Ok","Cancel");
 	if(License[playerid] == 2)
-	ShowPlayerDialog(playerid,1103,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 License Notes:","\n\n"cred"Your License Have Been Revoked For Base Raping\nYou have To apply At forums For Your License\nForums xenon-extreme.com\nMake A Topic In License Appeals Board\nIf your License App is Accepted Please PM a LV5+ Admin\n\n"cwhite"License Status "cred" [REVOKED]","Ok","Cancel");
+	ShowPlayerDialog(playerid,1103,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 License Notes:","\n\n"cred"Your License Have Been Revoked For Base Raping\nYou have To apply At forums For Your License\nForums xpsamp.com\nMake A Topic In License Appeals Board\nIf your License App is Accepted Please PM a LV5+ Admin\n\n"cwhite"License Status "cred" [REVOKED]","Ok","Cancel");
 	return 1;
 }
 CMD:minigundm(playerid, params[])
@@ -11628,10 +11497,8 @@ CMD:rpm(playerid, params[])
 	   		SendClientMessage(id, yellow, str);
 	   		SendClientMessage(id, -1,"Use "cblue"/rpm [message] "cyellow"to reply to this PM");
 	   		PlayerPlaySound(id,1085,0.0,0.0,0.0);
-	   		format(str, sizeof(str),"PM from [%d]%s:"cred" %s", playerid, PlayerName2(playerid), str2);
-	   		IRC_GroupSay(gGroupID, IRC_ADMINCHANNEL, str);
 	   		format(adminstr, sizeof(adminstr),"PM from %s[%d] to %s[%d]: %s", PlayerName2(playerid), playerid, PlayerName2(id), id, str2);
-	   		MessageToAdmins(grey, adminstr);
+		   		MessageToAdmins(grey, adminstr);
 	   		LastPm[LastPm[playerid]] = playerid;
 	   }
 	   else return SendClientMessage(playerid, red,"That player is in do not disturb mode!");
@@ -12547,10 +12414,8 @@ CMD:ban(playerid, params[])
 //      new string[256];
       format(string, sizeof(string),"%s has been banned by Admin %s [Reason: %s]", PlayerName5(targetid), PlayerName5(playerid), reason);
       SendClientMessageToAll(red,string);
-      format(string, sizeof(string),"1,4%s has been banned by Admin %s [Reason: %s]", PlayerName5(targetid), PlayerName5(playerid), reason);
-      IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
 	  SendClientMessage(playerid,0xFFFF00FF,"You have been banned from the server please make a unban application at our forum");
-	  SendClientMessage(playerid,0xFFFF00FF,"Forum  xenon-extreme.com");
+	  SendClientMessage(playerid,0xFFFF00FF,"Forum  xpsamp.com");
       mysql_free_result();
       CMDMessageToAdmins(playerid,"BAN");
       SetTimerEx("DelayedKick", 1000, false, "i", targetid);
@@ -12691,7 +12556,7 @@ CMD:rban(playerid, params[])
       format(string, sizeof(string),"%s has been banned by Admin %s [Reason: %s]", PlayerName5(targetid), PlayerName5(playerid), reason);
       SendClientMessageToAll(red,string);
 	  SendClientMessage(playerid,0xFFFF00FF,"You have been banned from the server please make a unban application at our forum");
-	  SendClientMessage(playerid,0xFFFF00FF,"Forum  xenon-extreme.com");
+	  SendClientMessage(playerid,0xFFFF00FF,"Forum  xpsamp.com");
       mysql_free_result();
       CMDMessageToAdmins(playerid,"BAN");
       SetTimerEx("DelayedKick", 1000, false, "i", targetid);
@@ -13753,7 +13618,7 @@ CMD:announce(playerid,params[]) {
 CMD:infobeast(playerid,params[])
 {
 if(PlayerInfo[playerid][Level] >= 0) {
-    ShowPlayerDialog(playerid, 804, DIALOG_STYLE_MSGBOX, "{0000FF}COD-Real World At War 2 Website:", "{FF00FF}|----------= XP-COD-RWW2: =----------|\nxenon-extreme.com\n{FF00FF}|----------= Facebook Website Of Perfect_Boy =--------|\nwww.facebook.com/srijan.suresh\n{66FFFF}Gmail of Perfect_Boy\nsrijans25@gmail.com\nThis Script Made Exclusively By Perfect_Boy\n\nXenon Pro Gaming\n\n{0000FF}Call Of Duty : Real World At War 2 V10.9.6 ", "Okay", "Back");
+    ShowPlayerDialog(playerid, 804, DIALOG_STYLE_MSGBOX, "{0000FF}COD-Real World At War 2 Website:", "{FF00FF}|----------= XP-COD-RWW2: =----------|\nxpsamp.com\n{FF00FF}|----------= Facebook Website Of Perfect_Boy =--------|\nwww.facebook.com/srijan.suresh\n{66FFFF}Gmail of Perfect_Boy\nsrijans25@gmail.com\nThis Script Made Exclusively By Perfect_Boy\n\nXenon Pro Gaming\n\n{0000FF}Call Of Duty : Real World At War 2 V10.9.6 ", "Okay", "Back");
 return 1;
 }
 return 0;
@@ -13762,7 +13627,7 @@ return 0;
 CMD:swinfo(playerid,params[])
 {
 if(PlayerInfo[playerid][Level] >= 0) {
-ShowPlayerDialog(playerid, 803, DIALOG_STYLE_MSGBOX, "{FF0000}COD-Real World At War 2", "{0000FF}WElcome to COD RWW2 By Perfect_Boy\nThis Is the New version of RWW2 By Perfect_Boy\nNever Ask For Admin level, score And Cash With online Admins\nVisit us At xenon-extreme.com\nNever Disrespect or Use Discouraging Words to anyone\nCall Of Duty : Real World At War 2 V10.9.6 ", "Okay", "Back");
+ShowPlayerDialog(playerid, 803, DIALOG_STYLE_MSGBOX, "{FF0000}COD-Real World At War 2", "{0000FF}WElcome to COD RWW2 By Perfect_Boy\nThis Is the New version of RWW2 By Perfect_Boy\nNever Ask For Admin level, score And Cash With online Admins\nVisit us At xpsamp.com\nNever Disrespect or Use Discouraging Words to anyone\nCall Of Duty : Real World At War 2 V10.9.6 ", "Okay", "Back");
 return 1;
 }
 return 0;
@@ -13771,8 +13636,8 @@ return 0;
 CMD:site(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 1 || IsPlayerAdmin(playerid)) {
     	CMDMessageToAdmins(playerid,"SITE");
-    	SendClientMessageToAll(0xFF8DCC55,".::Visit our Website: xenon-extreme.com !::.");
-		return GameTextForAll("~n~~b~~h~      serverwebsite:~n~~g~~h~~>~xenon-extreme.com~<~",5000,5);
+    	SendClientMessageToAll(0xFF8DCC55,".::Visit our Website: xpsamp.com !::.");
+		return GameTextForAll("~n~~b~~h~      serverwebsite:~n~~g~~h~~>~xpsamp.com~<~",5000,5);
     } else return SendClientMessage(playerid,red,"JikyBot: You need to be level 1 to use this command");
 }
 CMD:announce2(playerid,params[]) {
@@ -14141,10 +14006,6 @@ CMD:warn(playerid,params[]) {
 					SendClientMessageToAll(red, str);
 					format(str, sizeof (str), "[Reason: %s]",params[1+strlen(tmp)]);
 					SendClientMessageToAll(red, str);
-					format(str, sizeof (str), "3Administrator \"%s\" has kicked \"%s\". (Warning: %d/%d)***", pName(playerid), pName(warned),  PlayerInfo[warned][Warnings], MAX_WARNINGS);
-					IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-					format(str, sizeof (str), "3[Reason: %s]",params[1+strlen(tmp)]);
-     IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
 					SaveToFile("KickLog",str);	Kick(warned);
 					return PlayerInfo[warned][Warnings] = 0;
 				} else {
@@ -14152,10 +14013,6 @@ CMD:warn(playerid,params[]) {
 					SendClientMessageToAll(yellow, str);
 					format(str, sizeof (str), "[Reason: %s]",  params[1+strlen(tmp)]);
 				    SendClientMessageToAll(yellow, str);
-				    format(str, sizeof (str), "*3Administrator \"%s\" has warned \"%s\". (Warning: %d/%d)***", pName(playerid), pName(warned), PlayerInfo[warned][Warnings], MAX_WARNINGS);
-					IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-					format(str, sizeof (str), "3[Reason: %s]",  params[1+strlen(tmp)]);
-				    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
 				    Anti_Warn[warned] = 1;
 				    Warn[playerid] = warned;
 				    format(str, 9909, "{FF7E19}Name: %s\n{00F700}Admin: %s\n{E10000}Reason: %s\n{FF9E00}Warning: %d/%d",pName(warned),pName(playerid),params[1+strlen(tmp)], PlayerInfo[warned][Warnings], MAX_WARNINGS);
@@ -14169,10 +14026,6 @@ CMD:warn(playerid,params[]) {
                     SendClientMessageToAll(red, str);
 					format(str, sizeof (str), "[ Reason: %s ]",params[1+strlen(tmp)]);
 					SendClientMessageToAll(red, str);
-					format(str, sizeof (str), "3*Server Tester \"%s\" has kicked \"%s\". (Warning: %d/%d)***", pName(playerid), pName(warned), PlayerInfo[warned][Warnings], MAX_WARNINGS);
-                     IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-					format(str, sizeof (str), "3[ Reason: %s ]",params[1+strlen(tmp)]);
-					 IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
 					SaveToFile("KickLog",str);	Kick(warned);
 					return PlayerInfo[warned][Warnings] = 0;
 				    } else {
@@ -14180,10 +14033,6 @@ CMD:warn(playerid,params[]) {
 					SendClientMessageToAll(yellow, str);
 					format(str, sizeof (str), "[Reason: %s]",params[1+strlen(tmp)]);
 					SendClientMessageToAll(yellow, str);
-					format(str, sizeof (str), "*3Server Tester \"%s\" has given \"%s\" a warning.( Warning: %d/%d )***", pName(playerid), pName(warned), PlayerInfo[warned][Warnings], MAX_WARNINGS);
-					IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
-					format(str, sizeof (str), "3[Reason: %s]",params[1+strlen(tmp)]);
-					IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
 					Anti_Warn[warned] = 1;
 					Warn[playerid] = warned;
 					format(str, 1090, "{FF7E19}Name: %s\n{00F700}Server Tester: %s\n{E10000}Reason: %s\n{FF9E00}Warning: %d/%d",pName(warned),pName(playerid),params[1+strlen(tmp)], PlayerInfo[warned][Warnings], MAX_WARNINGS);
@@ -14197,7 +14046,6 @@ CMD:warn(playerid,params[]) {
 		} else return SendClientMessage(playerid, red, "JikyBot: Player is not connected");
 	} else return SendClientMessage(playerid,red,"[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
 }
-
 
 forward AntiWarn(playerid);
 public AntiWarn(playerid)
@@ -14226,14 +14074,10 @@ CMD:kick(playerid,params[]) {
 				if(isnull(tmp2)) {
 					format(string,sizeof(string),"%s has been kicked by Administrator %s ",playername,adminname,params[2]); SendClientMessageToAll(red,string);
 					format(string,sizeof(string),"[ No Reason Given ]",params[2]); SendClientMessageToAll(red,string);
-					format(string,sizeof(string),"3%s has been kicked by Administrator %s ",playername,adminname,params[2]); IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
-					format(string,sizeof(string),"3[ No Reason Given ]",params[2]);  IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
 					SaveToFile("KickLog",string); print(string); return SetTimerEx("DelayedKick", 1000, false, "i", player1);
 				} else {
 					format(string,sizeof(string),"%s has been kicked by Administrator %s ",playername,adminname,params[2]); SendClientMessageToAll(red,string);
 					format(string,sizeof(string),"[ Reason: %s ]",params[2]); SendClientMessageToAll(red,string);
-					format(string,sizeof(string),"3%s has been kicked by Administrator %s ",playername,adminname,params[2]); IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
-					format(string,sizeof(string),"3[ Reason: %s ]",params[2]); IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
 					SaveToFile("KickLog",string); print(string); return SetTimerEx("DelayedKick", 1000, false, "i", player1); }
 				}
 			}
@@ -14255,6 +14099,7 @@ CMD:kick(playerid,params[]) {
 	} else return SendClientMessage(playerid,red,"JikyBot: You must be logged in to use this commands");
 	return 1;
 }
+
 CMD:dbike(playerid,params[]) // can i show u something? somwthing what?
 {
 	if(PlayerInfo[playerid][LoggedIn] == 1)
@@ -15276,9 +15121,9 @@ CMD:sendmsg(playerid,params[]) //fix sendmsg cmd added, so that admins don't nee
             case 2:
 			SendClientMessageToAll(red,"[MESSAGE]If you need any help or have a question please use /helpme [question]");
             case 3:
-			SendClientMessageToAll(red,"[MESSAGE]If you are banned, please make an unban application at xenon-extreme.com forum");
+			SendClientMessageToAll(red,"[MESSAGE]If you are banned, please make an unban application at xpsamp.com forum");
 			case 4:
-			SendClientMessageToAll(red,"[MESSAGE]You can also visit our forums: xenon-extreme.com");
+			SendClientMessageToAll(red,"[MESSAGE]You can also visit our forums: xpsamp.com");
 			case 5:
 			SendClientMessageToAll(red,"[MESSAGE]Please do not ask for score/cash in main chat, it may get you warned or even muted!");
             case 6:
@@ -16832,7 +16677,7 @@ CMD:rules(playerid, params[])
 			strcat(fstr, ""cgreen"Don't Team Attack/Kill\n");
 			strcat(fstr, ""cgreen"Don't Team Attack Admin on Duty\n");
 			strcat(fstr, ""cgreen"Don't Team Car Jack\n");
-            strcat(fstr, ""cyellow"Visit Our Website: xenon-extreme.com and be a part of our Community!\n\n");
+            strcat(fstr, ""cyellow"Visit Our Website: xpsamp.com and be a part of our Community!\n\n");
 			strcat(fstr, ""cgreen"Real World At War 2 V10.9.6 NEW by Perfect_Boy. All rights reserved. \nCopyright Xenon Pro Gaming.\n");
 			ShowPlayerDialog(playerid, 805, DIALOG_STYLE_MSGBOX, ""cgreen"Real World At War 2™ Rules", fstr, "Okay", "Cancel");
 	return 1;
@@ -16957,7 +16802,7 @@ CMD:login(playerid,params[])
 
 CMD:changepass(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1)	{
-		SendClientMessage(playerid,red, "JikyBot: You must go to http://xenon-extreme.com/usercp/   To change your Password");
+		SendClientMessage(playerid,red, "JikyBot: You must go to http://xpsamp.com/usercp/   To change your Password");
 		return SendClientMessage(playerid,yellow,"Login With Your Ingame Details There And Select Change Password");
 	} else return SendClientMessage(playerid,red, "JikyBot: You must have an account to use this command");
 }
@@ -17558,7 +17403,7 @@ stock MySQL_BanCheck(playerid)
      SendClientMessage(playerid, red, "If you think that this BAN was a mistake, then post a screenshot(using F8) on our website");
      SendClientMessage(playerid, red, "The current nick name has been banned you may join with a new name");
 	 SendClientMessage(playerid, red, "You have been banned from the server please make a unban application at our forum");
-	 SendClientMessage(playerid, red, "Forum  xenon-extreme.com");
+	 SendClientMessage(playerid, red, "Forum  xpsamp.com");
      SetTimerEx("DelayedKick", 400, false, "i", playerid);
   }
   mysql_free_result();
@@ -17594,7 +17439,7 @@ stock MySQL_BanCheck1(playerid)
      SendClientMessage(playerid, red, "If you think that this BAN was a mistake, then post a screenshot(using F8) on our website");
      SendClientMessage(playerid, red, "The IP has Been Banned you wont be able to join unless u make an appeal");
 	 SendClientMessage(playerid, red, "Please make a unban application at our forum");
-	 SendClientMessage(playerid, red, "Forum  xenon-extreme.com");
+	 SendClientMessage(playerid, red, "Forum  xpsamp.com");
      SetTimerEx("DelayedKick", 400, false, "i", playerid);
   }
   mysql_free_result();
@@ -20628,7 +20473,7 @@ IRCCMD:update(botid, channel[], user[], host[], params[])
 	    mysql_store_result();
 	    new string[200];
 	    format(string, sizeof(string),"11,10UPDATE %s SET %s='%s' WHERE %s='%s'", table,coloumn,amm,coloumn2,amm2);
-     IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+	    IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
 
   }
   return 1;
@@ -22065,7 +21910,7 @@ IRCCMD:info(botid, channel[], user[], host[], params[])
         IRC_GroupSay(gGroupID, IRC_CHANNEL, strmessage);
         format(strmessage, sizeof(strmessage), "6[Version] : 10.6.4");
         IRC_GroupSay(gGroupID, IRC_CHANNEL, strmessage);
-        format(strmessage, sizeof(strmessage), "6[Website] : xenon-extreme.com");
+        format(strmessage, sizeof(strmessage), "6[Website] : xpsamp.com");
 		IRC_GroupSay(gGroupID, IRC_CHANNEL, strmessage);
 	return true;
 }
