@@ -8,7 +8,7 @@
 
 					COD_RWWIIЩ - - - TDM - - - V10.9.2 - - - xpsamp.com
 					------===== [R]aM[P]aGe Rocks =====------
-					Version V10.9.1 by Rampage aka Srijan(DAAAAAAAAAARK) Abhay.Sv aka [XP]Perfect_Boy
+					Version V10.9.6 by Rampage aka Srijan(DAAAAAAAAAARK) Abhay.Sv aka [XP]Perfect_Boy
 
 									        _______
 									    .adOOOOOOOOOba.
@@ -26,7 +26,7 @@
 									   OOOOOOOOOOOOOOOOO
 									   YOOOOOOOOOOOOOOOP
 									   `OOOOOOOOOOOOOOO'
-									    `OOOOOOOOOOOOO'
+									    `OOOOOOOOOOOOO"
 									     `OOOOOOOOOOO'
 									       `~OOOOO~'
                     лллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
@@ -72,13 +72,14 @@ ALTER TABLE playerdata ADD adminlevel INT(20), oplevel INT(20), pkills INT(20), 
 /*                                       SERVER INCLUDES                                                 */
 /*********************************************************************************************************/
 #include "../modules/server/configs.inc"
-#include "../modules/maps/maps.inc"
+#include "../modules/maps/main.inc"
 #include "../modules/vehicles/main.inc"
 #include "../modules/admin/main.inc"
 #include "../modules/teams/main.inc"
 #include "../modules/paths/main.inc"
 #include "../modules/player/main.inc"
 #include "../modules/randommessages/main.inc"
+#include "../modules/irc/main.inc"
 
 
 //=============================================================================
@@ -109,7 +110,7 @@ new
 	
 new
 	hs_normal = 0;
-	
+
 new
 	hs_sniper = 0;
 ///////////////////////////////////////////////////////////////////////
@@ -118,6 +119,7 @@ new Cash[MAX_PLAYERS];
 ////////////////////////////////////////////////////////////////////////////////
 
 //+++++++++++++++++++++++++++   BUG FIX TRYING INTRODUCING A NEW VAR+++++++++++++++++++++++
+new bool:IsPlayerSpawned[MAX_PLAYERS];
 
 new buggy[MAX_PLAYERS];
 
@@ -247,29 +249,23 @@ new VIP[32],Vnewban[32],Vstring[200],NICKBAN[20];
 #define IP_LIMIT 3 // = Max connections from one single IP
 #define Time_Limit 3500 // = The time span between connects, adjust it to your own specifications
 
-
-
-#define SNAKE 0  //Snakes farm
-#define BAY 1 //Bay side sea shore
-#define BIG 2 //Area 69
-#define ARMY 3 //army restaurant
-#define PETROL 4 //army petrol bunk
-#define OIL 5 //oil factory
-#define DESERT 6 //gas station
-#define QUARRY 7 //Quarry
-#define GUEST 8 //Army guest house
-#define EAR 9 //Big ear
-#define CITY 10
-#define BRIDGE 11
-#define CLUCKIN 12
-#define BASE 13
-#define DP 14
-#define HILL 15
-#define AIRP 16
+#define SNAKE 1  //Snakes farm
+#define BAY 2 //Bay side sea shore
+#define BIG 3 //Area 69
+#define ARMY 4 //army restaurant
+#define PETROL 5 //army petrol bunk
+#define OIL 6 //oil factory
+#define DESERT 7 //gas station
+#define QUARRY 8 //Quarry
+#define GUEST 9 //Army guest house
+#define EAR 10 //Big ear
+#define CITY 11
+#define BRIDGE 12
+#define CLUCKIN 13
+#define BASE 14
+#define DP 15
+#define HILL 16
 #define SUBS 17
-
-
-
 
 #if !defined isnull
     #define isnull(%1) \
@@ -906,7 +902,6 @@ new VehicleNames[212][] = {
 forward Update(playerid);
 forward SetZone(playerid);
 forward UpdateLabelText(playerid);
-forward SaveStats();
 
 new Text3D:RankLabel[MAX_PLAYERS];
 new gTeam[MAX_PLAYERS];
@@ -963,9 +958,9 @@ new IsPlayerCapturing[MAX_PLAYERS][30];
 
 main()
 {
-	print("\n---------2015_RWW2 V10.9.1--=LOADING=--------");
+	print("\n---------2015_RWW2 V10.9.6--=LOADING=--------");
 	print(" LATEST VERSION BY Perfect_Boy");
-	print(" VERSION v10.9.1");
+	print(" VERSION v10.9.6");
 	print(" LOADED SUCESSFULLY!");
 	print("----------------------------------\n");
 	#if (USE_HARDCODED_PWS == true)
@@ -988,7 +983,7 @@ main()
 	AntiDeAMX();
 	
 //======================clan sys ==============================================
-	for(new x; x<MAX_PLAYERS; x++)
+	foreach(Player, x)
  	{
   		group[x][gid] = -1;
   		group[x][order] = -1;
@@ -1021,10 +1016,23 @@ public OnGameModeInit()
 	print("Loading Vehicles....");
 	print("-------------------------------------");
 	LoadVehicles();
+	
+	#if defined IRCENABLED
+	print("-------------------------------------");
+	print("IRC Bots Joining....");
+	print("-------------------------------------");
+	bot_irc_connect();
+	#else
+	print("-------------------------------------");
+	print("IRC disabledby config....");
+	print("-------------------------------------");
+	#pragma unused bot_irc_connect
+	#endif
+
 
  	LoadBox(-45);
 	UsePlayerPedAnims();
-	SetGameModeText("ХXPХCODХRWW2ЩХV10.9.1ХTDMХ");
+	SetGameModeText("ХXPХCODХRWW2ЩХV10.9.6ХTDMХ");
 	SendRconCommand("mapname ХSA/LS/TDMХXPХ");
 	for(new i; i<MAX_PLAYERS; i++)
 	{
@@ -1035,6 +1043,7 @@ public OnGameModeInit()
 		SetTimerEx("SavePlayer", 1, 5*SEC*MIN, "d", i);
 		}
 	}
+
 	EnableBot = 1;
 	//------Capture Zone Fix--------
   	tCP[SNAKE] = TEAM_NONE;
@@ -1047,7 +1056,6 @@ public OnGameModeInit()
 	tCP[QUARRY] = TEAM_NONE;
 	tCP[GUEST] = TEAM_NONE;
 	tCP[EAR] = TEAM_NONE;
- 	tCP[AIRP] = TEAM_NONE;
  	tCP[SUBS] = TEAM_NONE;
 
 
@@ -1061,7 +1069,6 @@ public OnGameModeInit()
 	UnderAttack[QUARRY] = 0;
 	UnderAttack[GUEST] = 0;
 	UnderAttack[EAR] = 0;
- 	UnderAttack[AIRP] = 0;
  	UnderAttack[SUBS] = 0;
 
 
@@ -1072,8 +1079,8 @@ public OnGameModeInit()
 	SetTimer("ZoneStats", 1000, true);
 	SetTimer("OnServerTimeUpdate", 100000000000000000, true);
 	SetTimer("UpdateLaunchTime", 100, true);
-	SetTimer("uselessnrg",300000,0);
-
+	SetTimer("uselessnrg",300000, true);
+//    SetTimer("SaveAllPlayers",310000, true);
 	
 	//Proto type
 /*
@@ -1082,13 +1089,13 @@ public OnGameModeInit()
 	Attach3DTextLabelToVehicle(ProtLabel[A69Prot],A69Prot, 0.0, 0.0, 0.0);
 */
 
-    AddPlayerClass(73,1110.1959,1909.0803,10.8203,5.0747,0,0,0,0,0,0); // EUR
-    AddPlayerClass(179,-794.9099,1610.2480,29.7032,78.7860,0,0,0,0,0,0); // ARABIA
-    AddPlayerClass(285,-136.0029,1115.9038,20.1966,3.7893,0,0,0,0,0,0); // RUSSIA
-    AddPlayerClass(287,245.0012,1859.0973,14.0840,74.5591,0,0,0,0,0,0); //USA
-    AddPlayerClass(206,405.5110,2451.0649,16.5000,0.2366,0,0,0,0,0,0); // AUSTRALIA
-    AddPlayerClass(299,-3103.24,1752.23,53.39,0.4521,0,0,0,0,0,0);
-    Create3DTextLabel("Antharx",0xFF66FFFF,-360.46,1597.50,76.71,30.0,1); Create3DTextLabel("Arabian Base",0xFF66FF,-360.46,1597.50,76.71,35.0,1);
+     AddPlayerClass(73,1110.1959,1909.0803,10.8203,5.0747,0,0,0,0,0,0); // EUR
+     AddPlayerClass(179,-794.9099,1610.2480,29.7032,78.7860,0,0,0,0,0,0); // ARABIA
+     AddPlayerClass(285,-136.0029,1115.9038,20.1966,3.7893,0,0,0,0,0,0); // RUSSIA
+     AddPlayerClass(287,245.0012,1859.0973,14.0840,74.5591,0,0,0,0,0,0); //USA
+     AddPlayerClass(206,405.5110,2451.0649,16.5000,0.2366,0,0,0,0,0,0); // AUSTRALIA
+     AddPlayerClass(299,-3103.24,1752.23,53.39,0.4521,0,0,0,0,0,0);
+     Create3DTextLabel("Antharx",0xFF66FFFF,-360.46,1597.50,76.71,30.0,1); Create3DTextLabel("Arabian Base",0xFF66FF,-360.46,1597.50,76.71,35.0,1);
      Create3DTextLabel("Arabian Team Briefcase",0xFFFF00AA,-797.42,1555.87,27.12,30.0,1); Create3DTextLabel("Army Guest House",0xFFFF00AA,-314.87,1772.42,43.64,30.0,1);
      Create3DTextLabel("Eurasian Team Briefcase",0x66CC00FF,1146.47,1975.78,10.82,30.0,1);
      //
@@ -1169,6 +1176,7 @@ public OnGameModeInit()
     PatriotObject[3] = CreateObject(3267, 0, 0, 0, 0.00000, 0.00000, -183.89996);
     BomberPatriot[4] = AddStaticVehicleEx(470, -863.2064, 1598.0447, 27.1365, 0.0000, -1, -1, 100); // Arabia
     PatriotObject[4] = CreateObject(3267, 0, 0, 0, 0.00000, 0.00000, -183.89996);
+
 
 
 ////////////////////////////////VEHICLES////////////////////////////////////////////////
@@ -1293,17 +1301,17 @@ TextDrawSetShadow(PSTATS2, 0);
 	TextDrawSetShadow(U,1);
 
 	Load = TextDrawCreate(250.000000, 0.000000, "New");
-TextDrawAlignment(Load, 2);
-TextDrawBackgroundColor(Load, 255);
-TextDrawFont(Load, 1);
-TextDrawLetterSize(Load, 0.000000, 1000.000000);
-TextDrawColor(Load, 255);
-TextDrawSetOutline(Load, 0);
-TextDrawSetProportional(Load, 0);
-TextDrawSetShadow(Load, 1);
-TextDrawUseBox(Load, 1);
-TextDrawBoxColor(Load, 255);
-TextDrawTextSize(Load, 40.000000, 1580.000000);
+	TextDrawAlignment(Load, 2);
+	TextDrawBackgroundColor(Load, 255);
+	TextDrawFont(Load, 1);
+	TextDrawLetterSize(Load, 0.000000, 1000.000000);
+	TextDrawColor(Load, 255);
+	TextDrawSetOutline(Load, 0);
+	TextDrawSetProportional(Load, 0);
+	TextDrawSetShadow(Load, 1);
+	TextDrawUseBox(Load, 1);
+	TextDrawBoxColor(Load, 255);
+	TextDrawTextSize(Load, 40.000000, 1580.000000);
 
 	A2 = TextDrawCreate(205.000000, 250.000000, "~p~Australia");
 	TextDrawBackgroundColor(A2, 255);
@@ -1314,7 +1322,7 @@ TextDrawTextSize(Load, 40.000000, 1580.000000);
 	TextDrawSetProportional(A2, 1);
 	TextDrawSetShadow(A2,1);
 
-   welcometo1 = TextDrawCreate(304.000000, 51.000000, "WELCOME TO REAL WORLD AT WAR 2 SERVER!");
+   	welcometo1 = TextDrawCreate(304.000000, 51.000000, "WELCOME TO REAL WORLD AT WAR 2 SERVER!");
 	TextDrawAlignment(welcometo1, 2);
 	TextDrawBackgroundColor(welcometo1, -16776961);
 	TextDrawFont(welcometo1, 2);
@@ -1342,7 +1350,8 @@ TextDrawTextSize(Load, 40.000000, 1580.000000);
 	TextDrawSetShadow(Web,1);
 	
     SetTimer("Zones_Update", 500, 1);
-    for(new i=0; i<MAX_PLAYERS; i++){
+    for(new i=0; i<MAX_PLAYERS; i++)
+	{
    	Zones[i] = TextDrawCreate(3.000000, 332.000000, "_");
    	TextDrawBackgroundColor(Zones[i], 65535);
    	TextDrawFont(Zones[i], 1);
@@ -1496,9 +1505,6 @@ TextDrawTextSize(Load, 40.000000, 1580.000000);
     //Big Ear
 	CP[EAR] = CreateDynamicCP(-311.0136,1542.9733,75.5625,3, -1,-1,-1,100.0);
 	Zone[EAR] = GangZoneCreate(-437.5,1513.671875,-244.140625,1636.71875);
-	// Mini Airport
-	CP[AIRP] = CreateDynamicCP(-1039.8412, 2580.0403, 73.9693,3, -1,-1,-1,100.0);
-	Zone[AIRP] = GangZoneCreate(-1058.2281, 2438.4309, -929.3984, 2641.9006);
 	// Subs
 	CP[SUBS] = CreateDynamicCP(-725.1169, 1869.6428, 2.4109,3, -1,-1,-1,100.0);
 	Zone[SUBS] = GangZoneCreate(-757.4594, 1828.9303, -699.1934, 1909.3093);
@@ -2041,9 +2047,9 @@ public UpdateHCPWs()
 stock GetPlayerIDbyIP(const ip[])
 {
 	new pip[16];
-	for (new i = 0; i < GetMaxPlayers(); i ++)
+	foreach(Player, i)
 	{
-		if(!IsPlayerConnected(i)) continue;
+	//	if(!IsPlayerConnected(i)) continue;
 		GetPlayerIp(i, pip, 16);
 	    if (!strcmp(ip, pip, true))
 		{
@@ -2097,10 +2103,14 @@ public OnGameModeExit()
 	#if defined USE_MENUS
 	DestroyAllMenus();
 	#endif
-	for(new i=0; i<MAX_PLAYERS; i++){
-    TextDrawHideForPlayer(i, Zones[i]);}
-   	for(new i=0; i < MAX_PLAYERS+1; i++){
-		if(grider[i][0]){
+	for(new i=0; i<MAX_PLAYERS; i++)
+	{
+    	TextDrawHideForPlayer(i, Zones[i]);
+	}
+   	for(new i=0; i < MAX_PLAYERS+1; i++)
+ 	{
+		if(grider[i][0])
+		{
 	    	DestroyObject(grider[i][0]);
 	    	DestroyObject(grider[i][1]);
 	    	DestroyObject(grider[i][2]);
@@ -2111,11 +2121,11 @@ public OnGameModeExit()
 	return 1;
 }
 
-public SaveStats()
+stock SaveStats()
 {
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
-         SendClientMessage(i, grey,"The server is restarting please wait 5-10 seconds...");
+ 		SendClientMessage(i, grey,"The server is restarting please wait 5-10 seconds...");
 		SendClientMessage(i, COLOR_WHITE,".::Stats Saved::.");
 		SavePlayer(i);
 	}
@@ -2131,8 +2141,7 @@ public RandomMessage()
 
 public OnPlayerRequestClass(playerid, classid)
 {
-
- new Float:x, Float:y, Float:z;
+ 	new Float:x, Float:y, Float:z;
 	GetPlayerPos(playerid, x,y,z);
 	switch(classid)
 	{
@@ -2143,7 +2152,7 @@ public OnPlayerRequestClass(playerid, classid)
 			SetPlayerPos(playerid, 986.0437,2099.5232,23.9544);
 			SetPlayerCameraPos(playerid, 987.9015, 2107.3215, 23.8944);
 			SetPlayerCameraLookAt(playerid, 987.6723, 2106.3511, 23.8996, CAMERA_MOVE);
-			 SetPlayerSpecialAction(playerid, 68);
+		 	SetPlayerSpecialAction(playerid, 68);
 		    TextDrawShowForPlayer(playerid, EUR);
 			TextDrawHideForPlayer(playerid, A);
 			TextDrawHideForPlayer(playerid, S);
@@ -2168,7 +2177,7 @@ public OnPlayerRequestClass(playerid, classid)
 			SetPlayerPos(playerid, -794.9099,1610.2480,29.7032);
 			SetPlayerCameraPos(playerid, -798.2032, 1611.5031, 30.2649);
 			SetPlayerSpecialAction(playerid,SPECIAL_ACTION_DANCE3);
-  	SetPlayerCameraLookAt(playerid,-797.2197, 1611.3000, 30.1449,CAMERA_MOVE);
+  			SetPlayerCameraLookAt(playerid,-797.2197, 1611.3000, 30.1449,CAMERA_MOVE);
 			TextDrawShowForPlayer(playerid, A);
 			TextDrawHideForPlayer(playerid, EUR);
 			TextDrawHideForPlayer(playerid, S);
@@ -2176,9 +2185,9 @@ public OnPlayerRequestClass(playerid, classid)
 			TextDrawHideForPlayer(playerid, I);
 			TextDrawHideForPlayer(playerid, A2);
 			TextDrawHideForPlayer(playerid, E);
-		TextDrawHideForPlayer(playerid,Load);
-		TextDrawHideForPlayer(playerid,welcometo1);
-		TextDrawHideForPlayer(playerid,welcometo2);
+			TextDrawHideForPlayer(playerid,Load);
+			TextDrawHideForPlayer(playerid,welcometo1);
+			TextDrawHideForPlayer(playerid,welcometo2);
 			SetPlayerTeam(playerid, 1);
 			SetPlayerSkin(playerid, 179);
 			gTeam[playerid] = TEAM_ARAB;
@@ -2192,7 +2201,7 @@ public OnPlayerRequestClass(playerid, classid)
 			SetPlayerFacingAngle(playerid, 181.3365);
 			SetPlayerPos(playerid, -144.2001,1224.5303,26.2031);
 			SetPlayerCameraPos(playerid, -144.0881, 1219.8387, 25.9057);
-             AnimLoopPlayer(playerid,"PARK","Tai_Chi_Loop",4.0,1,0,0,0,0);
+   			AnimLoopPlayer(playerid,"PARK","Tai_Chi_Loop",4.0,1,0,0,0,0);
 			SetPlayerCameraLookAt(playerid, -144.1272, 1220.8354, 25.8959, CAMERA_MOVE);
 			TextDrawShowForPlayer(playerid, S);
 			TextDrawHideForPlayer(playerid, A);
@@ -2201,9 +2210,9 @@ public OnPlayerRequestClass(playerid, classid)
 			TextDrawHideForPlayer(playerid, I);
 			TextDrawHideForPlayer(playerid, A2);
 			TextDrawHideForPlayer(playerid, E);
-				TextDrawHideForPlayer(playerid,Load);
-		TextDrawHideForPlayer(playerid,welcometo1);
-		TextDrawHideForPlayer(playerid,welcometo2);
+			TextDrawHideForPlayer(playerid,Load);
+			TextDrawHideForPlayer(playerid,welcometo1);
+			TextDrawHideForPlayer(playerid,welcometo2);
 			SetPlayerSkin(playerid, 285);
 			SetPlayerTeam(playerid, 2);
 			gTeam[playerid] = TEAM_SOVIET;
@@ -2215,9 +2224,9 @@ public OnPlayerRequestClass(playerid, classid)
 		{
 			// USA //
 			SetPlayerFacingAngle(playerid, 221.1536);
-   SetPlayerPos(playerid, 223.5235,1925.1610,23.6406);
-   SetPlayerCameraPos(playerid, 225.1002, 1919.4045, 23.5022);
-    SetPlayerSpecialAction(playerid,SPECIAL_ACTION_HANDSUP);
+		   	SetPlayerPos(playerid, 223.5235,1925.1610,23.6406);
+		   	SetPlayerCameraPos(playerid, 225.1002, 1919.4045, 23.5022);
+   			SetPlayerSpecialAction(playerid,SPECIAL_ACTION_HANDSUP);
 			SetPlayerCameraLookAt(playerid, 224.6982, 1920.3141, 23.5323, CAMERA_MOVE);
 			TextDrawHideForPlayer(playerid, A);
 			TextDrawHideForPlayer(playerid, S);
@@ -2227,8 +2236,8 @@ public OnPlayerRequestClass(playerid, classid)
 			TextDrawHideForPlayer(playerid, EUR);
 			TextDrawHideForPlayer(playerid, E);
 			TextDrawHideForPlayer(playerid,Load);
-		TextDrawHideForPlayer(playerid,welcometo1);
-		TextDrawHideForPlayer(playerid,welcometo2);
+			TextDrawHideForPlayer(playerid,welcometo1);
+			TextDrawHideForPlayer(playerid,welcometo2);
 			SetPlayerTeam(playerid, 3);
 			SetPlayerSkin(playerid, 287);
 			gTeam[playerid] = TEAM_USA;
@@ -2242,7 +2251,7 @@ public OnPlayerRequestClass(playerid, classid)
 			SetPlayerPos(playerid, 404.6997,2476.0964,29.6423);
 			SetPlayerCameraPos(playerid, 405.0119, 2480.5735, 29.7152);	SetPlayerFacingAngle(playerid, 1.1915);
             AnimLoopPlayer(playerid, "ON_LOOKERS", "wave_loop", 4.0, 1, 0, 0, 0, 0);
-   	SetPlayerCameraLookAt(playerid, 405.0100, 2479.5798, 29.6652, CAMERA_MOVE);
+   			SetPlayerCameraLookAt(playerid, 405.0100, 2479.5798, 29.6652, CAMERA_MOVE);
 			TextDrawHideForPlayer(playerid, U);
 			TextDrawHideForPlayer(playerid, S);
 			TextDrawShowForPlayer(playerid, A2);
@@ -2251,8 +2260,8 @@ public OnPlayerRequestClass(playerid, classid)
 			TextDrawHideForPlayer(playerid, EUR);
 			TextDrawHideForPlayer(playerid, E);
 			TextDrawHideForPlayer(playerid,Load);
-		TextDrawHideForPlayer(playerid,welcometo1);
-		TextDrawHideForPlayer(playerid,welcometo2);
+			TextDrawHideForPlayer(playerid,welcometo1);
+			TextDrawHideForPlayer(playerid,welcometo2);
 			SetPlayerTeam(playerid, 4);
 			SetPlayerSkin(playerid,206);
 			gTeam[playerid] = TEAM_AUS;
@@ -2262,19 +2271,20 @@ public OnPlayerRequestClass(playerid, classid)
 		case 5:
 		{
 			// Vietnam //
-				SetPlayerFacingAngle(playerid, 12.18);
+			SetPlayerFacingAngle(playerid, 12.18);
 			SetPlayerPos(playerid, -1514.32,2527.37,60.46);
-			SetPlayerCameraPos(playerid, -1515.32,2529.47,62.46);	SetPlayerFacingAngle(playerid,12.18);
+			SetPlayerCameraPos(playerid, -1515.32,2529.47,62.46);
+			SetPlayerFacingAngle(playerid,12.18);
             AnimLoopPlayer(playerid, "ON_LOOKERS", "wave_loop", 4.0, 1, 0, 0, 0, 0);
-   	SetPlayerCameraLookAt(playerid,-1514.72,2527.27,60.46 , CAMERA_MOVE);
+   			SetPlayerCameraLookAt(playerid,-1514.72,2527.27,60.46 , CAMERA_MOVE);
 			TextDrawShowForPlayer(playerid, I);
 			TextDrawHideForPlayer(playerid, A);
 			TextDrawHideForPlayer(playerid, S);
 			TextDrawHideForPlayer(playerid, U);
 			TextDrawHideForPlayer(playerid, EUR);
 			TextDrawHideForPlayer(playerid,Load);
-		TextDrawHideForPlayer(playerid,welcometo1);
-		TextDrawHideForPlayer(playerid,welcometo2);
+			TextDrawHideForPlayer(playerid,welcometo1);
+			TextDrawHideForPlayer(playerid,welcometo2);
 			TextDrawHideForPlayer(playerid, E);
 			TextDrawHideForPlayer(playerid, A2);
 			SetPlayerTeam(playerid,5 );
@@ -2283,9 +2293,8 @@ public OnPlayerRequestClass(playerid, classid)
 			SetPlayerColor(playerid, TEAM_MARVEL_COLOR);
 			Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
 			FirstSpawn[playerid] = 1;
-			}
-
-   }
+		}
+	}
 	return 1;
 }
 
@@ -2294,7 +2303,7 @@ public OnPlayerRequestClass(playerid, classid)
 public OnPlayerConnect(playerid)
 {
 //+++++++++++++++++++++++++++++++++SQL++++++++++++++++
-
+    IsPlayerSpawned[playerid] = false;
     ResetEverything(playerid);
 	MySQL_BanCheck(playerid);
     MySQL_BanCheck1(playerid); //for ip ban
@@ -2474,7 +2483,6 @@ public OnPlayerConnect(playerid)
 	IsPlayerCapturing[playerid][QUARRY] = 0;
 	IsPlayerCapturing[playerid][GUEST] = 0;
 	IsPlayerCapturing[playerid][EAR] = 0;
-	IsPlayerCapturing[playerid][AIRP] = 0;
 	IsPlayerCapturing[playerid][SUBS] = 0;
 
 
@@ -2488,7 +2496,6 @@ public OnPlayerConnect(playerid)
 	CountVar[playerid][QUARRY] = 25;
 	CountVar[playerid][GUEST] = 25;
 	CountVar[playerid][EAR] = 25;
-	CountVar[playerid][AIRP] = 25;
 	CountVar[playerid][SUBS] = 25;
 	
 	
@@ -2668,14 +2675,6 @@ public OnPlayerConnect(playerid)
 	else if(tCP[EAR] == TEAM_AUS) GangZoneShowForAll(Zone[EAR], TEAM_ZONE_AUS_COLOR);
 	else if(tCP[EAR] == TEAM_SOVIET) GangZoneShowForAll(Zone[EAR], TEAM_ZONE_SOVIET_COLOR);
 	else if(tCP[EAR] == TEAM_MARVEL) GangZoneShowForAll(Zone[EAR], TEAM_ZONE_MARVEL_COLOR);
-	//-----
-	if(tCP[AIRP] == TEAM_NONE) GangZoneShowForAll(Zone[AIRP], -66);
-	else if(tCP[AIRP] == TEAM_EURASIA) GangZoneShowForAll(Zone[AIRP], TEAM_ZONE_EURASIA_COLOR);
-	else if(tCP[AIRP] == TEAM_ARAB) GangZoneShowForAll(Zone[AIRP], TEAM_ZONE_ARAB_COLOR);
-	else if(tCP[AIRP] == TEAM_USA) GangZoneShowForAll(Zone[AIRP], TEAM_ZONE_USA_COLOR);
-	else if(tCP[AIRP] == TEAM_AUS) GangZoneShowForAll(Zone[AIRP], TEAM_ZONE_AUS_COLOR);
-	else if(tCP[AIRP] == TEAM_SOVIET) GangZoneShowForAll(Zone[AIRP], TEAM_ZONE_SOVIET_COLOR);
-	else if(tCP[AIRP] == TEAM_MARVEL) GangZoneShowForAll(Zone[AIRP], TEAM_ZONE_MARVEL_COLOR);
 	//---------------------------
 	if(tCP[SUBS] == TEAM_NONE) GangZoneShowForAll(Zone[SUBS], -66);
 	else if(tCP[SUBS] == TEAM_EURASIA) GangZoneShowForAll(Zone[SUBS], TEAM_ZONE_EURASIA_COLOR);
@@ -2731,7 +2730,6 @@ public UpdateTextdraw(playerid)
    {
    	  TextDrawSetString(TeamText[playerid], "~p~~h~Admin");
    }
-
 }
 
 public UpdateLabelText(playerid)
@@ -2763,7 +2761,7 @@ public UpdateLabelText(playerid)
         Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
 		Update3DTextLabelText(RankLabel[playerid], TEAM_USA_COLOR, string);
    }
-     if(gTeam[playerid] == TEAM_MARVEL)
+   if(gTeam[playerid] == TEAM_MARVEL)
    {
         Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
 		Update3DTextLabelText(RankLabel[playerid], TEAM_MARVEL_COLOR, string);
@@ -2780,25 +2778,22 @@ public UpdateLabelText(playerid)
    return 1;
 }
 
-
 stock ResetEverything(playerid)
 {
   IsPTBAllowed[playerid] = 1;
   return 1;
 }
 
-
-
 public OnPlayerDisconnect(playerid, reason)
 {
-
-PlayersOnline--;
-ResetEverything(playerid);
-JetPack[playerid] = 0;
-//StealingA69Prot[playerid] = 0;  //prototype
-//++++++++++++++++++++SQL+++++++++++++++++
-if(Logged[playerid] == 1 && buggy[playerid] == 0 && reason == 1)
-{
+	IsPlayerSpawned[playerid]=false;
+	PlayersOnline--;
+	ResetEverything(playerid);
+	JetPack[playerid] = 0;
+	//StealingA69Prot[playerid] = 0;  //prototype
+	//++++++++++++++++++++SQL+++++++++++++++++
+	if(Logged[playerid] == 1 && buggy[playerid] == 0 && reason == 1)
+	{
         //If the player disconnects before registering,
         //we want to make sure it doesn't try update
         //so we check if the player is logged in.
@@ -2813,18 +2808,18 @@ if(Logged[playerid] == 1 && buggy[playerid] == 0 && reason == 1)
         format(query, sizeof(query), "UPDATE Accounts SET Score=%d, Cash=%d, Level=%d, Coins=%d, Kills=%d, Deaths=%d, Vip=%d, Kicks=%d, Bans=%d, Jails=%d, license=%d WHERE Name='%s'", score, money, PlayerInfo[playerid][Level], PlayerInfo[playerid][Helper], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][dRank], h, m, s, License[playerid], pname);
         mysql_query(query);
         //No need to store a result for a update string
-}
+	}
+	new byebye[100];
+	switch(reason)
+	{
+		case 2: format(byebye,sizeof byebye,"~r~~h~[Kicked / Banned]~y~~h~%s has ~r~~h~left ~p~~h~the server!",GetName(playerid),playerid);
+	}
 
-new byebye[100];
-switch(reason)
-{
- case 2: format(byebye,sizeof byebye,"~r~~h~[Kicked / Banned]~y~~h~%s has ~r~~h~left ~p~~h~the server!",GetName(playerid),playerid);
-}
+	SendBoxMessage(byebye);
+	format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Total Players In Server: %d",GetName(playerid),PlayersOnline);
 
-SendBoxMessage(byebye);
-format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Total Players In Server: %d",GetName(playerid),PlayersOnline);
-
-   if(grider[playerid][0]){
+   	if(grider[playerid][0])
+   	{
     	DestroyObject(grider[playerid][0]);
     	DestroyObject(grider[playerid][1]);
     	DestroyObject(grider[playerid][2]);
@@ -2832,7 +2827,7 @@ format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Total Players In S
 	}
 
 //    SavePlayer(playerid);
-    PlayerInfo[playerid][Hide]   	= 0;
+    PlayerInfo[playerid][Hide] = 0;
 	TextDrawHideForPlayer(playerid, TeamText[playerid]);
     TextDrawSetString(TeamText[playerid]," ");
     TextDrawHideForPlayer(playerid, Rank1[playerid]);
@@ -2876,7 +2871,6 @@ format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Total Players In S
  	MinigunDM[playerid] = 0;
  	buggy[playerid] = 1;
 
-
 	if(PlayerInfo[playerid][Jailed] == 1) KillTimer( JailTimer[playerid] );
 	if(PlayerInfo[playerid][Frozen] == 1) KillTimer( FreezeTimer[playerid] );
 	if(ServerInfo[Locked] == 1)	KillTimer( LockKickTimer[playerid] );
@@ -2914,7 +2908,7 @@ format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Total Players In S
 	{
 		LeavingQuarry(playerid);
 	}
-		if(Captured[playerid][CITY] == 0 && IsPlayerCapturing[playerid][CITY] == 1)
+	if(Captured[playerid][CITY] == 0 && IsPlayerCapturing[playerid][CITY] == 1)
 	{
 		LeavingCity(playerid);
 	}
@@ -2934,33 +2928,33 @@ format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Total Players In S
 	{
 		LeavingEar(playerid);
 	}
-	if(Captured[playerid][AIRP] == 0 && IsPlayerCapturing[playerid][AIRP] == 1)
-    {
-		LeavingAirp(playerid);
-	}
 	if(Captured[playerid][SUBS] == 0 && IsPlayerCapturing[playerid][SUBS] == 1)
     {
 		LeavingSubs(playerid);
 	}
 	//==========================================================================
 	#if defined ENABLE_SPEC
-	for(new x=0; x<MAX_PLAYERS; x++)
+	foreach(Player, x)
+	{
 	    if(GetPlayerState(x) == PLAYER_STATE_SPECTATING && PlayerInfo[x][SpecID] == playerid)
    		   	AdvanceSpectate(x);
+	}
 	#endif
 	//========clan=====
 	new playername[128];
 	new cfile[128];
 	GetPlayerName(playerid, playername, sizeof(playername));
     format(cfile, sizeof(cfile), savefolderclan,playername);
-    if(!dini_Exists(cfile)) {
+    if(!dini_Exists(cfile))
+	{
     }
-    else {
+    else
+	{
     	dini_IntSet(cfile, "gid", group[playerid][gid]);
     	dini_IntSet(cfile, "ginvited", group[playerid][invited]);
    		dini_IntSet(cfile, "gattemptjoin",group[playerid][attemptjoin]);
    		dini_IntSet(cfile, "order",group[playerid][order]);
-   		}
+   	}
 //    LeaveGroup(playerid, 2);
 
 	//===================
@@ -2968,27 +2962,28 @@ format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Total Players In S
 }
 public OnPlayerSpawn(playerid)
 {
-if(MoneyGiven[playerid] != -1)
-{
-	GivePlayerMoney(playerid, MoneyGiven[playerid]);
- 	MoneyGiven[playerid] = -1;
-}
-SavePlayer(playerid);
-if(Synching[playerid] == true)
+    IsPlayerSpawned[playerid]=true;
+	if(MoneyGiven[playerid] != -1)
+	{
+		GivePlayerMoney(playerid, MoneyGiven[playerid]);
+ 		MoneyGiven[playerid] = -1;
+	}
+	SavePlayer(playerid);
+	if(Synching[playerid] == true)
     {
-    Synching[playerid] = false;
-    SetPlayerHealth(playerid,sHP[playerid]);
-    SetPlayerArmour(playerid,sAP[playerid]);
-    SetPlayerPos(playerid,sPos[playerid][0],sPos[playerid][1],sPos[playerid][2]);
-    setskin(playerid);
-    SendClientMessage(playerid,green,"You Have Synced!");
-    ResetPlayerWeapons(playerid);
-    for(new slot; slot < 13; slot ++)
-    {
-     GivePlayerWeapon(playerid,sWeap[playerid][slot],sAmmo[playerid][slot]);
-    }
-    return 1; // Prevent the rest of the onplayerspawn, because it's just a synchronizing isn't it?
-}
+	    Synching[playerid] = false;
+	    SetPlayerHealth(playerid,sHP[playerid]);
+	    SetPlayerArmour(playerid,sAP[playerid]);
+	    SetPlayerPos(playerid,sPos[playerid][0],sPos[playerid][1],sPos[playerid][2]);
+	    setskin(playerid);
+	    SendClientMessage(playerid,green,"You Have Synced!");
+	    ResetPlayerWeapons(playerid);
+	    for(new slot; slot < 13; slot ++)
+	    {
+			GivePlayerWeapon(playerid,sWeap[playerid][slot],sAmmo[playerid][slot]);
+	    }
+	    return 1; // Prevent the rest of the onplayerspawn, because it's just a synchronizing isn't it?
+	}
 if(IsPlayerNPC(playerid))
  {
  new npcname[MAX_PLAYER_NAME];
@@ -3003,14 +2998,14 @@ if(IsPlayerNPC(playerid))
 	{
 		SendClientMessage(playerid, -1,"Please select your class");
 		FirstSpawn[playerid] = 0;
-		ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
+		ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 7\n"ccolor"Engineer - "ccolor2"Rank 4\n"ccolor"JetTrooper - "ccolor2"Rank 5\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 6\n"ccolor"Spy - "ccolor2"Rank 6\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
 	}
 
 	SetPlayerHealth(playerid, 99999.0);
 	SetTimerEx("SpawnProtection", 10000, false, "i", playerid);
 	SendClientMessage(playerid, C_PINK, "Anti Spawn Kill Protection For 10 seconds! Leave The Base As Soon As You Can!");
 //	GameTextForPlayer(playerid,"~r~PREAPARE~n~~w~TO ~y~FIGHT",4000,5);
-	GameTextForPlayer(playerid,"Use /recoverscore to recover old stats if you havent used it yet",4000,3);
+//	GameTextForPlayer(playerid,"Use /recoverscore to recover old stats if you havent used it yet",4000,3);
 	AntiSK[playerid] = 1;
 	SetPlayerVirtualWorld(playerid, 0);
 	SetPlayerInterior(playerid, 0);
@@ -3058,7 +3053,6 @@ if(IsPlayerNPC(playerid))
 		IsPlayerAnimsPreloaded[playerid] = 1;
 	}
 
-
 	if(gTeam[playerid] == TEAM_EURASIA)
 	{
 	   new rand = random(sizeof(EurasiaSpawn));
@@ -3091,20 +3085,20 @@ if(IsPlayerNPC(playerid))
 	}
 	else if(gTeam[playerid] == TEAM_MERC)
 	{
-    new rand = random(sizeof(MercSpawn));
-    SetPlayerPos(playerid, MercSpawn[rand][0], MercSpawn[rand][1], MercSpawn[rand][2]);
-    SetPlayerHealth(playerid, 999999);
-    SetPlayerColor(playerid, 0xF600F6FF);
-    GivePlayerWeapon(playerid, 38, 999999);
-    SetPlayerSkin(playerid, 217);
+	    new rand = random(sizeof(MercSpawn));
+	    SetPlayerPos(playerid, MercSpawn[rand][0], MercSpawn[rand][1], MercSpawn[rand][2]);
+	    SetPlayerHealth(playerid, 999999);
+	    SetPlayerColor(playerid, 0xF600F6FF);
+	    GivePlayerWeapon(playerid, 38, 999999);
+	    SetPlayerSkin(playerid, 217);
     }
-    	else if(gTeam[playerid] == TEAM_MARVEL)
+   	else if(gTeam[playerid] == TEAM_MARVEL)
 	{
-    new rand = random(sizeof(MARVELSpawn));
-    SetPlayerPos(playerid, MARVELSpawn[rand][0], MARVELSpawn[rand][1], MARVELSpawn[rand][2]);
-    SetPlayerHealth(playerid, 999999);
-    SetPlayerColor(playerid,0xFFFFFFFF);
-   	SetPlayerSkin(playerid, 122);
+	    new rand = random(sizeof(MARVELSpawn));
+	    SetPlayerPos(playerid, MARVELSpawn[rand][0], MARVELSpawn[rand][1], MARVELSpawn[rand][2]);
+	    SetPlayerHealth(playerid, 999999);
+	    SetPlayerColor(playerid,0xFFFFFFFF);
+	   	SetPlayerSkin(playerid, 122);
     }
 	if(Captured[playerid][SNAKE] == 0 && IsPlayerCapturing[playerid][SNAKE] == 1)
     {
@@ -3158,10 +3152,6 @@ if(IsPlayerNPC(playerid))
 	{
 		LeavingEar(playerid);
 	}
-	if(Captured[playerid][AIRP] == 0 && IsPlayerCapturing[playerid][AIRP] == 1)
-    {
-		LeavingAirp(playerid);
-	}
 	if(Captured[playerid][SUBS] == 0 && IsPlayerCapturing[playerid][SUBS] == 1)
     {
 		LeavingSubs(playerid);
@@ -3190,136 +3180,135 @@ if(IsPlayerNPC(playerid))
 	TextDrawSetString(Rank1[playerid], str);
 	if(GetPlayerScore(playerid) >= 50 && GetPlayerScore(playerid) <= 99)
 	{
-	TextDrawShowForPlayer(playerid, Star[0]);
-	TextDrawHideForPlayer(playerid, Star[1]);
-	TextDrawHideForPlayer(playerid, Star[2]);
-	TextDrawHideForPlayer(playerid, Star[3]);
-	TextDrawHideForPlayer(playerid, Star[4]);
-	TextDrawHideForPlayer(playerid, Star[5]);
-	TextDrawHideForPlayer(playerid, Star[6]);
-	TextDrawHideForPlayer(playerid, Star[7]);
-	TextDrawHideForPlayer(playerid, Star[8]);
-	TextDrawHideForPlayer(playerid, Star[9]);
+		TextDrawShowForPlayer(playerid, Star[0]);
+		TextDrawHideForPlayer(playerid, Star[1]);
+		TextDrawHideForPlayer(playerid, Star[2]);
+		TextDrawHideForPlayer(playerid, Star[3]);
+		TextDrawHideForPlayer(playerid, Star[4]);
+		TextDrawHideForPlayer(playerid, Star[5]);
+		TextDrawHideForPlayer(playerid, Star[6]);
+		TextDrawHideForPlayer(playerid, Star[7]);
+		TextDrawHideForPlayer(playerid, Star[8]);
+		TextDrawHideForPlayer(playerid, Star[9]);
 	}
 	else if(GetPlayerScore(playerid) >= 100 && GetPlayerScore(playerid) <= 499)
 	{
-	TextDrawShowForPlayer(playerid, Star[0]);
-	TextDrawShowForPlayer(playerid, Star[1]);
-	TextDrawHideForPlayer(playerid, Star[2]);
-	TextDrawHideForPlayer(playerid, Star[3]);
-	TextDrawHideForPlayer(playerid, Star[4]);
-	TextDrawHideForPlayer(playerid, Star[5]);
-	TextDrawHideForPlayer(playerid, Star[6]);
-	TextDrawHideForPlayer(playerid, Star[7]);
-	TextDrawHideForPlayer(playerid, Star[8]);
-	TextDrawHideForPlayer(playerid, Star[9]);
+		TextDrawShowForPlayer(playerid, Star[0]);
+		TextDrawShowForPlayer(playerid, Star[1]);
+		TextDrawHideForPlayer(playerid, Star[2]);
+		TextDrawHideForPlayer(playerid, Star[3]);
+		TextDrawHideForPlayer(playerid, Star[4]);
+		TextDrawHideForPlayer(playerid, Star[5]);
+		TextDrawHideForPlayer(playerid, Star[6]);
+		TextDrawHideForPlayer(playerid, Star[7]);
+		TextDrawHideForPlayer(playerid, Star[8]);
+		TextDrawHideForPlayer(playerid, Star[9]);
 	}
 	else if(GetPlayerScore(playerid) >= 500 && GetPlayerScore(playerid) <= 1499)
 	{
-	TextDrawShowForPlayer(playerid, Star[0]);
-	TextDrawShowForPlayer(playerid, Star[1]);
-	TextDrawShowForPlayer(playerid, Star[2]);
-	TextDrawHideForPlayer(playerid, Star[3]);
-	TextDrawHideForPlayer(playerid, Star[4]);
-	TextDrawHideForPlayer(playerid, Star[5]);
-	TextDrawHideForPlayer(playerid, Star[6]);
-	TextDrawHideForPlayer(playerid, Star[7]);
-	TextDrawHideForPlayer(playerid, Star[8]);
-	TextDrawHideForPlayer(playerid, Star[9]);
+		TextDrawShowForPlayer(playerid, Star[0]);
+		TextDrawShowForPlayer(playerid, Star[1]);
+		TextDrawShowForPlayer(playerid, Star[2]);
+		TextDrawHideForPlayer(playerid, Star[3]);
+		TextDrawHideForPlayer(playerid, Star[4]);
+		TextDrawHideForPlayer(playerid, Star[5]);
+		TextDrawHideForPlayer(playerid, Star[6]);
+		TextDrawHideForPlayer(playerid, Star[7]);
+		TextDrawHideForPlayer(playerid, Star[8]);
+		TextDrawHideForPlayer(playerid, Star[9]);
 	}
 	else if(GetPlayerScore(playerid) >= 1500 && GetPlayerScore(playerid) <= 2499)
 	{
-	TextDrawShowForPlayer(playerid, Star[0]);
-	TextDrawShowForPlayer(playerid, Star[1]);
-	TextDrawShowForPlayer(playerid, Star[2]);
-	TextDrawShowForPlayer(playerid, Star[3]);
-	TextDrawHideForPlayer(playerid, Star[4]);
-	TextDrawHideForPlayer(playerid, Star[5]);
-	TextDrawHideForPlayer(playerid, Star[6]);
-	TextDrawHideForPlayer(playerid, Star[7]);
-	TextDrawHideForPlayer(playerid, Star[8]);
-	TextDrawHideForPlayer(playerid, Star[9]);
+		TextDrawShowForPlayer(playerid, Star[0]);
+		TextDrawShowForPlayer(playerid, Star[1]);
+		TextDrawShowForPlayer(playerid, Star[2]);
+		TextDrawShowForPlayer(playerid, Star[3]);
+		TextDrawHideForPlayer(playerid, Star[4]);
+		TextDrawHideForPlayer(playerid, Star[5]);
+		TextDrawHideForPlayer(playerid, Star[6]);
+		TextDrawHideForPlayer(playerid, Star[7]);
+		TextDrawHideForPlayer(playerid, Star[8]);
+		TextDrawHideForPlayer(playerid, Star[9]);
 	}
 	else if(GetPlayerScore(playerid) >= 2500 && GetPlayerScore(playerid) <= 4999)
 	{
-	TextDrawShowForPlayer(playerid, Star[0]);
-	TextDrawShowForPlayer(playerid, Star[1]);
-	TextDrawShowForPlayer(playerid, Star[2]);
-	TextDrawShowForPlayer(playerid, Star[3]);
-	TextDrawShowForPlayer(playerid, Star[4]);
-	TextDrawHideForPlayer(playerid, Star[5]);
-	TextDrawHideForPlayer(playerid, Star[6]);
-	TextDrawHideForPlayer(playerid, Star[7]);
-	TextDrawHideForPlayer(playerid, Star[8]);
-	TextDrawHideForPlayer(playerid, Star[9]);
+		TextDrawShowForPlayer(playerid, Star[0]);
+		TextDrawShowForPlayer(playerid, Star[1]);
+		TextDrawShowForPlayer(playerid, Star[2]);
+		TextDrawShowForPlayer(playerid, Star[3]);
+		TextDrawShowForPlayer(playerid, Star[4]);
+		TextDrawHideForPlayer(playerid, Star[5]);
+		TextDrawHideForPlayer(playerid, Star[6]);
+		TextDrawHideForPlayer(playerid, Star[7]);
+		TextDrawHideForPlayer(playerid, Star[8]);
+		TextDrawHideForPlayer(playerid, Star[9]);
 	}
 	else if(GetPlayerScore(playerid) >= 5000 && GetPlayerScore(playerid) <= 14999)
 	{
-	TextDrawShowForPlayer(playerid, Star[0]);
-	TextDrawShowForPlayer(playerid, Star[1]);
-	TextDrawShowForPlayer(playerid, Star[2]);
-	TextDrawShowForPlayer(playerid, Star[3]);
-	TextDrawShowForPlayer(playerid, Star[4]);
-	TextDrawShowForPlayer(playerid, Star[5]);
-	TextDrawHideForPlayer(playerid, Star[6]);
-	TextDrawHideForPlayer(playerid, Star[7]);
-	TextDrawHideForPlayer(playerid, Star[8]);
-	TextDrawHideForPlayer(playerid, Star[9]);
-	TextDrawShowForPlayer(playerid, Rank1[playerid]);
+		TextDrawShowForPlayer(playerid, Star[0]);
+		TextDrawShowForPlayer(playerid, Star[1]);
+		TextDrawShowForPlayer(playerid, Star[2]);
+		TextDrawShowForPlayer(playerid, Star[3]);
+		TextDrawShowForPlayer(playerid, Star[4]);
+		TextDrawShowForPlayer(playerid, Star[5]);
+		TextDrawHideForPlayer(playerid, Star[6]);
+		TextDrawHideForPlayer(playerid, Star[7]);
+		TextDrawHideForPlayer(playerid, Star[8]);
+		TextDrawHideForPlayer(playerid, Star[9]);
+		TextDrawShowForPlayer(playerid, Rank1[playerid]);
 	}
 	else if(GetPlayerScore(playerid) >= 15000 && GetPlayerScore(playerid) <= 24999)
 	{
-	TextDrawShowForPlayer(playerid, Star[0]);
-	TextDrawShowForPlayer(playerid, Star[1]);
-	TextDrawShowForPlayer(playerid, Star[2]);
-	TextDrawShowForPlayer(playerid, Star[3]);
-	TextDrawShowForPlayer(playerid, Star[4]);
-	TextDrawShowForPlayer(playerid, Star[5]);
-	TextDrawShowForPlayer(playerid, Star[6]);
-	TextDrawHideForPlayer(playerid, Star[7]);
-	TextDrawHideForPlayer(playerid, Star[8]);
-	TextDrawHideForPlayer(playerid, Star[9]);
+		TextDrawShowForPlayer(playerid, Star[0]);
+		TextDrawShowForPlayer(playerid, Star[1]);
+		TextDrawShowForPlayer(playerid, Star[2]);
+		TextDrawShowForPlayer(playerid, Star[3]);
+		TextDrawShowForPlayer(playerid, Star[4]);
+		TextDrawShowForPlayer(playerid, Star[5]);
+		TextDrawShowForPlayer(playerid, Star[6]);
+		TextDrawHideForPlayer(playerid, Star[7]);
+		TextDrawHideForPlayer(playerid, Star[8]);
+		TextDrawHideForPlayer(playerid, Star[9]);
 	}
 	else if(GetPlayerScore(playerid) >= 25000 && GetPlayerScore(playerid) <= 34999)
 	{
-	TextDrawShowForPlayer(playerid, Star[0]);
-	TextDrawShowForPlayer(playerid, Star[1]);
-	TextDrawShowForPlayer(playerid, Star[2]);
-	TextDrawShowForPlayer(playerid, Star[3]);
-	TextDrawShowForPlayer(playerid, Star[4]);
-	TextDrawShowForPlayer(playerid, Star[5]);
-	TextDrawShowForPlayer(playerid, Star[6]);
-	TextDrawShowForPlayer(playerid, Star[7]);
-	TextDrawHideForPlayer(playerid, Star[8]);
-	TextDrawHideForPlayer(playerid, Star[9]);
+		TextDrawShowForPlayer(playerid, Star[0]);
+		TextDrawShowForPlayer(playerid, Star[1]);
+		TextDrawShowForPlayer(playerid, Star[2]);
+		TextDrawShowForPlayer(playerid, Star[3]);
+		TextDrawShowForPlayer(playerid, Star[4]);
+		TextDrawShowForPlayer(playerid, Star[5]);
+		TextDrawShowForPlayer(playerid, Star[6]);
+		TextDrawShowForPlayer(playerid, Star[7]);
+		TextDrawHideForPlayer(playerid, Star[8]);
+		TextDrawHideForPlayer(playerid, Star[9]);
 	}
 	else if(GetPlayerScore(playerid) >= 35000 && GetPlayerScore(playerid) <= 49999)
 	{
-	TextDrawShowForPlayer(playerid, Star[0]);
-	TextDrawShowForPlayer(playerid, Star[1]);
-	TextDrawShowForPlayer(playerid, Star[2]);
-	TextDrawShowForPlayer(playerid, Star[3]);
-	TextDrawShowForPlayer(playerid, Star[4]);
-	TextDrawShowForPlayer(playerid, Star[5]);
-	TextDrawShowForPlayer(playerid, Star[6]);
-	TextDrawShowForPlayer(playerid, Star[7]);
-	TextDrawShowForPlayer(playerid, Star[8]);
-	TextDrawHideForPlayer(playerid, Star[9]);
+		TextDrawShowForPlayer(playerid, Star[0]);
+		TextDrawShowForPlayer(playerid, Star[1]);
+		TextDrawShowForPlayer(playerid, Star[2]);
+		TextDrawShowForPlayer(playerid, Star[3]);
+		TextDrawShowForPlayer(playerid, Star[4]);
+		TextDrawShowForPlayer(playerid, Star[5]);
+		TextDrawShowForPlayer(playerid, Star[6]);
+		TextDrawShowForPlayer(playerid, Star[7]);
+		TextDrawShowForPlayer(playerid, Star[8]);
+		TextDrawHideForPlayer(playerid, Star[9]);
 	}
 	else if(GetPlayerScore(playerid) >= 100000)
 	{
-	TextDrawShowForPlayer(playerid, Star[0]);
-	TextDrawShowForPlayer(playerid, Star[1]);
-	TextDrawShowForPlayer(playerid, Star[2]);
-	TextDrawShowForPlayer(playerid, Star[3]);
-	TextDrawShowForPlayer(playerid, Star[4]);
-	TextDrawShowForPlayer(playerid, Star[5]);
-	TextDrawShowForPlayer(playerid, Star[6]);
-	TextDrawShowForPlayer(playerid, Star[7]);
-	TextDrawShowForPlayer(playerid, Star[8]);
-	TextDrawShowForPlayer(playerid, Star[9]);
+		TextDrawShowForPlayer(playerid, Star[0]);
+		TextDrawShowForPlayer(playerid, Star[1]);
+		TextDrawShowForPlayer(playerid, Star[2]);
+		TextDrawShowForPlayer(playerid, Star[3]);
+		TextDrawShowForPlayer(playerid, Star[4]);
+		TextDrawShowForPlayer(playerid, Star[5]);
+		TextDrawShowForPlayer(playerid, Star[6]);
+		TextDrawShowForPlayer(playerid, Star[7]);
+		TextDrawShowForPlayer(playerid, Star[8]);
+		TextDrawShowForPlayer(playerid, Star[9]);
 	}
-
 	if(gTeam[playerid] == TEAM_EURASIA)
 	{
 		SetPlayerTeam(playerid, TEAM_EURASIA);
@@ -3345,33 +3334,36 @@ if(IsPlayerNPC(playerid))
 		SetPlayerTeam(playerid, TEAM_AUS);
 		SetPlayerColor(playerid, TEAM_AUS_COLOR);
 	}
-		if(gTeam[playerid] == TEAM_MARVEL)
+	if(gTeam[playerid] == TEAM_MARVEL)
 	{
 		SetPlayerTeam(playerid, TEAM_MARVEL);
 		SetPlayerColor(playerid, TEAM_MARVEL_COLOR);
 	}
     if(PlayerInfo[playerid][OnDuty] == 1)
 	{
-    SetPlayerHealth(playerid, 99999);
-    SetPlayerColor(playerid,0xF600F6FF);
-    GivePlayerWeapon(playerid, 38, 999999);
-    SetPlayerSkin(playerid, 217);
+	    SetPlayerHealth(playerid, 99999);
+	    SetPlayerColor(playerid,0xF600F6FF);
+	    GivePlayerWeapon(playerid, 38, 999999);
+	    SetPlayerSkin(playerid, 217);
     }
 	PlayerInfo[playerid][Spawned] = 1;
 
-	if(PlayerInfo[playerid][Frozen] == 1) {
+	if(PlayerInfo[playerid][Frozen] == 1)
+	{
 		TogglePlayerControllable(playerid,false); return SendClientMessage(playerid,red,"You cant escape your punishment. You Are Still Frozen");
 	}
-
-	if(PlayerInfo[playerid][Jailed] == 1) {
+	if(PlayerInfo[playerid][Jailed] == 1)
+	{
 	    JailPlayer(playerid); return SendClientMessage(playerid,red,"You cant escape your punishment. You Are Still In Jail");
 	}
-
-	if(ServerInfo[AdminOnlySkins] == 1) {
-		if( (GetPlayerSkin(playerid) == ServerInfo[AdminSkin]) || (GetPlayerSkin(playerid) == ServerInfo[AdminSkin2]) ) {
+	if(ServerInfo[AdminOnlySkins] == 1)
+	{
+		if( (GetPlayerSkin(playerid) == ServerInfo[AdminSkin]) || (GetPlayerSkin(playerid) == ServerInfo[AdminSkin2]) )
+		{
 			if(PlayerInfo[playerid][Level] >= 1)
 				GameTextForPlayer(playerid,"~b~Welcome~n~~w~Admin",3000,1);
-			else {
+			else
+			{
 				GameTextForPlayer(playerid,"~r~This Skin Is For~n~Administrators~n~Only",4000,5);
 				//SetTimerEx("DelayKillPlayer", 2500,0,"d",playerid);
 				return 1;
@@ -3418,7 +3410,7 @@ if(IsPlayerNPC(playerid))
 	TextDrawHideForPlayer(playerid, S);
 	TextDrawHideForPlayer(playerid, U);
 	TextDrawHideForPlayer(playerid, A2);
-     TextDrawHideForPlayer(playerid,Load);
+	TextDrawHideForPlayer(playerid,Load);
 	TextDrawHideForPlayer(playerid, welcometo1);
 	TextDrawHideForPlayer(playerid, welcometo2);
 	TextDrawShowForPlayer(playerid, Web);
@@ -3506,6 +3498,10 @@ public SpawnProtection(playerid)
 	{
         SetPlayerColor(playerid, 0x69006900);
 	}
+	if(gTeam[playerid] == TEAM_MARVEL && gClass[playerid] == SNIPER)
+	{
+        SetPlayerColor(playerid, 0xF4A06800);
+	}
 	return 1;
 }
 stock GivePlayerWeapons(playerid)
@@ -3557,7 +3553,7 @@ stock GivePlayerWeapons(playerid)
     }
     else if(gClass[playerid] == SP)
 	{
-        GameTextForPlayer(playerid,"~r~Player Class~n~~g~SP",4000,5);
+        GameTextForPlayer(playerid,"~r~Player Class~n~~g~Support",4000,5);
         ResetPlayerWeapons(playerid);
 		GivePlayerWeapon(playerid, 27, 100);
 		GivePlayerWeapon(playerid, 16, 1);
@@ -3567,7 +3563,7 @@ stock GivePlayerWeapons(playerid)
 	}
     else if(gClass[playerid] == SCOUT)
 	{
-        GameTextForPlayer(playerid,"~r~Player Class~n~~g~Scount",4000,5);
+        GameTextForPlayer(playerid,"~r~Player Class~n~~g~Scout",4000,5);
         ResetPlayerWeapons(playerid);
 		GivePlayerWeapon(playerid, 29, 100);
 		GivePlayerWeapon(playerid, 26, 100);
@@ -3575,7 +3571,7 @@ stock GivePlayerWeapons(playerid)
 	}
 	else if(gClass[playerid] == AG)
 	{
-        GameTextForPlayer(playerid,"~r~Player Class~n~~g~AG",4000,5);
+        GameTextForPlayer(playerid,"~r~Player Class~n~~g~Spy",4000,5);
         ResetPlayerWeapons(playerid);
 		GivePlayerWeapon(playerid, 29, 100);
 		GivePlayerWeapon(playerid, 4, 2);
@@ -3630,7 +3626,7 @@ else if(gClass[playerid] == SOLCON)
 	return 1;
 }
 
-
+new RewardSoundEnd[MAX_PLAYERS];
 public OnPlayerDeath(playerid, killerid, reason)
 {
         PlayerInfo[playerid][Deaths]++;
@@ -3688,10 +3684,6 @@ public OnPlayerDeath(playerid, killerid, reason)
 		if(Captured[playerid][EAR] == 0 && IsPlayerCapturing[playerid][EAR] == 1)
 		{
 			LeavingEar(playerid);
-		}
-		if(Captured[playerid][AIRP] == 0 && IsPlayerCapturing[playerid][AIRP] == 1)
-		{
-			LeavingAirp(playerid);
 		}
       	if(Captured[playerid][SUBS] == 0 && IsPlayerCapturing[playerid][SUBS] == 1)
         {
@@ -3787,9 +3779,9 @@ public OnPlayerDeath(playerid, killerid, reason)
 		SendDeathMessage(killerid, playerid, reason);
 
 		if(gClass[killerid] == AG)
-	{
-		GameTextForPlayer(playerid, "~w~you got ~r~KILLED ~w~by a~n~~b~PRO SPY", 3000, 3);
-	}
+		{
+			GameTextForPlayer(playerid, "~w~you got ~r~KILLED ~w~by a~n~~b~A SPY", 3000, 3);
+		}
 		//---------
 		new msg[100];
 		new ammount = random(1050);
@@ -3816,124 +3808,67 @@ public OnPlayerDeath(playerid, killerid, reason)
 //		SetPlayerScore(killerid, GetPlayerScore(killerid) +1);
 		GivePlayerScore(killerid, 5);
         Streak[playerid] = 0;
-        if(killerid != INVALID_PLAYER_ID)
-        {
-                new KillerName[MAX_PLAYER_NAME];
-         		GetPlayerName(killerid, KillerName, sizeof(KillerName));
-            	new text[128];
-                Streak[killerid] ++;
-                Skills[killerid] ++;
-                RoundInfo[killerid][Kills] ++;
-                if(Streak[killerid] == 3)
-                {
-                    	format(text, sizeof(text), "%s is on a killing spree of 3 kills!", PlayerName2(killerid));
-                    	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/db765608b05afc72e0a8a2965f82f8f5/triplekill.mp3");
-                        SendBoxMessage(text);
-                        format(msg, sizeof(msg), "%s is on a killing spree of 3 kills!",PlayerName2(killerid));
-                        SendClientMessageToAll(C_PINK,msg);
-                }
-                if(Streak[killerid] == 5)
-                {
-                    	format(text, sizeof(text), "%s is on a killing spree of 5 kills!", PlayerName2(killerid));
-                    	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/07ceb2f3ce93be7bfbe0a7cc3de09d64/dominating.mp3");
-                        SendBoxMessage(text);
-                        format(msg, sizeof(msg), "%s is on a killing spree of 5 kills!",PlayerName2(killerid));
-                        SendClientMessageToAll(C_PINK,msg);
-                        SendClientMessage(killerid, lightblue, "You get $1000 and +2 score! (killing spree bonus)");
-                        GivePlayerMoney(playerid, 1000);
-                        GivePlayerScore(playerid, 2);
-                }
-                if(Streak[killerid] == 10)
-                {
-                    	format(text, sizeof(text), "%s is on a killing spree of 10 kills!", PlayerName2(killerid));
-                    	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/4e03ed3e60eb8df40c2870afad7acabe/multikill.mp3");
-                        SendBoxMessage(text);
-                        format(msg, sizeof(msg), "%s is on a killing spree of 10 kills!",PlayerName2(killerid));
-                        SendClientMessageToAll(C_PINK,msg);
-                        SendClientMessage(killerid, lightblue, "You get $2000 and +5 score! (killing spree bonus)");
-                        GivePlayerMoney(playerid, 2000);
-                        GivePlayerScore(playerid, 5);
-                }
-                if(Streak[killerid] == 15)
-                {
-                    	format(text, sizeof(text), "%s is on a killing spree of 15 kills!", PlayerName2(killerid));
-                    	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/3e6f00e09831d55bd5496ff5e3c1879a/impressive.mp3");
-                        SendBoxMessage(text);
-                        format(msg, sizeof(msg), "%s is on a killing spree of 15 kills!",PlayerName2(killerid));
-                        SendClientMessageToAll(C_PINK,msg);
-                        SendClientMessage(killerid, lightblue, "You get $3000 and +5 score! (killing spree bonus)");
-                        GivePlayerMoney(playerid, 3000);
-                        GivePlayerScore(playerid, 5);
-                }
-                if(Streak[killerid] == 20)
-                {
-                    	format(text, sizeof(text), "%s is on a killing spree of 20 kills!", PlayerName2(killerid));
-                    	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/15f2fe78d60ce23b7463af4fd7553616/killingspree.mp3");
-                        SendBoxMessage(text);
-                        format(msg, sizeof(msg), "%s is on a killing spree of 20 kills!",PlayerName2(killerid));
-                        SendClientMessageToAll(C_PINK,msg);
-                        SendClientMessage(killerid, lightblue, "You get $3000 and +5 score! (killing spree bonus)");
-                        GivePlayerMoney(playerid, 3000);
-                        GivePlayerScore(playerid, 5);
-                }
-                if(Streak[killerid] == 25)
-                {
-                    	format(text, sizeof(text), "%s is on a killing spree of 25 kills!", PlayerName2(killerid));
-                    	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/15f2fe78d60ce23b7463af4fd7553616/killingspree.mp3");
-                        SendBoxMessage(text);
-                        format(msg, sizeof(msg), "%s is on a killing spree of 25 kills!",PlayerName2(killerid));
-                        SendClientMessageToAll(C_PINK,msg);
-                        SendClientMessage(killerid, lightblue, "You get $3500 and +6 score! (killing spree bonus)");
-                        GivePlayerMoney(playerid, 3500);
-                        GivePlayerScore(playerid, 6);
-                }
-                if(Streak[killerid] == 50)
-                {
-                    	format(text, sizeof(text), "%s is on a killing spree of 50 kills!", PlayerName2(killerid));
-                    	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/79ae993cf0925a0865c69e1a1c650d05/rampage.mp3");
-                        SendBoxMessage(text);
-                        format(msg, sizeof(msg), "%s is on a killing spree of 50 kills!",PlayerName2(killerid));
-                        SendClientMessageToAll(C_PINK,msg);
-                        SendClientMessage(killerid, lightblue, "You get $5000 and +8 score! (killing spree bonus)");
-                        GivePlayerMoney(playerid, 5000);
-                        GivePlayerScore(playerid, 8);
-                }
-                if(Streak[killerid] == 75)
-                {
-                       format(text, sizeof(text), "%s is on a killing spree of 75 kills!", PlayerName2(killerid));
-                       PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/35ffdb07b0ba97904c0a0824c0aab80c/monsterkill.mp3");
-                        SendBoxMessage(text);
-                        format(msg, sizeof(msg), "%s is on a killing spree of 75 kills!",PlayerName2(killerid));
-                        SendClientMessageToAll(C_PINK,msg);
-                        SendClientMessage(killerid, lightblue, "You get $10000 and +10 score! (killing spree bonus)");
-                        GivePlayerMoney(playerid, 10000);
-                        GivePlayerScore(playerid, 10);
-                 }
-                if(Streak[killerid] == 100)
-                {
-                       format(text, sizeof(text), "%s is on a killing spree of 100 kills!", PlayerName2(killerid));
-                       PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/5e51b108b66dd318e5eab58e56ef0cd6/wickedsick.mp3");
-                        SendBoxMessage(text);
-                        SendClientMessage(killerid, lightblue, "You get $20000 and +20 score! (killing spree bonus)");
-                        GivePlayerMoney(playerid, 20000);
-                        GivePlayerScore(playerid, 20);
-                 }
-                 if(Streak[killerid] == 150)
-                {
-                       format(text, sizeof(text), "%s is on a killing spree of 100 kills!", PlayerName2(killerid));
-                       PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/5e51b108b66dd318e5eab58e56ef0cd6/wickedsick.mp3");
-                        SendBoxMessage(text);
-                        SendClientMessage(killerid, lightblue, "You get $20000 and +20 score! (killing spree bonus)");
-                        GivePlayerMoney(playerid, 20000);
-                        GivePlayerScore(playerid, 20);
-                 }
-                 if(Streak[killerid] == 0)
-                 {
-                       format(text, sizeof(text), "%s killing spree has end!", PlayerName2(killerid));
-                        SendBoxMessage(text);
-                        }
-
-        }
+        Streak[playerid] = 0;
+    if(killerid != INVALID_PLAYER_ID)
+    {//fix+opt switched to switch case structure for better optimisation and used math to make the code smaller, fixed minor display bugs and
+   		new KillerName[MAX_PLAYER_NAME];
+        GetPlayerName(killerid, KillerName, sizeof(KillerName));
+        new text[128];
+        new pmes[128];
+        Streak[killerid] ++;
+        Skills[killerid] ++;
+        RoundInfo[killerid][Kills] ++;
+		switch (Streak[killerid])
+		{
+			case 3:
+			{
+			    format(text, sizeof(text), "%s is on a killing spree of 3 kills!", PlayerName2(killerid));
+              //	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/db765608b05afc72e0a8a2965f82f8f5/triplekill.mp3");
+                SendBoxMessage(text);
+                SendClientMessageToAll(C_PINK, text);
+                SendClientMessage(killerid, lightblue, "You get $1000 and 1 score! (killing spree bonus)");
+                GivePlayerMoney(killerid, 1000);
+                GivePlayerScore(killerid, 1);
+                RewardTrackForPlayer(killerid);//samp sound (with termination)
+			}
+			case 5, 10, 15, 20, 25:
+			{
+				format(text, sizeof(text), "%s is on a killing spree of %d kills!", PlayerName2(killerid), Streak[killerid]);
+                   //	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/07ceb2f3ce93be7bfbe0a7cc3de09d64/dominating.mp3");
+                SendBoxMessage(text);
+                SendClientMessageToAll(C_PINK, text);
+                format(pmes, sizeof(pmes), "You get $%d and %d score! (killing spree bonus)", 2000*Streak[killerid] / 5, 2*Streak[killerid] / 5);
+                SendClientMessage(killerid, lightblue, pmes);
+				GivePlayerMoney(killerid, 2000*(Streak[killerid] / 5));
+                GivePlayerScore(killerid, 2*(Streak[killerid] / 5));
+            	RewardTrackForPlayer(killerid);//samp sound (with termination)
+			}
+			case 50, 75, 100:
+			{
+				format(text, sizeof(text), "%s is on a killing spree of %d kills!", PlayerName2(killerid), Streak[killerid]);
+                   //	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/07ceb2f3ce93be7bfbe0a7cc3de09d64/dominating.mp3");
+                SendBoxMessage(text);
+                SendClientMessageToAll(C_PINK, text);
+            	format(pmes, sizeof(pmes), "You get $%d and %d score! (killing spree bonus)", 5000*Streak[killerid] / 25, 5*Streak[killerid] / 25);
+                SendClientMessage(killerid, lightblue, pmes);
+                GivePlayerMoney(killerid, 5000*(Streak[killerid] / 25));
+                GivePlayerScore(killerid, 5*(Streak[killerid] / 25));
+                RewardTrackForPlayer(killerid);//samp sound (with termination)
+			}
+			case 150:
+			{
+				format(text, sizeof(text), "%s is on a killing spree of 150 kills!", PlayerName2(killerid));
+                   //	PlayAudioStreamForPlayer(killerid, "http://picosong.com/media/songs/07ceb2f3ce93be7bfbe0a7cc3de09d64/dominating.mp3");
+                SendBoxMessage(text);
+                SendClientMessageToAll(C_PINK, text);
+                SendClientMessage(killerid, lightblue, "You get $40000 and 40 score! (killing spree bonus)");
+                GivePlayerMoney(killerid, 40000);
+                GivePlayerScore(killerid, 40);
+                RewardTrackForPlayer(killerid);//samp sound (with termination)
+                Streak[killerid]=0;
+			}
+		}
+	}
 /*
         if(StealingA69Prot[playerid] == 1)
 		{
@@ -3950,23 +3885,40 @@ public OnPlayerDeath(playerid, killerid, reason)
   		}
 */
         PlayerInfo[killerid][Kills] ++;
-
-
-
      	#if defined ENABLE_SPEC
-		for(new x=0; x<MAX_PLAYERS; x++)
+		foreach(Player, x)
+		{
 		    if(GetPlayerState(x) == PLAYER_STATE_SPECTATING && PlayerInfo[x][SpecID] == playerid)
 		       AdvanceSpectate(x);
+		}
 		#endif
 		return 1;
 }
+stock RewardTrackForPlayer(playerid)
+{
+    new Float:x, Float:y, Float:z;
+	GetPlayerPos(playerid, x, y, z);
+    PlayerPlaySound(playerid, 1185, x, y, z);
+    RewardSoundEnd[playerid] = SetTimerEx("cancelrev", 10000, false, "d", playerid);
+	return 1;
+}
+forward cancelrev(playerid);
+public cancelrev(playerid)
+{
+    new Float:x, Float:y, Float:z;
+	GetPlayerPos(playerid, x, y, z);
+    PlayerPlaySound(playerid, 1186, x, y, z);
+    KillTimer(RewardSoundEnd[playerid]);
+	return 1;
+}
 stock GivePlayerScore(playerid, score)
 {
-        SetPlayerScore(playerid, GetPlayerScore(playerid)+score);
-        return 1;
+    SetPlayerScore(playerid, GetPlayerScore(playerid)+score);
+	return 1;
 }
 
-public destroyThisObject(objid) {
+public destroyThisObject(objid)
+{
 	DestroyObject(objid);
 }
 
@@ -4013,7 +3965,7 @@ if(gTeam[issuerid] == gTeam[playerid])
         	GameTextForPlayer(playerid,"~r~ You have been headshoted by the enemy", 3000, 3);
         	SendClientMessage(issuerid, lightblue, "You get $200 and +2 score! (killing spree bonus)");
          	GivePlayerMoney(issuerid, 200);
-          	GivePlayerScore(issuerid, 2);
+          	GivePlayerScore(issuerid, 1);
         	SetPlayerHealth(playerid, 0.0);
         	}
     	}
@@ -4026,7 +3978,7 @@ if(gTeam[issuerid] == gTeam[playerid])
         	GameTextForPlayer(playerid,"~r~ You have been headshoted by a ~p~pro Sniper", 3000, 3);
         	SendClientMessage(issuerid, lightblue, "You get $20000 and +20 score! (killing spree bonus)");
          	GivePlayerMoney(issuerid, 300);
-          	GivePlayerScore(issuerid, 3);
+          	GivePlayerScore(issuerid, 1);
         	SetPlayerHealth(playerid, 0.0);
         	}
     	}
@@ -4129,7 +4081,7 @@ stock ActiveSnakeFarm(playerid)
 			      SendClientMessage(playerid, red,"This flag is currently not controlled by any team");
 				}
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+    			foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][SNAKE] = 1;
 				}
@@ -4155,7 +4107,7 @@ stock SnakeFarmCaptured(playerid)
 	GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][SNAKE] = 0;
 	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
@@ -4196,8 +4148,6 @@ stock SnakeFarmCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"~y~[ZONE]%s has captured ~b~Snakes Farm ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    
-
 	return 1;
 }
 stock LeavingSnakeFarm(playerid)
@@ -4209,7 +4159,7 @@ stock LeavingSnakeFarm(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][SNAKE] = 25;
     GangZoneStopFlashForAll(Zone[SNAKE]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][SNAKE] = 0;
 	}
@@ -4300,7 +4250,7 @@ stock ActiveBay(playerid)
 			      SendClientMessage(playerid, red,"This flag is currently not controlled by any team");
 				}
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+				foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][BAY] = 1;
 				}
@@ -4325,7 +4275,7 @@ stock BayCaptured(playerid)
 	SendClientMessage(playerid, COLOR_WHITE,"[ZONE-REWARD]You got +5 scores and +$5000 cash for the capture of this area!");
     GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][BAY] = 0;
 	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
@@ -4367,7 +4317,6 @@ stock BayCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"~y~[ZONE]%s has captured ~b~Bay ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-
 	return 1;
 }
 stock LeavingBay(playerid)
@@ -4379,7 +4328,7 @@ stock LeavingBay(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][BAY] = 25;
     GangZoneStopFlashForAll(Zone[BAY]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][BAY] = 0;
 	}
@@ -4469,7 +4418,7 @@ stock ActiveArea51(playerid)
 			      SendClientMessage(playerid, red,"This flag is currently not controlled by any team");
 				}
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+				foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][BIG] = 1;
 				}
@@ -4495,7 +4444,7 @@ stock Area51Captured(playerid)
 	SendClientMessage(playerid, COLOR_WHITE,"You have captured Area 51 you got an Extra +3 score!");
 	GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][BIG] = 0;
 	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
@@ -4536,7 +4485,6 @@ stock Area51Captured(playerid)
     new str[128];
     format(str, sizeof(str),"~y~[ZONE]%s has captured ~b~Area51 ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-
 	return 1;
 }
 stock LeavingArea51(playerid)
@@ -4548,7 +4496,7 @@ stock LeavingArea51(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][BIG] = 25;
     GangZoneStopFlashForAll(Zone[BIG]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][BIG] = 0;
 	}
@@ -4638,7 +4586,7 @@ stock ActiveArmy(playerid)
 			      SendClientMessage(playerid, red,"This flag is currently not controlled by any team");
 				}
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+				foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][ARMY] = 1;
 				}
@@ -4663,7 +4611,7 @@ stock ArmyCaptured(playerid)
     SendClientMessage(playerid, COLOR_WHITE,"[ZONE-REWARD]You got +5 scores and +$5000 cash for the capture of this area!");
     GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][ARMY] = 0;
 	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
@@ -4715,7 +4663,7 @@ stock LeavingArmy(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][ARMY] = 25;
     GangZoneStopFlashForAll(Zone[ARMY]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+ 	foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][ARMY] = 0;
 	}
@@ -4795,7 +4743,7 @@ stock ActivePetrol(playerid)
 			      SendClientMessage(playerid, COLOR_YELLOW,"[ZONE]This flag is being controlled by team "COL_RED"<AUSTRALIA>");
 			      SendTeamMessage(TEAM_AUS, green,"*Army petrol bunk is under attack!");
 				}
-					else if(tCP[PETROL] == TEAM_AUS)
+				else if(tCP[PETROL] == TEAM_AUS)
 				{
 			      SendClientMessage(playerid, COLOR_YELLOW,"[ZONE]This flag is being controlled by team "COL_RED"<VIETNAM>");
 			      SendTeamMessage(TEAM_MARVEL, green,"*Army petrol bunk is under attack!");
@@ -4805,7 +4753,7 @@ stock ActivePetrol(playerid)
 			      SendClientMessage(playerid, red,"This flag is currently not controlled by any team");
 				}
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+				foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][PETROL] = 1;
 				}
@@ -4830,7 +4778,7 @@ stock PetrolCaptured(playerid)
     SendClientMessage(playerid, COLOR_WHITE,"[ZONE-REWARD]You got +5 scores and +$5000 cash for the capture of this area!");
     GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][PETROL] = 0;
 	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
@@ -4871,7 +4819,6 @@ stock PetrolCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"~y~[ZONE]%s has captured ~b~Army Petrol Bunk ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-
 	return 1;
 }
 stock LeavingPetrol(playerid)
@@ -4883,7 +4830,7 @@ stock LeavingPetrol(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][PETROL] = 25;
     GangZoneStopFlashForAll(Zone[PETROL]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][PETROL] = 0;
 	}
@@ -4974,7 +4921,7 @@ stock ActiveOil(playerid)
 				}
 
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+				foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][OIL] = 1;
 				}
@@ -4999,7 +4946,7 @@ stock OilCaptured(playerid)
     SendClientMessage(playerid, COLOR_WHITE,"[ZONE-REWARD]You got +5 scores and +$5000 cash for the capture of this area!");
     GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][OIL] = 0;
 	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
@@ -5040,7 +4987,6 @@ stock OilCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"~y~[ZONE]%s has captured ~b~Qil Factory ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-
 	return 1;
 }
 stock LeavingOil(playerid)
@@ -5052,7 +4998,7 @@ stock LeavingOil(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][OIL] = 25;
     GangZoneStopFlashForAll(Zone[OIL]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][OIL] = 0;
 	}
@@ -5103,9 +5049,9 @@ stock ActiveDesert(playerid)
 				{
 			      GangZoneFlashForAll(Zone[DESERT], TEAM_ZONE_AUS_COLOR);
 				}
-					else if(gTeam[playerid] == TEAM_MARVEL)
+				else if(gTeam[playerid] == TEAM_MARVEL)
 				{
-			      GangZoneFlashForAll(Zone[DESERT], TEAM_ZONE_MARVEL_COLOR);
+   				  GangZoneFlashForAll(Zone[DESERT], TEAM_ZONE_MARVEL_COLOR);
 				}
 				//------Message-----
 			    if(tCP[DESERT] == TEAM_EURASIA)
@@ -5133,7 +5079,7 @@ stock ActiveDesert(playerid)
 			      SendClientMessage(playerid, COLOR_YELLOW,"[ZONE]This flag is being controlled by team "COL_RED"<AUSTRALIA>");
 			      SendTeamMessage(TEAM_AUS, green,"*Gas Factory is under attack!");
 				}
-					else if(tCP[DESERT] == TEAM_MARVEL)
+				else if(tCP[DESERT] == TEAM_MARVEL)
 				{
 			      SendClientMessage(playerid, COLOR_YELLOW,"[ZONE]This flag is being controlled by team "COL_RED"<VIETNAM>");
 			      SendTeamMessage(TEAM_MARVEL, green,"*Gas Factory is under attack!");
@@ -5143,7 +5089,7 @@ stock ActiveDesert(playerid)
 			      SendClientMessage(playerid, red,"This flag is currently not controlled by any team");
 				}
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+				foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][DESERT] = 1;
 				}
@@ -5156,8 +5102,11 @@ stock ActiveDesert(playerid)
 	return 1;
 }
 stock DesertCaptured(playerid)
-{for(new num = 0; num < 4; num ++)
-	{ TextDrawHideForPlayer(playerid, ZoneTextdraw_[num][playerid]); }
+{
+	for(new num = 0; num < 4; num ++)
+	{
+		TextDrawHideForPlayer(playerid, ZoneTextdraw_[num][playerid]);
+	}
 	Captured[playerid][DESERT] = 1;
 	UnderAttack[DESERT] = 0;
 	KillTimer(timer[playerid][DESERT]);
@@ -5168,14 +5117,14 @@ stock DesertCaptured(playerid)
     SendClientMessage(playerid, COLOR_WHITE,"[ZONE-REWARD]You got +5 scores and +$5000 cash for the capture of this area!");
     GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
-	   IsPlayerCapturing[i][DESERT] = 0;
-	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
-	   {
-		   SendClientMessage(i, yellow,""cyellow"[ZONE]Your team has sucessfully captured "cred"Gas Factory"cwhite"! You received +1 score for it!");
-		   GivePlayerScore(i, 1);
-	   }
+	   	IsPlayerCapturing[i][DESERT] = 0;
+	   	if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
+	   	{
+		   	SendClientMessage(i, yellow,""cyellow"[ZONE]Your team has sucessfully captured "cred"Gas Factory"cwhite"! You received +1 score for it!");
+		   	GivePlayerScore(i, 1);
+	   	}
 	}
 	//==========================================================================
 	tCP[DESERT] = gTeam[playerid];
@@ -5209,7 +5158,6 @@ stock DesertCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"y~[ZONE]%s has captured ~b~Gas Factory ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-
 	return 1;
 }
 stock LeavingDesert(playerid)
@@ -5221,7 +5169,7 @@ stock LeavingDesert(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][DESERT] = 25;
     GangZoneStopFlashForAll(Zone[DESERT]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][DESERT] = 0;
 	}
@@ -5271,7 +5219,7 @@ stock ActiveQuarry(playerid)
 				{
 			      GangZoneFlashForAll(Zone[QUARRY], TEAM_ZONE_AUS_COLOR);
 				}
-					else if(gTeam[playerid] == TEAM_MARVEL)
+				else if(gTeam[playerid] == TEAM_MARVEL)
 				{
 			      GangZoneFlashForAll(Zone[QUARRY], TEAM_ZONE_MARVEL_COLOR);
 				}
@@ -5311,7 +5259,7 @@ stock ActiveQuarry(playerid)
 			      SendClientMessage(playerid, red,"This flag is currently not controlled by any team");
 				}
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+				foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][QUARRY] = 1;
 				}
@@ -5336,7 +5284,7 @@ stock QuarryCaptured(playerid)
     SendClientMessage(playerid, COLOR_WHITE,"[ZONE-REWARD]You got +5 scores and +$5000 cash for the capture of this area!");
     GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][QUARRY] = 0;
 	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
@@ -5369,7 +5317,7 @@ stock QuarryCaptured(playerid)
     {
 	   GangZoneShowForAll(Zone[QUARRY], TEAM_ZONE_AUS_COLOR);
     }
-    	else if(gTeam[playerid] == TEAM_MARVEL)
+   	else if(gTeam[playerid] == TEAM_MARVEL)
     {
 	   GangZoneShowForAll(Zone[QUARRY], TEAM_ZONE_MARVEL_COLOR);
     }
@@ -5377,7 +5325,7 @@ stock QuarryCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"y~[ZONE]%s has captured ~b~Quarry ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-         	return 1;
+    return 1;
 }
 stock LeavingQuarry(playerid)
 {for(new num = 0; num < 4; num ++)
@@ -5388,7 +5336,7 @@ stock LeavingQuarry(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][QUARRY] = 25;
     GangZoneStopFlashForAll(Zone[QUARRY]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][QUARRY] = 0;
 	}
@@ -5478,7 +5426,7 @@ stock ActiveGuest(playerid)
 			      SendClientMessage(playerid, red,"This flag is currently not controlled by any team");
 				}
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+				foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][GUEST] = 1;
 				}
@@ -5503,7 +5451,7 @@ stock GuestCaptured(playerid)
     SendClientMessage(playerid, COLOR_WHITE,"[ZONE-REWARD]You got +5 scores and +$5000 cash for the capture of this area!");
     GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][GUEST] = 0;
 	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
@@ -5544,7 +5492,7 @@ stock GuestCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"y~[ZONE]%s has captured ~b~Army Guest House ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-    	return 1;
+    return 1;
 }
 stock LeavingGuest(playerid)
 {for(new num = 0; num < 4; num ++)
@@ -5555,7 +5503,7 @@ stock LeavingGuest(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][GUEST] = 25;
     GangZoneStopFlashForAll(Zone[GUEST]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][GUEST] = 0;
 	}
@@ -5605,7 +5553,7 @@ stock ActiveEar(playerid)
 				{
 			      GangZoneFlashForAll(Zone[EAR], TEAM_ZONE_AUS_COLOR);
 				}
-					else if(gTeam[playerid] == TEAM_MARVEL)
+				else if(gTeam[playerid] == TEAM_MARVEL)
 				{
 			      GangZoneFlashForAll(Zone[EAR], TEAM_ZONE_MARVEL_COLOR);
 				}
@@ -5646,7 +5594,7 @@ stock ActiveEar(playerid)
 			      SendClientMessage(playerid, red,"This flag is currently not controlled by any team");
 				}
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+				foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][EAR] = 1;
 				}
@@ -5671,7 +5619,7 @@ stock EarCaptured(playerid)
     SendClientMessage(playerid, COLOR_WHITE,"[ZONE-REWARD]You got +5 scores and +$5000 cash for the capture of this area!");
     GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][EAR] = 0;
 	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
@@ -5712,7 +5660,6 @@ stock EarCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"y~[ZONE]%s has captured ~b~Big Ear ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-
 	return 1;
 }
 stock LeavingEar(playerid)
@@ -5724,7 +5671,7 @@ stock LeavingEar(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][EAR] = 25;
     GangZoneStopFlashForAll(Zone[EAR]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][EAR] = 0;
 	}
@@ -5804,7 +5751,7 @@ stock ActiveBridge(playerid)
 			      SendClientMessage(playerid, red,"This flag is currently not controlled by any team");
 				}
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+				foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][BRIDGE] = 1;
 				}
@@ -5830,7 +5777,7 @@ stock BridgeCaptured(playerid)
 	SendClientMessage(playerid, COLOR_WHITE,"[ZONE-REWARD]You got +5 scores and +$5000 cash for the capture of this area!");
     GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][BRIDGE] = 0;
 	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
@@ -5878,7 +5825,7 @@ stock LeavingBridge(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][BRIDGE] = 25;
     GangZoneStopFlashForAll(Zone[BRIDGE]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][BRIDGE] = 0;
 	}
@@ -5960,7 +5907,7 @@ stock ActiveCity(playerid)
 			      SendClientMessage(playerid, red,"This flag is currently not controlled by any team");
 				}
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+				foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][CITY] = 1;
 				}
@@ -5986,14 +5933,14 @@ stock CityCaptured(playerid)
 	SendClientMessage(playerid, COLOR_WHITE,"[ZONE-REWARD]You got +5 scores and +$5000 cash for the capture of this area!");
     GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
-	   IsPlayerCapturing[i][CITY] = 0;
-	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
-	   {
-		   SendClientMessage(i, yellow,""cyellow"[ZONE]Your team has sucessfully captured "cred"Abondoned City"cwhite"! You received +1 score for it!");
-		   GivePlayerScore(i, 1);
-	   }
+	   	IsPlayerCapturing[i][CITY] = 0;
+	   	if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
+	   	{
+		   	SendClientMessage(i, yellow,""cyellow"[ZONE]Your team has sucessfully captured "cred"Abondoned City"cwhite"! You received +1 score for it!");
+		   	GivePlayerScore(i, 1);
+	   	}
 	}
 	//==========================================================================
 	tCP[CITY] = gTeam[playerid];
@@ -6034,7 +5981,7 @@ stock LeavingCity(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][CITY] = 25;
     GangZoneStopFlashForAll(Zone[CITY]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][CITY] = 0;
 	}
@@ -6114,7 +6061,7 @@ stock ActiveCluckin(playerid)
 			      SendClientMessage(playerid, red,"This flag is not controlled by any team");
 				}
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+				foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][CLUCKIN] = 1;
 				}
@@ -6140,7 +6087,7 @@ stock CluckinCaptured(playerid)
 	SendClientMessage(playerid, COLOR_WHITE,"[ZONE-REWARD]You got +5 scores and +$5000 cash for the capture of this area!");
     GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][CITY] = 0;
 	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
@@ -6188,7 +6135,7 @@ stock LeavingCluckin(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][CLUCKIN] = 25;
     GangZoneStopFlashForAll(Zone[CLUCKIN]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][CLUCKIN] = 0;
 	}
@@ -6203,159 +6150,6 @@ public Cluckin(playerid)
 	return 1;
 }
 //=====================================================================================
-stock ActiveAirp(playerid)
-{
-	if(Spectating[playerid] == 0 || PlayerInfo[playerid][OnDuty] == 0 || gTeam[playerid] != TEAM_MERC)
-	{
-		if(UnderAttack[AIRP] == 0)
-		{
-			if(!IsPlayerInAnyVehicle(playerid))
-		 	{for(new num = 0; num < 4; num ++)
-				{ TextDrawShowForPlayer(playerid, ZoneTextdraw_[num][playerid]); }
-			 	UnderAttack[AIRP] = 1;
-			 	timer[playerid][AIRP] = SetTimerEx("Airp", 25000, false,"i",playerid);
-			 	Captured[playerid][CLUCKIN] = 0;
-				 SendClientMessage(playerid, C_PINK,"[ZONE]Stay in this checkpoint for 25 seconds to capture it and earn score!");
-				 GameTextForPlayer(playerid,"~r~CAPTURING...",4000,5);
-             	if(gTeam[playerid] == TEAM_EURASIA)
-			    {
-				  GangZoneFlashForAll(Zone[AIRP], TEAM_ZONE_EURASIA_COLOR);
-				}
-				else if(gTeam[playerid] == TEAM_ARAB)
-				{
-			      GangZoneFlashForAll(Zone[AIRP], TEAM_ZONE_ARAB_COLOR);
-			    }
-			    else if(gTeam[playerid] == TEAM_SOVIET)
-			    {
-			      GangZoneFlashForAll(Zone[AIRP], TEAM_ZONE_SOVIET_COLOR);
-				}
-				else if(gTeam[playerid] == TEAM_USA)
-				{
-			      GangZoneFlashForAll(Zone[AIRP], TEAM_ZONE_USA_COLOR);
-				}
-				else if(gTeam[playerid] == TEAM_AUS)
-				{
-			      GangZoneFlashForAll(Zone[AIRP], TEAM_ZONE_AUS_COLOR);
-				}
-				//------Message-----
-			    if(tCP[AIRP] == TEAM_EURASIA)
-			    {
-			      SendClientMessage(playerid, COLOR_YELLOW,"[ZONE]This flag is being controlled by team "COL_RED"<ASIA>");
-			      SendTeamMessage(TEAM_EURASIA, green,"*Mini Airport Station is under attack!");
-			    }
-			    else if(tCP[AIRP] == TEAM_ARAB)
-			    {
-			      SendClientMessage(playerid, COLOR_YELLOW,"[ZONE]This flag is being controlled by team "COL_RED"<ARAB>");
-			      SendTeamMessage(TEAM_ARAB, green,"*Mini Airport Station is under attack!");
-			    }
-			    else if(tCP[AIRP] == TEAM_SOVIET)
-			    {
-			      SendClientMessage(playerid, COLOR_YELLOW,"[ZONE]This flag is being controlled by team "COL_RED"<SOVIET>");
-			      SendTeamMessage(TEAM_SOVIET, green,"*Mini Airport Station is under attack!");
-				}
-				else if(tCP[AIRP] == TEAM_USA)
-				{
-				  SendClientMessage(playerid, COLOR_YELLOW,"[ZONE]This flag is being controlled by team "COL_RED"<USA>");
-				  SendTeamMessage(TEAM_USA, green,"*Mini Airport Station is under attack!");
-				}
-				else if(tCP[AIRP] == TEAM_AUS)
-				{
-			      SendClientMessage(playerid, COLOR_YELLOW,"[ZONE]This flag is being controlled by team "COL_RED"<AUSTRALIA>");
-			      SendTeamMessage(TEAM_AUS, green,"*Mini Airport Station is under attack!");
-				}
-				else if(tCP[AIRP] == TEAM_NONE)
-				{
-			      SendClientMessage(playerid, red,"This flag is not controlled by any team");
-				}
-				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
-				{
-				   IsPlayerCapturing[i][AIRP] = 1;
-				}
-			}
-			else return CaptureZoneMessage(playerid, 1);
-		}
-		else return CaptureZoneMessage(playerid, 2);
-	}
-	else return CaptureZoneMessage(playerid, 3);
-	return 1;
-}
-stock AirpCaptured(playerid)
-{for(new num = 0; num < 4; num ++)
-	{ TextDrawHideForPlayer(playerid, ZoneTextdraw_[num][playerid]); }
-	Captured[playerid][AIRP] = 1;
-	UnderAttack[AIRP] = 0;
-	KillTimer(timer[playerid][AIRP]);
-    TextDrawHideForPlayer(playerid, CountText[playerid]);
-    CountVar[playerid][AIRP] = 25;
-	GivePlayerScore(playerid, 5);
-    GivePlayerMoney(playerid, 5000);
-    TextDrawShowForPlayer(playerid, Rank1[playerid]);
-	SendClientMessage(playerid, COLOR_WHITE,"[ZONE-REWARD]You got +5 scores and +$5000 cash for the capture of this area!");
-    GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
-	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
-	{
-	   IsPlayerCapturing[i][CITY] = 0;
-	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
-	   {
-		   SendClientMessage(i, 0xFFFFFFFF,"Your team has captured "cred"Mini Airport Station"cwhite"! You received +1 score for it!");
-		   GivePlayerScore(i, 1);
-	   }
-	}
-	//==========================================================================
-	tCP[AIRP] = gTeam[playerid];
-	GangZoneStopFlashForAll(Zone[AIRP]);
-	//==========================================================================
-	if(gTeam[playerid] == TEAM_EURASIA)
-    {
-	   GangZoneShowForAll(Zone[AIRP], TEAM_ZONE_EURASIA_COLOR);
-	}
-	else if(gTeam[playerid] == TEAM_ARAB)
-	{
-       GangZoneShowForAll(Zone[AIRP], TEAM_ZONE_ARAB_COLOR);
-	}
-	else if(gTeam[playerid] == TEAM_SOVIET)
-	{
-	   GangZoneShowForAll(Zone[AIRP], TEAM_ZONE_SOVIET_COLOR);
-	}
-	else if(gTeam[playerid] == TEAM_USA)
-	{
-	   GangZoneShowForAll(Zone[AIRP], TEAM_ZONE_USA_COLOR);
-	}
-	else if(gTeam[playerid] == TEAM_AUS)
-    {
-	   GangZoneShowForAll(Zone[AIRP], TEAM_ZONE_AUS_COLOR);
-    }
-    //==========================================================================
-    new str[128];
-    format(str, sizeof(str),"%s has captured Mini Airport Station for team %s", pName(playerid), GetTeamName(playerid));
-    SendBoxMessage(str);
-	return 1;
-}
-stock LeavingAirp(playerid)
-{for(new num = 0; num < 4; num ++)
-	{ TextDrawHideForPlayer(playerid, ZoneTextdraw_[num][playerid]); }
-	Captured[playerid][AIRP] = 1;
-	UnderAttack[AIRP] = 0;
-	KillTimer(timer[playerid][AIRP]);
-    TextDrawHideForPlayer(playerid, CountText[playerid]);
-    CountVar[playerid][AIRP] = 25;
-    GangZoneStopFlashForAll(Zone[AIRP]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
-	{
-	   IsPlayerCapturing[i][CLUCKIN] = 0;
-	}
-	PlayAudioStreamForPlayer(playerid,"http://files.mboxdrive.com/100000856487902/WR_StoleFlag.wav");
-	SendClientMessage(playerid, red,"[ZONE]You have failed to capture this zone! Quick, RECAPTURE IT!");
-	return 1;
-}
-forward Airp(playerid);
-public Airp(playerid)
-{
-	AirpCaptured(playerid);
-	return 1;
-}
 //================================== SUBS====================================
 //===============S SUBS ====================================================
 stock ActiveSubs(playerid)
@@ -6433,7 +6227,7 @@ stock ActiveSubs(playerid)
 			      SendClientMessage(playerid, red,"This flag is currently not controlled by any team");
 				}
 				//---------loop-------//
-				for(new i = 0; i < MAX_PLAYERS; i ++)
+				foreach(Player, i)
 				{
 				   IsPlayerCapturing[i][SUBS] = 1;
 				}
@@ -6459,7 +6253,7 @@ stock SubsCaptured(playerid)
 	GameTextForPlayer(playerid,"~g~CAPTURED!",4000,5);
 
 	//==========================================================================
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][SUBS] = 0;
 	   if(gTeam[i] == gTeam[playerid] && i != playerid && PlayerInfo[i][OnDuty] == 0)
@@ -6500,8 +6294,6 @@ stock SubsCaptured(playerid)
     new str[128];
     format(str, sizeof(str),"~y~[ZONE]%s has captured ~b~Submarines ~p~for team ~w~%s", pName(playerid), GetTeamName(playerid));
     SendBoxMessage(str);
-
-
 	return 1;
 }
 stock LeavingSubs(playerid)
@@ -6513,7 +6305,7 @@ stock LeavingSubs(playerid)
     TextDrawHideForPlayer(playerid, CountText[playerid]);
     CountVar[playerid][SUBS] = 25;
     GangZoneStopFlashForAll(Zone[SUBS]);
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
 	{
 	   IsPlayerCapturing[i][SUBS] = 0;
 	}
@@ -6714,19 +6506,6 @@ public OnPlayerEnterDynamicCP(playerid, checkpointid)
 			} else return CaptureZoneMessage(playerid, 2);
 		} else return 0;
 	}
-	else if(checkpointid == CP[AIRP])
-	{
-		if(Spectating[playerid] == 0) {
-			if(UnderAttack[AIRP] == 0) {
-				if(PlayerInfo[playerid][OnDuty] == 0) {
-					if(tCP[AIRP] != gTeam[playerid]) {
-						CountVar[playerid][AIRP] = 25;
-						ActiveAirp(playerid);
-					} else return SendClientMessage(playerid, -1,"[ZONE]This zone is controlled by your team! Look for any other zone!");
-				} else return CaptureZoneMessage(playerid, 3);
-			} else return CaptureZoneMessage(playerid, 2);
-		} else return 0;
-	}
 	else if(checkpointid == CP[SUBS])
 	{
 		if(Spectating[playerid] == 0) {
@@ -6740,9 +6519,6 @@ public OnPlayerEnterDynamicCP(playerid, checkpointid)
 			} else return CaptureZoneMessage(playerid, 2);
 		} else return 0;
 	}
-	
-
-
 	return 1;
 }
 public OnPlayerLeaveDynamicCP(playerid, checkpointid)
@@ -6799,10 +6575,6 @@ public OnPlayerLeaveDynamicCP(playerid, checkpointid)
 	{
 		LeavingBridge(playerid);
 	}
-	if(checkpointid == CP[AIRP] && Captured[playerid][AIRP] == 0 && IsPlayerCapturing[playerid][AIRP] == 1 && !IsPlayerInDynamicCP(playerid, CP[AIRP]))
-	{
-		LeavingBridge(playerid);
-	}
 	return 1;
 }
 //==============================================================================
@@ -6828,7 +6600,7 @@ public OnPlayerText(playerid, text[])
 	}
 	if(text[0] == '@' && PlayerInfo[playerid][Level] >= 9) {
 	    new string[128]; GetPlayerName(playerid,string,sizeof(string));
-		format(string,sizeof(string),"Perfect.Chat:[%i]%s: %s",playerid,string,text[1]);
+		format(string,sizeof(string),"Exec.Chat:[%i]%s: %s",playerid,string,text[1]);
 		MessageToOwner(0xFF0000FF,string);
 		return 0;
 	}
@@ -7162,13 +6934,13 @@ public OnPlayerText(playerid, text[])
 public OnPlayerPickUpPickup(playerid, pickupid)
 {
 
-if(pickupid == Pickup[5] || pickupid == Pickup[6] || pickupid == Pickup[7] || pickupid == Pickup[8] || pickupid == Pickup[9] || pickupid == Pickup[10] || pickupid == Pickup[11] || pickupid == Pickup[12] || pickupid == Pickup[13] ||
+	if(pickupid == Pickup[5] || pickupid == Pickup[6] || pickupid == Pickup[7] || pickupid == Pickup[8] || pickupid == Pickup[9] || pickupid == Pickup[10] || pickupid == Pickup[11] || pickupid == Pickup[12] || pickupid == Pickup[13] ||
 	   pickupid == Pickup[1] || pickupid == Pickup[2] || pickupid == Pickup[3] || pickupid == Pickup[4])
 	{
 	    if(pVehicles[playerid] != -1)
 	    {
-	        for(new i; i < MAX_PLAYERS; i++)
-	        {
+	        foreach(Player, i)
+			{
 	            if(IsPlayerConnected(i))
 	            {
 	        		if(IsPlayerInVehicle(i,  pVehicles[playerid])) DestroyVehicle(pVehicles[playerid]);
@@ -7404,17 +7176,17 @@ if(gTeam[playerid] == TEAM_EURASIA)
 stock GetRankName(playerid)
 {
 	new str3[64];
-	if (GetPlayerScore(playerid) >= 0 && GetPlayerScore(playerid) <= 49) str3 = ("Private");
-	if (GetPlayerScore(playerid) >= 50 && GetPlayerScore(playerid) <= 99) str3 = ("Corporal");
-	if (GetPlayerScore(playerid) >= 100 && GetPlayerScore(playerid) <= 499) str3 = ("Lieutenant");
-	if (GetPlayerScore(playerid) >= 500 && GetPlayerScore(playerid) <= 1499) str3 = ("Major");
-	if (GetPlayerScore(playerid) >= 1500 && GetPlayerScore(playerid) <= 2499) str3 = ("Captain");
-	if (GetPlayerScore(playerid) >= 2500 && GetPlayerScore(playerid) <= 4999) str3 = ("Commander");
-	if (GetPlayerScore(playerid) >= 5000 && GetPlayerScore(playerid) <= 14999) str3 = ("General");
-	if (GetPlayerScore(playerid) >= 15000 && GetPlayerScore(playerid) <= 24999) str3 = ("Brigadier");
-	if (GetPlayerScore(playerid) >= 25000 && GetPlayerScore(playerid) <= 34999) str3 = ("Field Marshall");
-	if (GetPlayerScore(playerid) >= 35000 && GetPlayerScore(playerid) <= 49999) str3 = ("Master of War");
-	if (GetPlayerScore(playerid) >= 100000) str3 = ("General of Army");
+	if (GetPlayerScore(playerid) >= 0 && GetPlayerScore(playerid) <= 49) str3 = ("Private - Rank 0");
+	if (GetPlayerScore(playerid) >= 50 && GetPlayerScore(playerid) <= 99) str3 = ("Corporal - Rank 1");
+	if (GetPlayerScore(playerid) >= 100 && GetPlayerScore(playerid) <= 499) str3 = ("Lieutenant - Rank 2");
+	if (GetPlayerScore(playerid) >= 500 && GetPlayerScore(playerid) <= 1499) str3 = ("Major - Rank 3");
+	if (GetPlayerScore(playerid) >= 1500 && GetPlayerScore(playerid) <= 2499) str3 = ("Captain - Rank 4");
+	if (GetPlayerScore(playerid) >= 2500 && GetPlayerScore(playerid) <= 4999) str3 = ("Commander - Rank 5");
+	if (GetPlayerScore(playerid) >= 5000 && GetPlayerScore(playerid) <= 7999) str3 = ("General - Rank 6");
+	if (GetPlayerScore(playerid) >= 8000 && GetPlayerScore(playerid) <= 14999) str3 = ("Brigadier - Rank 7");
+	if (GetPlayerScore(playerid) >= 15000 && GetPlayerScore(playerid) <= 34999) str3 = ("Field Marshall - Rank 8");
+	if (GetPlayerScore(playerid) >= 35000 && GetPlayerScore(playerid) <= 99999) str3 = ("Master of War - Rank 9");
+	if (GetPlayerScore(playerid) >= 100000) str3 = ("General of Army - Rank 10");
 	return str3;
 }
 stock GetClass(playerid)
@@ -7513,135 +7285,134 @@ if(dialogid == 15500) //Dialog login
 if(strfind(inputtext,"%",true) != -1) return SendClientMessage(playerid, RED," ");
 if(dialogid == CLASS_DIALOG)
 {
-   if(!response)
-   {
-	   new String[150];
-	new team1count = GetTeamCount(TEAM_EURASIA);
-    new team2count = GetTeamCount(TEAM_USA);
-    new team3count = GetTeamCount(TEAM_ARAB);
-    new team4count = GetTeamCount(TEAM_SOVIET);
-    new team5count = GetTeamCount(TEAM_AUS);
-	format(String, sizeof(String),""cblue"Usa [P:%d]\n"cgreen"Eurasia [P:%d]\n"cyellow"Arabica [P:%d]\n"cred"Soviet [P:%d]\n"cpurple"Austraillia [P:%d]",team2count, team1count, team3count, team4count, team5count);
-	ShowPlayerDialog(playerid, 1432, DIALOG_STYLE_LIST, "Select Team",String,"Select","Back");
-   }
-   else if(response)
-   {
+   	if(!response)
+   	{
+		new String[150];
+		new team1count = GetTeamCount(TEAM_EURASIA);
+    	new team2count = GetTeamCount(TEAM_USA);
+    	new team3count = GetTeamCount(TEAM_ARAB);
+    	new team4count = GetTeamCount(TEAM_SOVIET);
+    	new team5count = GetTeamCount(TEAM_AUS);
+		format(String, sizeof(String),""cblue"Usa [P:%d]\n"cgreen"Eurasia [P:%d]\n"cyellow"Arabica [P:%d]\n"cred"Soviet [P:%d]\n"cpurple"Austraillia [P:%d]",team2count, team1count, team3count, team4count, team5count);
+		ShowPlayerDialog(playerid, 1432, DIALOG_STYLE_LIST, "Select Team",String,"Select","Back");
+   	}
+   	else if(response)
+   	{
 	   switch(listitem)
 	   {
 		   case 0:
 		   {
-			   gClass[playerid] = Assault;
-			   SendClientMessage(playerid, -1,"You have chosen the Assault class");
-			   SendClientMessage(playerid, -1,"BONUS: No extra bonus with this class");
-			   SpawnPlayer(playerid);
-			   UpdateLabelText(playerid);
+				gClass[playerid] = Assault;
+			   	SendClientMessage(playerid, -1,"You have chosen the Assault class");
+			   	SendClientMessage(playerid, -1,"BONUS: No extra bonus with this class");
+			   	SpawnPlayer(playerid);
+			   	UpdateLabelText(playerid);
 		   }
 		   case 1:
 		   {
-				   gClass[playerid] = SNIPER;
-				   SendClientMessage(playerid, -1,"You have chosen the Sniper class");
-				   SendClientMessage(playerid, -1,"BONUS: Invisible on map");
-				   SpawnPlayer(playerid);
-				   UpdateLabelText(playerid);
+				gClass[playerid] = SNIPER;
+				SendClientMessage(playerid, -1,"You have chosen the Sniper class");
+				SendClientMessage(playerid, -1,"BONUS: Invisible on map");
+				SpawnPlayer(playerid);
+				UpdateLabelText(playerid);
 		   }
 		   case 2:
 		   {
-                if(GetPlayerScore(playerid) >= 1500)
+                if(GetPlayerScore(playerid) >= 8000)
                 {
-				   gClass[playerid] = PILOT;
-				   SendClientMessage(playerid, -1,"You have chosen Pilot class");
-				   SendClientMessage(playerid, -1,"BONUS: Can fly heavy air vehicles");
-				   SpawnPlayer(playerid);
-				   UpdateLabelText(playerid);
+				   	gClass[playerid] = PILOT;
+				   	SendClientMessage(playerid, -1,"You have chosen Pilot class");
+				   	SendClientMessage(playerid, -1,"BONUS: Can fly heavy air vehicles");
+				   	SpawnPlayer(playerid);
+				   	UpdateLabelText(playerid);
 				}
 				else
 				{
-                   ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
-                   SendClientMessage(playerid, red,"You need to have rank 6 to use this class!");
+                   	ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
+                   	SendClientMessage(playerid, red,"You need to have rank 7 to use this class!");
 				}
 
 		   }
 		   case 3:
 		   {
-                if(GetPlayerScore(playerid) >= 1000)
+                if(GetPlayerScore(playerid) >= 1500)
                 {
-				   gClass[playerid] = ENGINEER;
-				   SendClientMessage(playerid, -1,"You have chosen Engineer class");
-				   SendClientMessage(playerid, -1,"BONUS: Can drive rhino!");
-				   SpawnPlayer(playerid);
-				   UpdateLabelText(playerid);
+				   	gClass[playerid] = ENGINEER;
+				   	SendClientMessage(playerid, -1,"You have chosen Engineer class");
+				   	SendClientMessage(playerid, -1,"BONUS: Can drive rhino!");
+				   	SpawnPlayer(playerid);
+				   	UpdateLabelText(playerid);
 				}
 				else
 				{
-                   ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
-                   SendClientMessage(playerid, red,"You need to have rank 5 to use this class!");
+                   	ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
+                   	SendClientMessage(playerid, red,"You need to have rank 4 to use this class!");
 				}
 
            }
 		   case 4:
 		   {
-                if(GetPlayerScore(playerid) >= 1500)
+                if(GetPlayerScore(playerid) >= 2500)
                 {
-				   gClass[playerid] = JET;
-				   SendClientMessage(playerid, -1,"You have chosen JetTrooper class");
-				   SendClientMessage(playerid, -1,"BONUS: Can use /jp to spawn jetpack.");
-				   SpawnPlayer(playerid);
-				   UpdateLabelText(playerid);
+				   	gClass[playerid] = JET;
+				   	SendClientMessage(playerid, -1,"You have chosen JetTrooper class");
+				   	SendClientMessage(playerid, -1,"BONUS: Can use /jp to spawn jetpack.");
+				   	SpawnPlayer(playerid);
+				   	UpdateLabelText(playerid);
 				}
 				else
 				{
-                   ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
-                   SendClientMessage(playerid, red,"You need to have rank 6 to use this class!");
+                   	ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
+                   	SendClientMessage(playerid, red,"You need to have rank 5 to use this class!");
 				}
 
-			 }
-		     case 5:
-		     {
-                if(GetPlayerScore(playerid) >= 1000)
+			}
+		    case 5:
+		    {
+                if(GetPlayerScore(playerid) >= 2500)
                 {
-				   gClass[playerid] = SP;
-				   SendClientMessage(playerid, -1,"You have chosen Support class");
-				   SendClientMessage(playerid, -1,"BONUS: Use /Shelp For Supporter Commands.");
-				   SpawnPlayer(playerid);
-				   UpdateLabelText(playerid);
+				   	gClass[playerid] = SP;
+				   	SendClientMessage(playerid, -1,"You have chosen Support class");
+				   	SendClientMessage(playerid, -1,"BONUS: Use /Shelp For Supporter Commands.");
+				   	SpawnPlayer(playerid);
+				   	UpdateLabelText(playerid);
 				}
 				else
 				{
-                   ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
-                   SendClientMessage(playerid, red,"You need to have rank 5 to use this class!");
+                   	ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
+                   	SendClientMessage(playerid, red,"You need to have rank 5 to use this class!");
 				}
             }
-		     case 6:
-		     {
-                if(GetPlayerScore(playerid) >= 1000)
+		    case 6:
+		    {
+            	if(GetPlayerScore(playerid) >= 5000)
                 {
-				   gClass[playerid] = SCOUT;
-				   SendClientMessage(playerid, -1,"You have chosen Scout class");
-				   SendClientMessage(playerid, -1,"BONUS: Can Drive Sea Sparrow.");
-				   SpawnPlayer(playerid);
-				   UpdateLabelText(playerid);
+					gClass[playerid] = SCOUT;
+				    SendClientMessage(playerid, -1,"You have chosen Scout class");
+				    SendClientMessage(playerid, -1,"BONUS: Can Drive Sea Sparrow.");
+				    SpawnPlayer(playerid);
+				    UpdateLabelText(playerid);
 				}
 				else
 				{
-                   ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
-                   SendClientMessage(playerid, red,"You need to have rank 5 to use this class!");
+                    ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
+                    SendClientMessage(playerid, red,"You need to have rank 6 to use this class!");
 				}
-
            }
            case 7:
-		     {
-                if(GetPlayerScore(playerid) >= 2000)
+		   {
+     			if(GetPlayerScore(playerid) >= 5000)
                 {
-				   gClass[playerid] = AG;
-				   SendClientMessage(playerid, -1,"You have chosen Spy class");
-				   SendClientMessage(playerid, -1,"BONUS: /Dis to disguise.");
-				   SpawnPlayer(playerid);
-				   UpdateLabelText(playerid);
+				   	gClass[playerid] = AG;
+				   	SendClientMessage(playerid, -1,"You have chosen Spy class");
+				   	SendClientMessage(playerid, -1,"BONUS: /Dis to disguise.");
+				   	SpawnPlayer(playerid);
+				   	UpdateLabelText(playerid);
 				}
 				else
 				{
-                   ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
-                   SendClientMessage(playerid, red,"You need to have rank 7 to use this class!");
+                   	ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
+                   	SendClientMessage(playerid, red,"You need to have rank 6 to use this class!");
 				}
 
            }
@@ -7649,17 +7420,17 @@ if(dialogid == CLASS_DIALOG)
 		   {
                 if(PlayerInfo[playerid][dRank] >= 2)
                 {
-				   gClass[playerid] = DONOR;
-				   SendClientMessage(playerid, -1,"Donor Class");
-				   SendClientMessage(playerid, -1,"BONUS: Can Drive All Vehicles.");
-				   SendClientMessage(playerid, -1,"Use /DCmds For Donor Commands.");
-				   SpawnPlayer(playerid);
-				   UpdateLabelText(playerid);
+				   	gClass[playerid] = DONOR;
+				   	SendClientMessage(playerid, -1,"Donor Class");
+				   	SendClientMessage(playerid, -1,"BONUS: Can Drive All Vehicles.");
+				   	SendClientMessage(playerid, -1,"Use /DCmds For Donor Commands.");
+				   	SpawnPlayer(playerid);
+				   	UpdateLabelText(playerid);
 				}
 				else
 				{
-                   ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
-                   SendClientMessage(playerid, red,"You Need Atleast Donor Rank 2 For This Class!");
+                   	ShowPlayerDialog(playerid, CLASS_DIALOG, DIALOG_STYLE_LIST,"Class Selection",""ccolor"Assault - "ccolor2"Rank 0\n"ccolor"Sniper - "ccolor2"Rank 0\n"ccolor"Pilot - "ccolor2"Rank 6\n"ccolor"Engineer - "ccolor2"Rank 5\n"ccolor"JetTrooper - "ccolor2"Rank 6\n"ccolor"Support - "ccolor2"Rank 5\n"ccolor"Scout - "ccolor2"Rank 5\n"ccolor"Spy - "ccolor2"Rank 7\n"ccolor"Donor - "ccolor2"For Donators only","Select","Back");
+                   	SendClientMessage(playerid, red,"You Need Atleast Donor Rank 2 For This Class!");
 				}
 		   }
 	   }
@@ -7875,12 +7646,12 @@ if(dialogid == 991)
 					{
                         SendClientMessageToAll(TEAM_USA_COLOR,"Nuke has been launched to USA base.");
 					    GivePlayerMoney(playerid, -200000);
-					    nuke_time = 250;
+					    nuke_time = 2000;
 					    SetWeather(19);
 					    SCM(playerid,RED,"You Have Been Charged $200000 For Nuclear Rocket!");
 					    foreach(Player, i)
 						{
-					  if(IsPlayerInArea(i,-353.515625,2574.21875,-113.28125,2796.875))
+					  		if(IsPlayerInArea(i,-353.515625,2574.21875,-113.28125,2796.875))
 							{
                                 SetPlayerHealth(i, 0);
 							    new Float:x, Float:y, Float:z;
@@ -7908,12 +7679,12 @@ if(dialogid == 991)
      {
                        SendClientMessageToAll(TEAM_EURASIA_COLOR,"Nuke has been launch to EURASIA base.");
 					    GivePlayerMoney(playerid, -200000);
-					    nuke_time = 250;
+					    nuke_time = 2000;
 					    SetWeather(19);
 					    SCM(playerid,RED,"You Have Been Charged $200000 For Nuclear Rocket!");
 					    foreach(Player, i)
 						{
-					  if(IsPlayerInArea(i,994.1957, 1817.512, 1185.533, 2049.596))
+					  		if(IsPlayerInArea(i,994.1957, 1817.512, 1185.533, 2049.596))
 							{
                                 SetPlayerHealth(i, 0);
 							    new Float:x, Float:y, Float:z;
@@ -7941,7 +7712,7 @@ if(dialogid == 991)
 					{
                         SendClientMessageToAll(TEAM_ARAB_COLOR,"Nuke has been launch to ARABIA base.");
 					    GivePlayerMoney(playerid, -200000);
-					    nuke_time = 250;
+					    nuke_time = 2000;
 					    SetWeather(19);
 					    SCM(playerid,RED,"You Have Been Charged $200000 For Nuclear Rocket!");
 					    foreach(Player, i)
@@ -7974,7 +7745,7 @@ if(dialogid == 991)
 					{
                         SendClientMessageToAll(TEAM_SOVIET_COLOR,"Nuke has been launch to SOVIET base.");
 					    GivePlayerMoney(playerid, -200000);
-					    nuke_time = 250;
+					    nuke_time = 2000;
 					    SetWeather(19);
 					    SCM(playerid,RED,"You Have Been Charged $200000 For Nuclear Rocket!");
 					    foreach(Player, i)
@@ -8007,7 +7778,7 @@ if(dialogid == 991)
 					{
                         SendClientMessageToAll(TEAM_ZONE_AUS_COLOR,"Nuke has been launch to AUSTRAILLIA base.");
 					    GivePlayerMoney(playerid, -200000);
-					    nuke_time = 250;
+					    nuke_time = 2000;
 					    SetWeather(19);
 					    SCM(playerid,RED,"You Have Been Charged $200000 For Nuclear Rocket!");
 					    foreach(Player, i)
@@ -8040,7 +7811,7 @@ if(dialogid == 991)
 					{
                         SendClientMessageToAll(TEAM_MARVEL_COLOR,"Nuke has been launch to VIETNAM base.");
 					    GivePlayerMoney(playerid, -200000);
-					    nuke_time = 250;
+					    nuke_time = 2000;
 					    SetWeather(19);
 					    SCM(playerid,RED,"You Have Been Charged $200000 For Nuclear Rocket!");
 					    foreach(Player, i)
@@ -8433,11 +8204,11 @@ if(response)
 	}
     }
 if(response)
-    {
+{
     switch(dialogid)
-        {
+    {
 		case 30:
-    	    {
+  		{
            	switch(listitem)
         	{
         	    case 0:
@@ -8655,15 +8426,6 @@ public CountDown()
 			format(str1, sizeof(str1),"~r~%d ~y~Left To Capture.", CountVar[playerid][EAR]);
 			TextDrawSetString(CountText[playerid], str1);
 		}
-		if(IsPlayerInDynamicCP(playerid, CP[AIRP]) && UnderAttack[AIRP] == 1 && IsPlayerCapturing[playerid][AIRP] == 1)
-		{
-			CountVar[playerid][AIRP]--;
-			new str1[124];
-			TextDrawShowForPlayer(playerid, CountText[playerid]);
-			format(str1, sizeof(str1),"~r~%d ~y~Left To Capture.", CountVar[playerid][EAR]);
-			TextDrawSetString(CountText[playerid], str1);
-		}
-
 	}
 	return 1;
 }
@@ -8682,32 +8444,32 @@ stock GetTeamName(playerid)
 //==============SendTeamMessage function by Jarnu==============================
 stock SendTeamMessage(teamid, color, string[])
 {
-  for(new x=0; x < MAX_PLAYERS; x++)
-  {
-	if(IsPlayerConnected(x))
+  	foreach(Player, x)
 	{
-	  if(gTeam[x] == teamid)
-	  {
-		SendClientMessage(x, color, string);
-	  }
-	}
-  }
-  return 1;
+		if(IsPlayerConnected(x))
+		{
+	  		if(gTeam[x] == teamid)
+	  		{
+				SendClientMessage(x, color, string);
+	  		}
+		}
+  	}
+  	return 1;
 }
 //=======================Give Team Score by Jarnu==============================
 stock GiveTeamScore(teamid, amount)
 {
-  for(new x=0; x < MAX_PLAYERS; x++)
-  {
-	if(IsPlayerConnected(x))
+  	foreach(Player, x)
 	{
-	  if(gTeam[x] == teamid)
-	  {
-		SetPlayerScore(x, GetPlayerScore(x)+amount);
-	  }
-	}
-  }
-  return 1;
+		if(IsPlayerConnected(x))
+		{
+	  		if(gTeam[x] == teamid)
+	  		{
+				SetPlayerScore(x, GetPlayerScore(x)+amount);
+	  		}
+		}
+  	}
+ 	return 1;
 }
 //==============================================================================
 
@@ -8718,8 +8480,8 @@ public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 stock GetTeamCount(teamid)
 {
    new playercount = 0;//Set our count to 0 as we have not counted any players yet..
-    for(new i = 0; i < MAX_PLAYERS; i++)//Loop through MAX_PLAYERS(I suggest you redefine MAX_PLAYERS to ensure max efficency)..
-    {
+    foreach(Player, i)
+	{//Loop through MAX_PLAYERS(I suggest you redefine MAX_PLAYERS to ensure max efficency).. eat foreach whoever said that..
         if(GetPlayerState(i) == PLAYER_STATE_NONE) continue;//If a player is in class selection continue..
         if(gTeam[i] != teamid) continue;//If a player is NOT in the specified teamid continue..
         playercount++;//else (there in the teamid) so count the player in the team..
@@ -8793,7 +8555,7 @@ CMD:undis(playerid, params[])
 	                	SCM(playerid,grey,"Undis");
 
 			        }
-			            if(gTeam[playerid] == TEAM_MARVEL)
+           			if(gTeam[playerid] == TEAM_MARVEL)
 	                {
 	                    SetPlayerSkin(playerid, 122);
 	                	SetPlayerColor(playerid, TEAM_MARVEL_COLOR);
@@ -8817,75 +8579,75 @@ CMD:undis(playerid, params[])
 
 
 CMD:givegun(playerid, params[])
+{
+	new playername[24];
+	new weaponname[65], player2name[MAX_PLAYER_NAME];
+	new playermsg[128], player2msg[128];
+   	new tmp[256];
+   	new idx;
+   	tmp = strtok(params, idx);
+	if(!strlen(tmp))
 	{
-		new playername[24];
- 		new weaponname[65], player2name[MAX_PLAYER_NAME];
-   		new playermsg[128], player2msg[128];
-   		new tmp[256];
-   		new idx;
+		SendClientMessage(playerid, red, "JikyBot: Usage:/givegun [playerid]");
+   		return 1;
+   	}
 
-     	tmp = strtok(params, idx);
+    new player2id = strval(tmp);
 
-		if(!strlen(tmp)) {
-  			SendClientMessage(playerid, red, "JikyBot: Usage:/givegun [playerid]");
-     		return 1;
-       	}
-        new player2id = strval(tmp);
-
-		if(IsPlayerConnected(player2id))
-  		{
-    		if(player2id==playerid)
-      		{
-     			SendClientMessage(playerid, red, "You Gave An Invalid ID. Give Me A Correct ID!");
-        		return 1;
-          	}
-           	else
+	if(IsPlayerConnected(player2id))
+	{
+    	if(player2id==playerid)
+      	{
+     		SendClientMessage(playerid, red, "You Gave An Invalid ID. Give Me A Correct ID!");
+        	return 1;
+        }
+        else
+		{
+            new weaponid = GetPlayerWeapon(playerid);
+            new weaponammo;
+            if(weaponid == 0)
             {
-            	new weaponid = GetPlayerWeapon(playerid);
-             	new weaponammo;
-              	if(weaponid == 0)
+              	SendClientMessage(playerid, red, "You're Not Holding A Damn Weapon");
+              	return 1;
+            }
+            else
+			{
+           		new weapo[13][2];
+               	for(new i;i<13;i++)
                	{
-                	SendClientMessage(playerid, red, "You're Not Holding A Damn Weapon");
-                 	return 1;
-                }
-                else
-                {
-               		new weapo[13][2];
-                	for(new i;i<13;i++)
-                	{
-                		GetPlayerWeaponData(playerid, i, weapo[i][0], weapo[i][1]);
-                		if(weapo[i][0]==weaponid) weaponammo=weapo[i][1];
-                	}
+               		GetPlayerWeaponData(playerid, i, weapo[i][0], weapo[i][1]);
+               		if(weapo[i][0]==weaponid) weaponammo=weapo[i][1];
+               	}
 
-                	new Float:gX, Float:gY, Float:gZ;
-			    	GetPlayerPos(player2id, gX, gY, gZ);
-			    	if( !IsPlayerInRangeOfPoint(playerid, 5.0, gX, gY, gZ) )
-			    	{
-			    	    SendClientMessage(playerid, C_PINK, "Player  Is 1 Mile Away! He Has To Be Near You!");
-			    	    return 1;
-			    	}
-                	ResetPlayerWeapons(playerid);
-                	for(new i;i<13;i++) if(weapo[i][0]!=weaponid) GivePlayerWeapon(playerid, weapo[i][0], weapo[i][1]);
-                	GivePlayerWeapon(player2id, weaponid, weaponammo);
+               	new Float:gX, Float:gY, Float:gZ;
+		    	GetPlayerPos(player2id, gX, gY, gZ);
+		    	if( !IsPlayerInRangeOfPoint(playerid, 5.0, gX, gY, gZ) )
+		    	{
+		    	    SendClientMessage(playerid, C_PINK, "Player  Is 1 Mile Away! He Has To Be Near You!");
+		    	    return 1;
+		    	}
+               	ResetPlayerWeapons(playerid);
+               	for(new i;i<13;i++) if(weapo[i][0]!=weaponid) GivePlayerWeapon(playerid, weapo[i][0], weapo[i][1]);
+               	GivePlayerWeapon(player2id, weaponid, weaponammo);
 
-                	GetWeaponName(weaponid, weaponname, 64);
-                	GetPlayerName(playerid, playername, sizeof(playername));
-                	GetPlayerName(player2id, player2name, sizeof(player2name));
+               	GetWeaponName(weaponid, weaponname, 64);
+               	GetPlayerName(playerid, playername, sizeof(playername));
+               	GetPlayerName(player2id, player2name, sizeof(player2name));
 
-                	format(playermsg, 255, "You gave your %s to %s(%d)", weaponname, player2name, player2id);
-                	SendClientMessage(playerid, COLOR_YELLOW, playermsg);
+               	format(playermsg, 255, "You gave your %s to %s(%d)", weaponname, player2name, player2id);
+               	SendClientMessage(playerid, COLOR_YELLOW, playermsg);
 
-                	format(player2msg, 255, "You recived a %s from %s(%d)", weaponname, playername, playerid);
-                	SendClientMessage(player2id, COLOR_YELLOW, player2msg);
-				}
+               	format(player2msg, 255, "You recived a %s from %s(%d)", weaponname, playername, playerid);
+               	SendClientMessage(player2id, COLOR_YELLOW, player2msg);
 			}
 		}
-  		else
-    	{
-       		SendClientMessage(playerid, red, "That Player Is Not Connected.");
-		}
-  		return 1;
-    }
+	}
+  	else
+    {
+    	SendClientMessage(playerid, red, "That Player Is Not Connected.");
+	}
+	return 1;
+}
 CMD:getteam(playerid, params[])
 {
    if(PlayerInfo[playerid][Level] >= 4)
@@ -8896,113 +8658,113 @@ CMD:getteam(playerid, params[])
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
-			   if(gTeam[i] == TEAM_USA)
-			   {
-				   SetPlayerInterior(i, interior);
-				   SetPlayerVirtualWorld(i, world);
-				   SetPlayerPos(i, x+3, y, z);
-				   TogglePlayerControllable(i, false);
-				   PlayerInfo[i][Frozen] = 1;
-			   }
-		   }
-		   new string[100];
-		   format(string,sizeof(string),"Team %s Has Been Telepoted By Administrator %s",PlayerName2(playerid),params);
-		   SendClientMessageToAll(C_PINK, string);
+		   	foreach(Player, i)
+			{
+			   	if(gTeam[i] == TEAM_USA)
+			   	{
+				   	SetPlayerInterior(i, interior);
+				   	SetPlayerVirtualWorld(i, world);
+				   	SetPlayerPos(i, x+3, y, z);
+				   	TogglePlayerControllable(i, false);
+				   	PlayerInfo[i][Frozen] = 1;
+			   	}
+		   	}
+		   	new string[100];
+		   	format(string,sizeof(string),"Team %s Has Been Telepoted By Administrator %s",PlayerName2(playerid),params);
+		   	SendClientMessageToAll(C_PINK, string);
 	   }
 
 
 	   //---------------------------------
-	     if(strfind(params,"Vietnam",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
-	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
-			   if(gTeam[i] == TEAM_MARVEL)
-			   {
-				   SetPlayerInterior(i, interior);
-				   SetPlayerVirtualWorld(i, world);
-				   SetPlayerPos(i, x+3, y, z);
-				   TogglePlayerControllable(i, false);
-				   PlayerInfo[i][Frozen] = 1;
-			   }
-		   }
-		   new string[100];
-		   format(string,sizeof(string),"Team %s Has Been Telepoted By Administrator %s",PlayerName2(playerid),params);
-		   SendClientMessageToAll(C_PINK, string);
-	   }
+    	if(strfind(params,"Vietnam",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
+	   	{
+		   	foreach(Player, i)
+			{
+			   	if(gTeam[i] == TEAM_MARVEL)
+			   	{
+				   	SetPlayerInterior(i, interior);
+				   	SetPlayerVirtualWorld(i, world);
+				   	SetPlayerPos(i, x+3, y, z);
+				   	TogglePlayerControllable(i, false);
+				   	PlayerInfo[i][Frozen] = 1;
+			   	}
+		   	}
+		   	new string[100];
+		   	format(string,sizeof(string),"Team %s Has Been Telepoted By Administrator %s",PlayerName2(playerid),params);
+		   	SendClientMessageToAll(C_PINK, string);
+	   	}
 	   //--------Eurasia----------------
 	   if(strfind(params,"Eurasia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
-			   if(gTeam[i] == TEAM_EURASIA)
-			   {
-				   SetPlayerPos(i, x+3, y, z);
-				   SetPlayerInterior(i, interior);
-				   SetPlayerVirtualWorld(i, world);
-				   TogglePlayerControllable(i, false);
-				   PlayerInfo[i][Frozen] = 1;
-			   }
-		   }
-		   new string[100];
-		   format(string,sizeof(string),"Team %s Has Been Telepoted By Administrator %s",PlayerName2(playerid),params);
-		   SendClientMessageToAll(C_PINK, string);
+		   	foreach(Player, i)
+			{
+			   	if(gTeam[i] == TEAM_EURASIA)
+			   	{
+				   	SetPlayerPos(i, x+3, y, z);
+				   	SetPlayerInterior(i, interior);
+				   	SetPlayerVirtualWorld(i, world);
+				   	TogglePlayerControllable(i, false);
+				   	PlayerInfo[i][Frozen] = 1;
+			   	}
+		   	}
+		   	new string[100];
+		   	format(string,sizeof(string),"Team %s Has Been Telepoted By Administrator %s",PlayerName2(playerid),params);
+		   	SendClientMessageToAll(C_PINK, string);
 	   }
 	   //-------Arabia---------
 	   if(strfind(params,"Arabia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
-			   if(gTeam[i] == TEAM_ARAB)
-			   {
-				   SetPlayerPos(i, x+3, y, z);
-				   SetPlayerInterior(i, interior);
-				   SetPlayerVirtualWorld(i, world);
-				   TogglePlayerControllable(i, false);
-				   PlayerInfo[i][Frozen] = 1;
-			   }
-		   }
-		   new string[100];
-		   format(string,sizeof(string),"Team %s Has Been Telepoted By Administrator %s",PlayerName2(playerid),params);
-		   SendClientMessageToAll(C_PINK, string);
+		   	foreach(Player, i)
+			{
+			   	if(gTeam[i] == TEAM_ARAB)
+			   	{
+				   	SetPlayerPos(i, x+3, y, z);
+				   	SetPlayerInterior(i, interior);
+				   	SetPlayerVirtualWorld(i, world);
+				   	TogglePlayerControllable(i, false);
+				   	PlayerInfo[i][Frozen] = 1;
+			   	}
+		   	}
+		   	new string[100];
+		   	format(string,sizeof(string),"Team %s Has Been Telepoted By Administrator %s",PlayerName2(playerid),params);
+		   	SendClientMessageToAll(C_PINK, string);
 	   }
 	   //----------Soviet-------
 	   if(strfind(params,"Soviet",true) != -1 || strfind(params,"Russia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
-			   if(gTeam[i] == TEAM_SOVIET)
-			   {
-				   SetPlayerPos(i, x+3, y, z);
-				   SetPlayerInterior(i, interior);
-				   SetPlayerVirtualWorld(i, world);
-				   TogglePlayerControllable(i, false);
-				   PlayerInfo[i][Frozen] = 1;
-			   }
-		   }
-		   new string[100];
-		   format(string,sizeof(string),"Team %s Has Been Telepoted By Administrator %s",PlayerName2(playerid),params);
-		   SendClientMessageToAll(C_PINK, string);
+		   	foreach(Player, i)
+			{
+			   	if(gTeam[i] == TEAM_SOVIET)
+			   	{
+				   	SetPlayerPos(i, x+3, y, z);
+				   	SetPlayerInterior(i, interior);
+				   	SetPlayerVirtualWorld(i, world);
+				   	TogglePlayerControllable(i, false);
+				   	PlayerInfo[i][Frozen] = 1;
+			   	}
+		   	}
+		   	new string[100];
+		   	format(string,sizeof(string),"Team %s Has Been Telepoted By Administrator %s",PlayerName2(playerid),params);
+		   	SendClientMessageToAll(C_PINK, string);
 	   }
 	   //-----------Australia---------
 	   if(strfind(params,"Australia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
-			   if(gTeam[i] == TEAM_AUS)
-			   {
-				   SetPlayerPos(i, x+3, y, z);
-                   SetPlayerInterior(i, interior);
-				   SetPlayerVirtualWorld(i, world);
-				   TogglePlayerControllable(i, false);
-				   PlayerInfo[i][Frozen] = 1;
-			   }
-		   }
-		   new string[100];
-		   format(string,sizeof(string),"Team %s Has Been Telepoted By Administrator %s",PlayerName2(playerid),params);
-		   SendClientMessageToAll(C_PINK, string);
-	   }
+		   	foreach(Player, i)
+			{
+			   	if(gTeam[i] == TEAM_AUS)
+			   	{
+				   	SetPlayerPos(i, x+3, y, z);
+                   	SetPlayerInterior(i, interior);
+				   	SetPlayerVirtualWorld(i, world);
+				   	TogglePlayerControllable(i, false);
+				   	PlayerInfo[i][Frozen] = 1;
+			   	}
+		   	}
+		   	new string[100];
+		   	format(string,sizeof(string),"Team %s Has Been Telepoted By Administrator %s",PlayerName2(playerid),params);
+		   	SendClientMessageToAll(C_PINK, string);
+	   	}
 	}
 	else return SendClientMessage(playerid, red,"You Are Not Consisting The Level To Use This Command!");
 	return 1;
@@ -9018,8 +8780,8 @@ CMD:gteam(playerid, params[])
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+	   		foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_USA)
 			   {
 				   SetPlayerInterior(i, interior);
@@ -9035,10 +8797,10 @@ CMD:gteam(playerid, params[])
 		   SendClientMessageToAll(C_PINK, string);
 	   }
 	   //---------------------------------
-	   	   if(strfind(params,"Vet",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
+	   if(strfind(params,"Vet",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_MARVEL)
 			   {
 				   SetPlayerInterior(i, interior);
@@ -9056,8 +8818,8 @@ CMD:gteam(playerid, params[])
 	   //--------Eurasia----------------
 	   if(strfind(params,"Eur",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_EURASIA)
 			   {
 				   SetPlayerPos(i, x+3, y, z);
@@ -9075,8 +8837,8 @@ CMD:gteam(playerid, params[])
 	   //-------Arabia---------
 	   if(strfind(params,"Arab",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_ARAB)
 			   {
 				   SetPlayerPos(i, x+3, y, z);
@@ -9094,8 +8856,8 @@ CMD:gteam(playerid, params[])
 	   //----------Soviet-------
 	   if(strfind(params,"rus",true) != -1 || strfind(params,"Russia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_SOVIET)
 			   {
 				   SetPlayerPos(i, x+3, y, z);
@@ -9113,8 +8875,8 @@ CMD:gteam(playerid, params[])
 	   //-----------Australia---------
 	   if(strfind(params,"Aus",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_AUS)
 			   {
 				   SetPlayerPos(i, x+3, y, z);
@@ -9143,8 +8905,8 @@ CMD:spawnteam(playerid, params[])
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_USA)
 			   {
 				   SpawnPlayer(i);
@@ -9158,8 +8920,8 @@ CMD:spawnteam(playerid, params[])
 	   //---------------------------------
 	   if(strfind(params,"Vietnam",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_MARVEL)
 			   {
 				   SpawnPlayer(i);
@@ -9173,8 +8935,8 @@ CMD:spawnteam(playerid, params[])
 	   //--------Eurasia----------------
 	   if(strfind(params,"Eurasia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_EURASIA)
 			   {
 				   SpawnPlayer(i);
@@ -9188,8 +8950,8 @@ CMD:spawnteam(playerid, params[])
 	   //-------Arabia---------
 	   if(strfind(params,"Arabia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_ARAB)
 			   {
 				   SpawnPlayer(i);
@@ -9203,8 +8965,8 @@ CMD:spawnteam(playerid, params[])
 	   //----------Soviet-------
 	   if(strfind(params,"Soviet",true) != -1 || strfind(params,"Russia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_SOVIET)
 			   {
 				   SpawnPlayer(i);
@@ -9218,8 +8980,8 @@ CMD:spawnteam(playerid, params[])
 	   //-----------Australia---------
 	   if(strfind(params,"Australia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_AUS)
 			   {
 				   SpawnPlayer(i);
@@ -9243,8 +9005,8 @@ CMD:steam(playerid, params[])
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_USA)
 			   {
 				   SpawnPlayer(i);
@@ -9257,8 +9019,8 @@ CMD:steam(playerid, params[])
 	   }
 	   	   if(strfind(params,"Vet",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_MARVEL)
 			   {
 				   SpawnPlayer(i);
@@ -9273,8 +9035,8 @@ CMD:steam(playerid, params[])
 	   //--------Eurasia----------------
 	   if(strfind(params,"Eur",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_EURASIA)
 			   {
 				   SpawnPlayer(i);
@@ -9288,8 +9050,8 @@ CMD:steam(playerid, params[])
 	   //-------Arabia---------
 	   if(strfind(params,"Arab",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_ARAB)
 			   {
 				   SpawnPlayer(i);
@@ -9303,8 +9065,8 @@ CMD:steam(playerid, params[])
 	   //----------Soviet-------
 	   if(strfind(params,"Soviet",true) != -1 || strfind(params,"Rus",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_SOVIET)
 			   {
 				   SpawnPlayer(i);
@@ -9318,8 +9080,8 @@ CMD:steam(playerid, params[])
 	   //-----------Australia---------
 	   if(strfind(params,"Aus",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_AUS)
 			   {
 				   SpawnPlayer(i);
@@ -9343,8 +9105,8 @@ CMD:freezeteam(playerid, params[])
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_USA)
 			   {
 				   TogglePlayerControllable(i, false);
@@ -9356,10 +9118,10 @@ CMD:freezeteam(playerid, params[])
 		   SendClientMessageToAll(C_PINK, string);
 	   }
 	   //---------------------------------
- if(strfind(params,"Vietnam",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
+	   if(strfind(params,"Vietnam",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_MARVEL)
 			   {
 				   TogglePlayerControllable(i, false);
@@ -9373,8 +9135,8 @@ CMD:freezeteam(playerid, params[])
 	   //--------Eurasia----------------
 	   if(strfind(params,"Eurasia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
+		   	foreach(Player, i)
+			{
 			   if(gTeam[i] == TEAM_EURASIA)
 			   {
 				   TogglePlayerControllable(i, false);
@@ -9388,7 +9150,7 @@ CMD:freezeteam(playerid, params[])
 	   //-------Arabia---------
 	   if(strfind(params,"Arabia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_ARAB)
 			   {
@@ -9403,7 +9165,7 @@ CMD:freezeteam(playerid, params[])
 	   //----------Soviet-------
 	   if(strfind(params,"Soviet",true) != -1 || strfind(params,"Russia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_SOVIET)
 			   {
@@ -9418,7 +9180,7 @@ CMD:freezeteam(playerid, params[])
 	   //-----------Australia---------
 	   if(strfind(params,"Australia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_AUS)
 			   {
@@ -9444,7 +9206,7 @@ CMD:fteam(playerid, params[])
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_USA)
 			   {
@@ -9460,7 +9222,7 @@ CMD:fteam(playerid, params[])
 	   //--------Eurasia----------------
 	   if(strfind(params,"Eur",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_EURASIA)
 			   {
@@ -9475,7 +9237,7 @@ CMD:fteam(playerid, params[])
 	   //-------Arabia---------
 	   if(strfind(params,"Arab",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_ARAB)
 			   {
@@ -9489,7 +9251,7 @@ CMD:fteam(playerid, params[])
 	   }
 	   if(strfind(params,"Eur",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_EURASIA)
 			   {
@@ -9504,7 +9266,7 @@ CMD:fteam(playerid, params[])
 	   //----------Soviet-------
 	   if(strfind(params,"Rus",true) != -1 || strfind(params,"Vietnam",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_SOVIET)
 			   {
@@ -9518,7 +9280,7 @@ CMD:fteam(playerid, params[])
 	   }
 	   	   if(strfind(params,"Vet",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_MARVEL)
 			   {
@@ -9534,7 +9296,7 @@ CMD:fteam(playerid, params[])
 	   //-----------Australia---------
 	   if(strfind(params,"Aus",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_AUS)
 			   {
@@ -9560,7 +9322,7 @@ CMD:unfreezeteam(playerid, params[])
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_USA)
 			   {
@@ -9576,7 +9338,7 @@ CMD:unfreezeteam(playerid, params[])
 	   //--------Eurasia----------------
 	   if(strfind(params,"Eurasia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_EURASIA)
 			   {
@@ -9591,7 +9353,7 @@ CMD:unfreezeteam(playerid, params[])
 	   //-------Arabia---------
 	   if(strfind(params,"Arabia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_ARAB)
 			   {
@@ -9607,7 +9369,7 @@ CMD:unfreezeteam(playerid, params[])
 	   //----------Soviet-------
 	   if(strfind(params,"Soviet",true) != -1 || strfind(params,"Russia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_SOVIET)
 			   {
@@ -9622,7 +9384,7 @@ CMD:unfreezeteam(playerid, params[])
 	   //ggggggggggg//
 	   if(strfind(params,"Vietnam",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_MARVEL)
 			   {
@@ -9638,7 +9400,7 @@ CMD:unfreezeteam(playerid, params[])
 	   //-----------Australia---------
 	   if(strfind(params,"Australia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_AUS)
 			   {
@@ -9663,7 +9425,7 @@ CMD:dteam(playerid, params[])
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_USA)
 			   {
@@ -9678,7 +9440,7 @@ CMD:dteam(playerid, params[])
 	   //--------Eurasia----------------
 	   if(strfind(params,"Eur",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_EURASIA)
 			   {
@@ -9692,7 +9454,7 @@ CMD:dteam(playerid, params[])
 	   //-------Arabia---------
 	   if(strfind(params,"Arab",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_ARAB)
 			   {
@@ -9706,7 +9468,7 @@ CMD:dteam(playerid, params[])
 	   //----------Soviet-------
 	   if(strfind(params,"Rus",true) != -1 || strfind(params,"Russia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_SOVIET)
 			   {
@@ -9719,7 +9481,7 @@ CMD:dteam(playerid, params[])
 	   }
 	    if(strfind(params,"Vet",true) != -1 || strfind(params,"Vietnam",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_MARVEL)
 			   {
@@ -9733,7 +9495,7 @@ CMD:dteam(playerid, params[])
 	   //-----------Australia---------
 	   if(strfind(params,"Aus",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_AUS)
 			   {
@@ -9757,7 +9519,7 @@ CMD:gsteam(playerid, params[])
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_USA)
 			   {
@@ -9773,7 +9535,7 @@ CMD:gsteam(playerid, params[])
 	   //--------Eurasia----------------
 	   if(strfind(params,"Eur",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_EURASIA)
 			   {
@@ -9788,7 +9550,7 @@ CMD:gsteam(playerid, params[])
 	   //-------Arabia---------
 	   if(strfind(params,"Arab",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_ARAB)
 			   {
@@ -9803,7 +9565,7 @@ CMD:gsteam(playerid, params[])
 	   //----------Soviet-------
 	   if(strfind(params,"Rus",true) != -1 || strfind(params,"Russia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_SOVIET)
 			   {
@@ -9818,7 +9580,7 @@ CMD:gsteam(playerid, params[])
 	   //hhghh//
 	   	   if(strfind(params,"Vet",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_MARVEL)
 			   {
@@ -9833,7 +9595,7 @@ CMD:gsteam(playerid, params[])
 	   //-----------Australia---------
 	   if(strfind(params,"Aus",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_AUS)
 			   {
@@ -9858,7 +9620,7 @@ CMD:gcteam(playerid, params[])
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_USA)
 			   {
@@ -9874,7 +9636,7 @@ CMD:gcteam(playerid, params[])
 	   //--------Eurasia----------------
 	   if(strfind(params,"Eur",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_EURASIA)
 			   {
@@ -9889,7 +9651,7 @@ CMD:gcteam(playerid, params[])
 	   //-------Arabia---------
 	   if(strfind(params,"Arab",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_ARAB)
 			   {
@@ -9904,7 +9666,7 @@ CMD:gcteam(playerid, params[])
 	   //----------Soviet-------
 	   if(strfind(params,"Vet",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_SOVIET)
 			   {
@@ -9919,7 +9681,7 @@ CMD:gcteam(playerid, params[])
 	   //----------Vet------------------//
 	    if(strfind(params,"Rus",true) != -1 || strfind(params,"Vietnam",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_MARVEL)
 			   {
@@ -9934,7 +9696,7 @@ CMD:gcteam(playerid, params[])
 	   //-----------Australia---------
 	   if(strfind(params,"Aus",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_AUS)
 			   {
@@ -9976,9 +9738,9 @@ CMD:ranks(playerid, params[])
    strcat(str2, str);
    format(str, sizeof(str),""ccolor"Rank 4 Captain"cwhite" - (1500 Score)\n"cgreen"Rank 5 Commander"cwhite" - (2500 Score)\n");
    strcat(str2, str);
-   format(str, sizeof(str),""cyellow"Rank 6 General"cwhite" - (5000 Score)\n"cblue"Rank 7 Brigadier"cwhite" - (15000 Score)\n");
+   format(str, sizeof(str),""cyellow"Rank 6 General"cwhite" - (5000 Score)\n"cblue"Rank 7 Brigadier"cwhite" - (8000 Score)\n");
    strcat(str2, str);
-   format(str, sizeof(str),""cred"Rank 8 Field Marshall"cwhite" - (25000 Score)\n"cpurple"Rank 9 Master of War"cwhite" - (35000 Score)\n");
+   format(str, sizeof(str),""cred"Rank 8 Field Marshall"cwhite" - (15000 Score)\n"cpurple"Rank 9 Master of War"cwhite" - (35000 Score)\n");
    strcat(str2, str);
    format(str, sizeof(str),""ccolor"Rank 10 General of Army - (100000 Score)");
    strcat(str2, str);
@@ -9988,51 +9750,53 @@ CMD:ranks(playerid, params[])
 
 CMD:ranks2(playerid, params[])
 {
-SCM(playerid,-1,"*List of Ranks:");
-SCM(playerid,-1,"*Rank 0 Private (0 Score)");
-SCM(playerid,-1,"*Rank 1 Corporal (50 Score)");
-SCM(playerid,-1,"*Rank 2 Lieurenant (100 Score)");
-SCM(playerid,-1,"*Rank 3 Major (500 Score)");
-SCM(playerid,-1,"*Rank 4 Captain (1500 Score)");
-SCM(playerid,-1,"*Rank 5 Commander (2500 Score)");
-SCM(playerid,-1,"*Rank 6 General (5000 Score)");
-SCM(playerid,-1,"*Rank 7 Brigadier (15000 Score)");
-SCM(playerid,-1,"*Rank 8 Field Marshall (25000 Score)");
-SCM(playerid,-1,"*Rank 9 Master of War (35000 Score)");
-SCM(playerid,-1,"*Rank 10 General of Army (100000 Score)");
-return 1;
+	SCM(playerid,-1,"*List of Ranks:");
+	SCM(playerid,-1,"*Rank 0 Private (0 Score)");
+	SCM(playerid,-1,"*Rank 1 Corporal (50 Score)");
+	SCM(playerid,-1,"*Rank 2 Lieurenant (100 Score)");
+	SCM(playerid,-1,"*Rank 3 Major (500 Score)");
+	SCM(playerid,-1,"*Rank 4 Captain (1500 Score)");
+	SCM(playerid,-1,"*Rank 5 Commander (2500 Score)");
+	SCM(playerid,-1,"*Rank 6 General (5000 Score)");
+	SCM(playerid,-1,"*Rank 7 Brigadier (15000 Score)");
+	SCM(playerid,-1,"*Rank 8 Field Marshall (25000 Score)");
+	SCM(playerid,-1,"*Rank 9 Master of War (35000 Score)");
+	SCM(playerid,-1,"*Rank 10 General of Army (100000 Score)");
+	return 1;
 }
 
-CMD:r(playerid,params[]) {
-#pragma unused params
-if(isnull(params)) return SendClientMessage(playerid, -1, "JikyBot: Usage:/r [text] to talk in team radio");
-new Name[MAX_PLAYER_NAME]; GetPlayerName(playerid, Name, sizeof(Name));
-new string[128], adminstr[128];
-format(string, sizeof(string), "[TEAM RADIO][%i]%s: %s",playerid, Name, params[0]);
-printf("%s", string);
-format(adminstr, sizeof(adminstr),">> [RADIO][%s]%s: %s",GetTeamName(playerid),GetName(playerid),params[0]);
-MessageTo4(grey, adminstr);
-
-for(new i = 0; i < MAX_PLAYERS; i++)
+CMD:r(playerid,params[])
 {
-if(IsPlayerConnected(i) && gTeam[i] == gTeam[playerid]) SendClientMessage(i, 0xFF8080FF, string); SetPlayerChatBubble(playerid, string, 0xFF8080FF, 100.0, 2000);
-}
-return 1;
+	#pragma unused params
+	if(isnull(params)) return SendClientMessage(playerid, -1, "JikyBot: Usage:/r [text] to talk in team radio");
+	new Name[MAX_PLAYER_NAME]; GetPlayerName(playerid, Name, sizeof(Name));
+	new string[128], adminstr[128];
+	format(string, sizeof(string), "[TEAM RADIO][%i]%s: %s",playerid, Name, params[0]);
+	printf("%s", string);
+	format(adminstr, sizeof(adminstr),">> [RADIO][%s]%s: %s",GetTeamName(playerid),GetName(playerid),params[0]);
+	MessageTo4(grey, adminstr);
+
+	foreach(Player, i)
+	{
+		if(IsPlayerConnected(i) && gTeam[i] == gTeam[playerid]) SendClientMessage(i, 0xFF8080FF, string); SetPlayerChatBubble(playerid, string, 0xFF8080FF, 100.0, 2000);
+	}
+	return 1;
 }
 
-CMD:order(playerid,params[]) {
-#pragma unused params
-if(isnull(params)) return SendClientMessage(playerid, -1, "JikyBot: Usage:/order [text]");
-new Name[MAX_PLAYER_NAME]; GetPlayerName(playerid, Name, sizeof(Name));
-new string[128];
-format(string, sizeof(string), "*%s %s: %s",GetRankName(playerid), Name, params[0]);
-printf("%s", string);
-
-for(new i = 0; i < MAX_PLAYERS; i++)
+CMD:order(playerid,params[])
 {
-if(IsPlayerConnected(i) && gTeam[i] == gTeam[playerid]) SendClientMessage(i, 0xFF8080FF, string);
-}
-return 1;
+	#pragma unused params
+	if(isnull(params)) return SendClientMessage(playerid, -1, "JikyBot: Usage:/order [text]");
+	new Name[MAX_PLAYER_NAME]; GetPlayerName(playerid, Name, sizeof(Name));
+	new string[128];
+	format(string, sizeof(string), "*%s %s: %s",GetRankName(playerid), Name, params[0]);
+	printf("%s", string);
+	
+	foreach(Player, i)
+	{
+		if(IsPlayerConnected(i) && gTeam[i] == gTeam[playerid]) SendClientMessage(i, 0xFF8080FF, string);
+	}
+	return 1;
 }
 
 
@@ -10043,33 +9807,39 @@ CMD:rank(playerid, params[])
 	ShowPlayerDialog(playerid, 808, DIALOG_STYLE_MSGBOX, ""cwhite"RWW2-Rank", string, "Okay", "Close");
 	return 1;
 }
-CMD:async(playerid,params[]) {
-         if(PlayerInfo[playerid][Level] >= 1) {
-	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if (isnull(tmp)) return SendClientMessage(playerid, red, "JikyBot: Usage:/async [playerid]");
+CMD:async(playerid,params[])
+{
+	if(PlayerInfo[playerid][Level] >= 1)
+	{
+		new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
+		if (isnull(tmp)) return SendClientMessage(playerid, red, "JikyBot: Usage:/async [playerid]");
 		new player1 = strval(tmp);
-        if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
-        if(!IsPlayerInAnyVehicle(player1))
-		 	{
-        Synching[player1] = true;
-        AntiSK[player1] = 0;
-        GetPlayerHealth(player1,sHP[player1]);
-        GetPlayerArmour(player1,sAP[player1]);
-        GetPlayerPos(player1,sPos[player1][0],sPos[player1][1],sPos[player1][2]);
-        for(new slot; slot < 13; slot++)
-        {
-        GetPlayerWeaponData(player1,slot,sWeap[player1][slot],sAmmo[player1][slot]);
-        }
-        SpawnPlayer(player1);
-        CMDMessageToAdmins(playerid,"ASYNC");
-        AntiSK[player1] = 0;
-        new string[128];
-        format(string, sizeof(string), "Admin %s has synced you.", GetName(playerid)); SendClientMessage(player1,blue,string);
-        UpdateLabelText(player1);
-         UpdateTextdraw(player1);
-			} else return SendClientMessage(playerid,red,"JikyBot: You cannot sync players in vehicles.");
-	    } else return SendClientMessage(playerid,red,"JikyBot: Player is not connected");
-	} else return SendClientMessage(playerid,red,"[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
+	 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID)
+	 	{
+		    if(!IsPlayerInAnyVehicle(player1))
+			{
+		        Synching[player1] = true;
+		        AntiSK[player1] = 0;
+		        GetPlayerHealth(player1,sHP[player1]);
+		        GetPlayerArmour(player1,sAP[player1]);
+		        GetPlayerPos(player1,sPos[player1][0],sPos[player1][1],sPos[player1][2]);
+		        for(new slot; slot < 13; slot++)
+		        {
+		        	GetPlayerWeaponData(player1,slot,sWeap[player1][slot],sAmmo[player1][slot]);
+		        }
+		        SpawnPlayer(player1);
+		        CMDMessageToAdmins(playerid,"ASYNC");
+		        AntiSK[player1] = 0;
+		        new string[128];
+		        format(string, sizeof(string), "Admin %s has synced you.", GetName(playerid)); SendClientMessage(player1,blue,string);
+		        UpdateLabelText(player1);
+		       	UpdateTextdraw(player1);
+			}
+			else return SendClientMessage(playerid,red,"JikyBot: You cannot sync players in vehicles.");
+	    }
+		else return SendClientMessage(playerid,red,"JikyBot: Player is not connected");
+	}
+	else return SendClientMessage(playerid,red,"[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
 	return 1;
 }
 CMD:sync(playerid, params[])
@@ -10168,14 +9938,14 @@ CMD:help2(playerid, params[])
 	SendClientMessage(playerid, COLOR_YELLOW, "if you have any Question or need help /pm any admin online or any operators (/admins, /operators)");
 	return 1;
 }
+
 CMD:kill(playerid, params[])
 {
-SetPlayerHealth(playerid, 0.0);
-MinigunDM[playerid] = 0;
-SendClientMessage(playerid, -1, "You Have commited a Suicide");
-return true;
+	SetPlayerHealth(playerid, 0.0);
+	MinigunDM[playerid] = 0;
+	SendClientMessage(playerid, -1, "You Have commited a Suicide");
+	return true;
 }
-
 
 CMD:rules2(playerid, params[])
 {
@@ -10198,15 +9968,10 @@ CMD:rules2(playerid, params[])
 
 CMD:updates(playerid, params[])
 {
-if(PlayerInfo[playerid][Level] >= 0) {
-ShowPlayerDialog(playerid,110,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 Update Notes:","\n\n"cgreen"Scripted By Perfect_Boy\nIntelVan at area21 By MexIvanov\nPermanent Clan System Added\nNew Radio System With New Channels\nAnti cheat by Mex\nHeadshot And Christmas System Added\nLags Reduced\n\n"cwhite"Visit us at xpsamp.com\n\nXenon Pro Gaming\n\nCall Of Duty - Real World At War 2","Ok","Cancel");
-return 1;
-}
-return 0;
+	ShowPlayerDialog(playerid,110,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 Update Notes:","\n\n"cgreen"Scripted By Perfect_Boy\nNew Radio System With New Channels\nBrand New Maps by CJS and Jake a.k.a MeGaTroN\nAnti cheat and Destructable Objects by Mex_Ivanov\nHeadshot System Fixed\nOptimisation Tweaks = Reduced Lags\nMany major/minor Bugfixes\n\n"cwhite"Visit us at xpsamp.com\n\nXenon Pro Gaming\n\nCall Of Duty - Real World At War 2","Ok","Cancel");
+	return 1;
 }
 CMD:license(playerid, params[])
-{
-if(PlayerInfo[playerid][Level] >= 0)
 {
 	if(License[playerid] == 0)
 	ShowPlayerDialog(playerid,1100,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 License Notes:","\n\n"cgreen"You Need a License To Drive Heavy Vehicles Like Hunter, Hydra\nCurently Your Do Not Have A Heavy Vehicle License\nYou can Buy A license From The Briefcase Or Ask An Admin\nLicense Will Cost You 50000 $ Ingame Cash \nBase Raping Will lead To license being Revoked\n Attacking Bases With Heavy Vehicles IS Base Rape/n/n "cwhite"License Status "cred" [NO LICENSE]","Ok","Cancel");
@@ -10215,12 +9980,8 @@ if(PlayerInfo[playerid][Level] >= 0)
 	if(License[playerid] == 2)
 	ShowPlayerDialog(playerid,1103,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 License Notes:","\n\n"cred"Your License Have Been Revoked For Base Raping\nYou have To apply At forums For Your License\nForums xpsamp.com\nMake A Topic In License Appeals Board\nIf your License App is Accepted Please PM a LV5+ Admin\n\n"cwhite"License Status "cred" [REVOKED]","Ok","Cancel");
 	return 1;
-	}
-return 0;
 }
 CMD:minigundm(playerid, params[])
-{
-if(PlayerInfo[playerid][Level] >= 0)
 {
 	if(AntiSK[playerid] == 0)
  	{
@@ -10244,14 +10005,12 @@ if(PlayerInfo[playerid][Level] >= 0)
 		format(string, sizeof(string), "~y~%s Has Joined ~g~Minigun Stadium..", name);
 		SendBoxMessage(string);
   		SendClientMessageToAll(green, string);
+	  	return 1;
 	}
 	else return SendClientMessage(playerid, RED,"You cannot join DM while in AntiSK protection! Try again later");
-	return 1;
-	}
-return 0;
 }
 CMD:mgdm(playerid, params[])
-            return cmd_minigundm(playerid, params);
+	return cmd_minigundm(playerid, params);
 
 /*
 
@@ -10447,8 +10206,10 @@ CMD:cmds(playerid, params[])
 CMD:donorhelp(playerid, params[])
 {
 	SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2Щ Donor help -|_________");
-	SendClientMessage(playerid, COLOR_GREEN, "Goto Our Forum Donate Topic Check Out Donation Reward.");
-	SendClientMessage(playerid, COLOR_GREEN, "Read The Donation Format To Donate To Server.");
+	SendClientMessage(playerid, COLOR_GREEN, "Go to Our Forum Donate Topic Check Out Donation Rewards.");
+	SendClientMessage(playerid, COLOR_GREEN, "Read The Donation info to Donate to our Community.");
+	SendClientMessage(playerid, COLOR_GREEN, "Write /donorpack [1-5] to see donation package info.");
+	SendClientMessage(playerid, COLOR_GREEN, "Write /donorprice to see donation package prices.");
 	return true;
 }
 
@@ -10465,89 +10226,6 @@ CMD:grouphelp(playerid, params[])
 	SendClientMessage(playerid, COLOR_ORANGE, "/grouplist   | List the Players In The Group");
 	SendClientMessage(playerid, COLOR_ORANGE, "/groups      | Check All The Groups");
 	return true;
-}
-
-
-CMD:sorry(playerid, params[])
-{
-	new targetid;
-	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct JikyBot: Usage:/sorry [playerid]");
-	if(targetid != INVALID_PLAYER_ID && targetid != playerid)
-	{
-	    new tname[MAX_PLAYER_NAME], name[MAX_PLAYER_NAME], string[128];
-	    GetPlayerName(playerid, name, sizeof(name));
-	    GetPlayerName(targetid, tname, sizeof(tname));
-	    format(string, sizeof(string), "JikyBot says : %s wants %s to know that he is Sorry, could you forgive him %s?", name, tname, tname);
-	    SendClientMessageToAll(COLOR_PINK, string);
-	    CMDMessageToAdmins(playerid,"/sorry");
-	}
-	else return SendClientMessage(playerid, RED, "JikyBot: invalid playerid or playerid is yourself");
-	return 1;
-}
-CMD:forgive(playerid, params[])
-{
-	new targetid;
-	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct JikyBot: Usage:/forgive [playerid]");
-	if(targetid == INVALID_PLAYER_ID) return SendClientMessage(playerid, RED, "JikyBot: invalid playerid");
-	CMDMessageToAdmins(playerid,"/forgive");
-	new name[MAX_PLAYER_NAME], tname[MAX_PLAYER_NAME];
-	GetPlayerName(playerid, name, sizeof(name));
-	GetPlayerName(targetid, tname, sizeof(tname));
-	new string[128];
-	format(string, sizeof(string), "JikyBot says : %s has accepted the appology and forgiven %s", name, tname);
-	SendClientMessageToAll(COLOR_PINK, string);
-	return 1;
-}
-CMD:hate(playerid, params[])
-{
-	new targetid, reason[128];
-	if(sscanf(params, "us[128]", targetid, reason)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct JikyBot: Usage:/hate [playerid] [reason]");
-    if(targetid != INVALID_PLAYER_ID)
-	{
-		new tname[MAX_PLAYER_NAME], name[MAX_PLAYER_NAME];
-		GetPlayerName(playerid, name, sizeof(name));
-		GetPlayerName(targetid, tname, sizeof(tname));
-		new string[128];
-		CMDMessageToAdmins(playerid,"/hate");
-		format(string, sizeof(string), "JikyBot says : Player %s Hates %s, Reason: %s", name, tname, reason);
-		SendClientMessageToAll(COLOR_PINK, string);
-    }
-	else return SendClientMessage(playerid, RED, "JikyBot: invalid playerid");
-	return 1;
-}
-CMD:noobinhere(playerid, params[])
-{
-	new targetid;
-	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct JikyBot: Usage:/noobinhere [playerid]");
- 	if(targetid != INVALID_PLAYER_ID)
-	{
-	    new tname[MAX_PLAYER_NAME], name[MAX_PLAYER_NAME];
-		GetPlayerName(playerid, name, sizeof(name));
-		GetPlayerName(targetid, tname, sizeof(tname));
-		new string[128];
-		CMDMessageToAdmins(playerid,"/noob");
-		format(string, sizeof(string), "JikyBot says : Player %s wants everyone to know that %s is a noob, N.O.O.B. NOOB!!", name, tname);
-		SendClientMessageToAll(COLOR_PINK, string);
-	}
-	else return SendClientMessage(playerid, RED, "JikyBot: invalid playerid");
-	return 1;
-}
-CMD:rapedup(playerid, params[])
-{
-    new targetid;
-	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct JikyBot: Usage:/rapedup [playerid]");
-    if(targetid != INVALID_PLAYER_ID)
-	{
-		new tname[MAX_PLAYER_NAME], name[MAX_PLAYER_NAME];
-		GetPlayerName(playerid, name, sizeof(name));
-		GetPlayerName(targetid, tname, sizeof(tname));
-		new string[128];
-		CMDMessageToAdmins(playerid,"/rapedup");
-		format(string, sizeof(string), "JikyBot says : Player %s has Raped %s by putting a Bloody Fucked-up Rocket in his Ass!", name, tname);
-		SendClientMessageToAll(COLOR_PINK, string);
-	}
-	else return SendClientMessage(playerid, RED, "JikyBot: invalid playerid");
-	return 1;
 }
 CMD:hidemyass(playerid,params[])
 {
@@ -10623,61 +10301,80 @@ return 1;
 }
 CMD:donorpack(playerid, params[])
 {
-	SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2Щ Donor Pack -|_________");
-	SendClientMessage(playerid, COLOR_GREEN, "Donor Pack 1 Price 5.00$ ");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Donor Lv 1");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +15000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Inagem Score +2500");
-	SendClientMessage(playerid, COLOR_ORANGE, "See /donorpack2 for Pack 2");
-	return true;
-}
-CMD:donorpack2(playerid, params[])
-{
-	SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2Щ Donor Pack -|_________");
-	SendClientMessage(playerid, COLOR_GREEN, "Donor Pack 2 Price 10.00$ ");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Donor Lv 2");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +50000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Inagem Score +5000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Server Tester / Help Operator Status");
-	SendClientMessage(playerid, COLOR_ORANGE, "See /donorpack3 for Pack 3");
-	return true;
-}
-CMD:donorpack3(playerid, params[])
-{
-	SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2Щ Donor Pack -|_________");
-	SendClientMessage(playerid, COLOR_GREEN, "Donor Pack 3 Price 15.00$ ");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Donor Lv 3 (Premium Account)");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +75000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Inageme Score +10000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Server Tester / Help Operator Status");
-	SendClientMessage(playerid, COLOR_ORANGE, "See /donorpack4 for Pack 4 With Adimin Levels");
-	return true;
-}
-CMD:donorpack4(playerid, params[])
-{
-	SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2Щ Donor Pack -|_________");
-	SendClientMessage(playerid, COLOR_GREEN, "Donor Pack 4 Price 20.00$ ");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Donor Lv 3 (Premium Account)");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +20000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Inagem Score +25000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Access To Donor Chat");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Admin Level 1");
-	SendClientMessage(playerid, COLOR_ORANGE, "See /donorpack5 for Pack 5");
-	return true;
-}
-
-CMD:donorpack5(playerid, params[])
-{
-	SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2Щ Donor Pack -|_________");
-	SendClientMessage(playerid, COLOR_GREEN, "Donor Pack 4 Price 25.00$ ");
-	SendClientMessage(playerid, COLOR_GREEN, "Donor Lv 4 (Premium Account)");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +50000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Inageme Score +30000");
-	SendClientMessage(playerid, COLOR_GREEN, "-->Access To Special Donor Area Ingame");
-	SendClientMessage(playerid, COLOR_GREEN, "->Special Ranks On Forums");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Admin Level 2");
-	SendClientMessage(playerid, COLOR_ORANGE, "See More Packs On Forums");
-	return true;
+	new did;
+    if(sscanf(params,"d",did)) return SendClientMessage(playerid, RED,"Use /donorpack [1-6]");
+	switch(did)
+	{
+	    case 1:
+		{
+			SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2Щ Donor Pack -|_________");
+			SendClientMessage(playerid, COLOR_GREEN, "Donor Pack 1 Price 5.00$ ");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Donor Level 1");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +150000");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Score +2500");
+			SendClientMessage(playerid, COLOR_ORANGE, "See /donorpack 2 for Pack 2");
+		}
+		case 2:
+		{
+            SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2Щ Donor Pack -|_________");
+			SendClientMessage(playerid, COLOR_GREEN, "Donor Pack 2 Price 10.00$ ");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Donor Level 2");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +500000");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Score +5000");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Server Tester / Help Operator Status");
+			SendClientMessage(playerid, COLOR_ORANGE, "See /donorpack 3 for Pack 3");
+		}
+		case 3:
+		{
+            SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2Щ Donor Pack -|_________");
+			SendClientMessage(playerid, COLOR_GREEN, "Donor Pack 3 Price 15.00$ ");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Donor Level 3 (Premium Account)");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +750000");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Score +10000");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Server Tester / Help Operator Status");
+			SendClientMessage(playerid, COLOR_ORANGE, "See /donorpack 4 for Pack 4 With Adimin Levels");
+		}
+		case 4:
+		{
+            SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2Щ Donor Pack -|_________");
+			SendClientMessage(playerid, COLOR_GREEN, "Premium Pack 1 Price 20.00$ ");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Donor Level 3 (Premium Account)");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +2000000");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Score +25000");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Access To Donor Chat");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Admin Level 1");
+			SendClientMessage(playerid, COLOR_ORANGE, "See /donorpack 5 for Pack 5");
+		}
+		case 5:
+		{
+            SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2Щ Donor Pack -|_________");
+			SendClientMessage(playerid, COLOR_GREEN, "Premium Pack 2 Price 25.00$ ");
+			SendClientMessage(playerid, COLOR_GREEN, "Donor Level 3 (Premium Account)");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +5000000");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Score +30000");
+			SendClientMessage(playerid, COLOR_GREEN, "-->Access To Special Donor Area Ingame");
+			SendClientMessage(playerid, COLOR_GREEN, "->Special Ranks On Forums");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Admin Level 2");
+			SendClientMessage(playerid, COLOR_ORANGE, "See More Packs On Forums");
+		}
+		case 6:
+		{
+            SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2Щ Donor Pack -|_________");
+			SendClientMessage(playerid, COLOR_GREEN, "Premium Pack 3 Price 30.00$ ");
+			SendClientMessage(playerid, COLOR_GREEN, "Donor Level 3 (Premium Account)");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +7500000");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Score +30000");
+			SendClientMessage(playerid, COLOR_GREEN, "-->Access To Special Donor Area Ingame");
+			SendClientMessage(playerid, COLOR_GREEN, "->Special Ranks On Forums");
+			SendClientMessage(playerid, COLOR_GREEN, "--> Admin Level 2");
+			SendClientMessage(playerid, COLOR_ORANGE, "See More Packs On Forums");
+		}
+		default:
+		{
+			SendClientMessage(playerid, COLOR_ORANGE, "Please use id's from 1 to 6");
+		}
+	}
+	return 1;
 }
 CMD:commands(playerid, params[])
 {
@@ -10685,8 +10382,8 @@ CMD:commands(playerid, params[])
 	SendClientMessage(playerid, COLOR_ORANGE, "/Ranks | /Rank | /Kill | /Rules |/Attachments| /Stats | /Jp | /Dis | /Shelp");
 	SendClientMessage(playerid, COLOR_ORANGE, "/Help | /Pm | /R [text] | /Ep | /Anims | /Laseron | /Lasercol | /Spree | /Getid | /Disguise");
 	SendClientMessage(playerid, COLOR_ORANGE, "/Richlist | /Sync | /Rpm | /Radiohelp | /Order [text] | /Dcmds | /S [test] | /Dnd | /Switchclass");
-	SendClientMessage(playerid, COLOR_ORANGE, "/Operators | /Admins | /Donors  |/Donorprice | /Cmds | /St | /Sc | /Switchteam | /Objective | /Teams | /Savestats | /Givegun");
-	SendClientMessage(playerid, COLOR_ORANGE, "/Changename | /Changepass | /Streak | /Notes | /GM | /Nuke | /Anthraxhelp | /Times | /sites | /credits | /updates |");
+	SendClientMessage(playerid, COLOR_ORANGE, "/Operators | /Admins | /Donors  |/Donorprice | /Cmds | /St | /Sc | /Switchteam | /Objective | /Teams | /Savestats");
+	SendClientMessage(playerid, COLOR_ORANGE, "/Changename | /Changepass | /Streak | /Notes | /GM | /Nuke | /Anthraxhelp | /Times | /sites | /credits | /updates");
 	return true;
 }
 CMD:st(playerid, params[])
@@ -10735,7 +10432,7 @@ CMD:getadmins(playerid, params[])
 	   //---------USA------------------------
 	   	   if(strfind(params,"A",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_NONE)
 			   {
@@ -10759,100 +10456,101 @@ CMD:getadmins(playerid, params[])
 }
 CMD:forceteam(playerid, params[])
 {
-   if(PlayerInfo[playerid][Level] >= 4)
-   {
-	   new team[100];
-	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"JikyBot: Usage:/forceteam [teamname usa,viet,euro,arabia,aus,sov]");
+   	if(PlayerInfo[playerid][Level] >= 4)
+   	{
+	   	new team[100];
+	   	if(sscanf(params,"s[100]",team))
+		   	return SendClientMessage(playerid, RED,"JikyBot: Usage:/forceteam [teamname usa,viet,euro,arabia,aus,sov]");
 	   //---------USA------------------------
-	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
-	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
-			   if(gTeam[i] == TEAM_USA)
-			   {
-				   ForceClassSelection(playerid);
-				   SetPlayerHealth(i,0);
-			   }
-		   }
-		   new string[100];
-		   format(string,sizeof(string),"Administrator %s has Force team %s To Change The Team",PlayerName2(playerid),params);
-		   SendClientMessageToAll(C_PINK, string);
-	   }
+	   	if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
+	   	{
+		   	foreach(Player, i)
+		   	{
+			   	if(gTeam[i] == TEAM_USA)
+			   	{
+				   	ForceClassSelection(playerid);
+				   	SetPlayerHealth(i,0);
+			   	}
+		   	}
+		   	new string[100];
+		   	format(string,sizeof(string),"Administrator %s has Force team %s To Change The Team",PlayerName2(playerid),params);
+		   	SendClientMessageToAll(C_PINK, string);
+	   	}
 	   //---------------------------------
 	   //--------Eurasia----------------
-	   if(strfind(params,"Euro",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
-	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
-			   if(gTeam[i] == TEAM_EURASIA)
-			   {
-				   ForceClassSelection(playerid);
-				   SetPlayerHealth(i,0);
-			   }
-		   }
-		   new string[100];
-		   format(string,sizeof(string),"Administrator %s has Force team %s To Change The Team ",PlayerName2(playerid),params);
-		   SendClientMessageToAll(C_PINK, string);
+	   	if(strfind(params,"Euro",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
+	   	{
+		   	foreach(Player, i)
+		   	{
+			   	if(gTeam[i] == TEAM_EURASIA)
+			   	{
+				   	ForceClassSelection(playerid);
+				   	SetPlayerHealth(i,0);
+			   	}
+		   	}
+		   	new string[100];
+		   	format(string,sizeof(string),"Administrator %s has Force team %s To Change The Team ",PlayerName2(playerid),params);
+		   	SendClientMessageToAll(C_PINK, string);
 	   }
 	   //-------Arabia---------
 	   if(strfind(params,"Arab",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
-			   if(gTeam[i] == TEAM_ARAB)
-			   {
-				   ForceClassSelection(playerid);
-				   SetPlayerHealth(i,0);
-			   }
-		   }
-		   new string[100];
-		   format(string,sizeof(string),"Administrator %s has Force team %s To Change The Team ",PlayerName2(playerid),params);
-		   SendClientMessageToAll(C_PINK, string);
-	   }
+     		foreach(Player, i)
+		   	{
+			   	if(gTeam[i] == TEAM_ARAB)
+			   	{
+				   	ForceClassSelection(playerid);
+				   	SetPlayerHealth(i,0);
+			   	}
+		   	}
+		   	new string[100];
+		   	format(string,sizeof(string),"Administrator %s has Force team %s To Change The Team ",PlayerName2(playerid),params);
+		   	SendClientMessageToAll(C_PINK, string);
+	   	}
 	   //----------Soviet-------
-	   if(strfind(params,"rus",true) != -1 || strfind(params,"Russia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
-	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
-			   if(gTeam[i] == TEAM_SOVIET)
-			   {
-				   ForceClassSelection(playerid);
-				   SetPlayerHealth(i,0);
-			   }
-		   }
-		   new string[100];
-		   format(string,sizeof(string),"Administrator %s has Force team %s To Change The Team ",PlayerName2(playerid),params);
-		   SendClientMessageToAll(C_PINK, string);
-	   }
-	   //-----------Australia---------
-	   if(strfind(params,"Aus",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
-	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
-			   if(gTeam[i] == TEAM_AUS)
-			   {
-				   ForceClassSelection(playerid);
-				   SetPlayerHealth(i,0);
-			   }
-		   }
-		   new string[100];
-		   format(string,sizeof(string),"Administrator %s has Force team %s To Change The Team",PlayerName2(playerid),params);
-		   SendClientMessageToAll(C_PINK, string);
-	   }
-	   if(strfind(params,"viet",true) != -1) //Merc
-	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
-		   {
-			   if(gTeam[i] == TEAM_MARVEL)
-			   {
-				   ForceClassSelection(playerid);
-				   SetPlayerHealth(i,0);
-			   }
-		   }
-		   new string[100];
-		   format(string,sizeof(string),"Administrator %s has Force team %s To Change The Team ",PlayerName2(playerid),params);
-		   SendClientMessageToAll(C_PINK, string);
-	   }
+	   	if(strfind(params,"rus",true) != -1 || strfind(params,"Russia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
+	   	{
+		   	foreach(Player, i)
+		   	{
+			   	if(gTeam[i] == TEAM_SOVIET)
+			   	{
+				   	ForceClassSelection(playerid);
+				   	SetPlayerHealth(i,0);
+			   	}
+		   	}
+		   	new string[100];
+		   	format(string,sizeof(string),"Administrator %s has Force team %s To Change The Team ",PlayerName2(playerid),params);
+		   	SendClientMessageToAll(C_PINK, string);
+	   	}
+	   	//-----------Australia---------
+	   	if(strfind(params,"Aus",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
+	   	{
+		   	foreach(Player, i)
+		   	{
+			   	if(gTeam[i] == TEAM_AUS)
+			   	{
+				   	ForceClassSelection(playerid);
+				   	SetPlayerHealth(i,0);
+			   	}
+		   	}
+		   	new string[100];
+		   	format(string,sizeof(string),"Administrator %s has Force team %s To Change The Team",PlayerName2(playerid),params);
+		   	SendClientMessageToAll(C_PINK, string);
+	   	}
+	   	if(strfind(params,"viet",true) != -1) //Merc
+	   	{
+		   	foreach(Player, i)
+		   	{
+			   	if(gTeam[i] == TEAM_MARVEL)
+			   	{
+				   	ForceClassSelection(playerid);
+					SetPlayerHealth(i,0);
+			   	}
+		   	}
+		   	new string[100];
+		   	format(string,sizeof(string),"Administrator %s has Force team %s To Change The Team ",PlayerName2(playerid),params);
+		   	SendClientMessageToAll(C_PINK, string);
+	   	}
 	}
 	else return SendClientMessage(playerid, red,"[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
 	return 1;
@@ -10872,7 +10570,6 @@ CMD:switchclass(playerid, params[])
 	return 1;
 }
 
-
 CMD:ep(playerid, params[])
 {
 	GivePlayerWeapon(playerid, 46,1);
@@ -10882,7 +10579,6 @@ CMD:ep(playerid, params[])
 
 CMD:notes(playerid, params[])
 {
-
 	SendClientMessage(playerid, green, "________________| COD:Real World at War 2 V10.4.9 Release Updates: |________________");
 	SendClientMessage(playerid, green, " Quake Sounds Have Been Added");
 	SendClientMessage(playerid, green, " Group System Has Been Added [/grouphelp]");
@@ -10897,7 +10593,7 @@ CMD:credits1(playerid, params[]) {
 	SendClientMessage(playerid, green,"Server hosted By Perfect_Boy");
 	return 1;
 }
-CMD:recoverscore(playerid, params[]) {
+/*CMD:recoverscore(playerid, params[]) {
  	if(recovery == 1)
  	{
 	MySQL_Login_Old(playerid);
@@ -10905,6 +10601,7 @@ CMD:recoverscore(playerid, params[]) {
  	}
 	return 1;
 }
+*/
 CMD:credits2(playerid,params[]) {
 	#pragma unused params
 	if(PlayerInfo[playerid][Level] >= 0)
@@ -10913,7 +10610,7 @@ CMD:credits2(playerid,params[]) {
 			SendClientMessage(playerid, COLOR_YELLOW,   "|----------= Scripted And Updated by Perfect_Boy =---------|");
 			SendClientMessage(playerid, COLOR_YELLOW,   "|----------= Server Owned And Hosted by Perfect_Boy =--------|");
 			SendClientMessage(playerid, red,      "Script Made by Perfect_Boy, Not allowed to Scam And Sell Script");
-	} else return SendClientMessage(playerid,red, "Welcome to Real World Wat War 2 v10.9.1");
+	} else return SendClientMessage(playerid,red, "Welcome to Real World Wat War 2 v10.9.6");
 	return 1;
 }
 
@@ -10922,7 +10619,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 
 if(!strcmp(cmdtext, "/credits0", true))
 {
-    ShowPlayerDialog(playerid, 802, DIALOG_STYLE_MSGBOX, "COD-Real World At War 2 Credits", "|----------= XP-COD-RWW2_Credits: =----------|/n|----------= Scripted And Updated by Perfect_Boy =---------|/n|----------= Server Owned And Hosted by Perfect_Boy =--------|/n|----------= Beta Tester: [XP]Sumeeth =----------|/nScript Made by Perfect_Boy, Not allowed to Scam And Sell Script/nCall Of Duty : Real World At War 2 V10.9.1 ", "Okay", "Back");
+    ShowPlayerDialog(playerid, 802, DIALOG_STYLE_MSGBOX, "COD-Real World At War 2 Credits", "|----------= XP-COD-RWW2_Credits: =----------|/n|----------= Scripted And Updated by Perfect_Boy =---------|/n|----------= Server Owned And Hosted by Perfect_Boy =--------|/n|----------= Beta Tester: [XP]Sumeeth =----------|/nScript Made by Perfect_Boy, Not allowed to Scam And Sell Script/nCall Of Duty : Real World At War 2 V10.9.6 ", "Okay", "Back");
     return 1;
 }
 
@@ -10976,8 +10673,7 @@ if(PlayerInfo[playerid][LoggedIn] == 1 && PlayerInfo[playerid][LoggedIn] == 1)
 }
 else return SendClientMessage(playerid,red,"JikyBot: You are not authorised to use this commands");
 }
-
-CMD:recoverymode(playerid,params[]) // can i show u something? somwthing what?
+/*CMD:recoverymode(playerid,params[]) // can i show u something? somwthing what?
 {
 	if(PlayerInfo[playerid][LoggedIn] == 1)
 	{
@@ -11011,7 +10707,7 @@ CMD:recoverymodeoff(playerid,params[]) // can i show u something? somwthing what
 	else return SendClientMessage(playerid,red,"JikyBot: You must be logged in to use this commands");
 	return 1;
 }
-
+*/
 CMD:enablepump(playerid,params[]) // can i show u something? somwthing what?
 {
 	if(PlayerInfo[playerid][LoggedIn] == 1)
@@ -11047,6 +10743,23 @@ CMD:disablepump(playerid,params[]) // can i show u something? somwthing what?
 	return 1;
 }
 
+CMD:disablehs(playerid,params[]) // can i show u something? somwthing what?
+{
+	if(PlayerInfo[playerid][LoggedIn] == 1)
+	{
+		if(PlayerInfo[playerid][Level] >= 8)
+		{
+				new string[128];
+				format(string,sizeof(string),"Administrator %s has disabled headshot system.",pName(playerid));
+                SendClientMessageToAll(0x0080FFFF,string);
+                SendRconCommand("unloadfs hs");
+                SendClientMessage(playerid,blue,"Filter Script Succesfully unloaded, I think you Don't Like headShot system, DO you?");
+		}
+	  else return SendClientMessage(playerid,red,"[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
+	}
+	else return SendClientMessage(playerid,red,"JikyBot: You must be logged in to use this commands");
+	return 1;
+}
 
 CMD:enablexmas(playerid,params[]) // can i show u something? somwthing what?
 {
@@ -11135,12 +10848,13 @@ CMD:ghostrider(playerid,params[]) // Better huh onlyunused car respawn
 	return 1;
 }
 //==========================Rcon index and new cmds of admin area=======
-CMD:rconpw(playerid,params[]) {
-if(PlayerInfo[playerid][Level] >= 0)
+CMD:rconpw(playerid,params[])
 {
-    new pwstring[48];
-    format(pwstring, sizeof(pwstring), "[RconPro] The current password index is: %d", currenthcindex);
-    SendClientMessage(playerid, 0xFFFFFFFF, pwstring);
+	if(PlayerInfo[playerid][Level] >= 0)
+	{
+	    new pwstring[48];
+	    format(pwstring, sizeof(pwstring), "[RconPro] The current password index is: %d", currenthcindex);
+	    SendClientMessage(playerid, 0xFFFFFFFF, pwstring);
     }
 	return 1;
 }
@@ -11151,8 +10865,8 @@ CMD:sendadminmsg(playerid, params[])
 	new str[128], Name1[MAX_PLAYER_NAME];
 	if(sscanf(params,"s[128]", str))
 	{
-	 SendClientMessage(playerid, red,"CORRECT JikyBot: Usage:/sendadminmsg [text]");
-	 return 1;
+		 SendClientMessage(playerid, red,"CORRECT JikyBot: Usage:/sendadminmsg [text]");
+		 return 0;
 	}
 	GetPlayerName(playerid, Name1, sizeof(Name1));
 	format(str, sizeof(str),"{00FFFF}[ADMIN MSG From %s]:{00FFF0} %s",Name1, str);
@@ -11172,7 +10886,7 @@ CMD:ruc(playerid,params[]) // Better huh onlyunused car respawn
 				format(string,sizeof(string),"Administrator %s has respawn only unused vehicles.",pName(playerid));
                 SendClientMessageToAll(blue,string);
                 CMDMessageToAdmins(playerid,"RUC");
-    			for(new i=0;i<MAX_VEHICLES;i++)
+    			forveh(i)
 				{
 			    	if(IsVehicleOccupied(i) == 0)
 			    	{
@@ -11198,7 +10912,7 @@ CMD:url(playerid,params[])
 		format(string, sizeof(string), "Admin %s(%d) has streamed a music | Url : %s", pname, playerid, url);
 	    SendClientMessageToAll(-1, string);
 		SendClientMessageToAll(-1, "======================================");
-		for(new i = 0; i < MAX_PLAYERS; i++)
+		foreach(Player, i)
 	    {
 	        PlayAudioStreamForPlayer(i, url);
 	    }
@@ -11242,18 +10956,12 @@ CMD:desnrg(playerid,params[]) // Better huh onlyunused car respawn
 				format(string,sizeof(string),"Administrator %s has respawn extra unused vehicles.",pName(playerid));
                 SendClientMessageToAll(blue,string);
                 CMDMessageToAdmins(playerid,"DESNRG");
-    			for(new i=314;i<MAX_VEHICLES;i++)
-				{
-			    	if(IsVehicleOccupied(i) == 0)
-			    	{
-			        	DestroyVehicle(i);
-			    	}
-				}
+    			return uselessnrg();
 		}
 	  else return SendClientMessage(playerid,red,"[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
 	}
 	else return SendClientMessage(playerid,red,"JikyBot: You must be logged in to use this commands");
-	return 1;
+//	return 1;
 }
 CMD:fixinvisible(playerid,params[]) // Better huh onlyunused car respawn
 {
@@ -11265,7 +10973,8 @@ CMD:fixinvisible(playerid,params[]) // Better huh onlyunused car respawn
 				format(string,sizeof(string),"Administrator %s has fixed invisible vehicles.",pName(playerid));
                 SendClientMessageToAll(blue,string);
                 CMDMessageToAdmins(playerid,"FIXINVISIBLE");
-    			for(new i=306;i<MAX_VEHICLES;i++)
+    			//for(new i=306;i<MAX_VEHICLES;i++)
+				forveh(i)
 				{
 			    	LinkVehicleToInterior(i, 0);
 				}
@@ -11291,7 +11000,7 @@ CMD:find(playerid,params[])
 		format(str,sizeof(str),"You are now finding %s - they are marked on your map!",id);
     	SendClientMessage(playerid, COLOR_WHITE,str);
 		SetPlayerMarkerForPlayer(playerid,id,0xFF0000FF);
-             findtimer[playerid] = SetTimerEx("Trace", 1000*5/*5secs*/, true, "ii",playerid, id);
+  		findtimer[playerid] = SetTimerEx("Trace", 1000*5/*5secs*/, true, "ii",playerid, id);
     	Finding[id] = 1;
 	}
 	else
@@ -11311,7 +11020,7 @@ CMD:cfind(playerid,params[]) // Cancels the marker
 	GetPlayerName(id,pname,sizeof(pname));
 	format(str,sizeof(str),"You have stopped finding %s - they have been removed from your map!",id);
 	SendClientMessage(playerid, COLOR_WHITE,str);
-         KillTimer(findtimer[playerid]);
+ 	KillTimer(findtimer[playerid]);
 	SetPlayerMarkerForPlayer(playerid,id,0xFFFFFF00);
 	Finding[id] = 0;
 	return 1;
@@ -11555,23 +11264,13 @@ if(PlayerInfo[playerid][Level] >= 6)
 
     CMD:clist(playerid, params[])
             return cmd_clanlist(playerid, params);
-            
-
-
-
 
 //======================================================================
-CMD:credits(playerid,params[]) {
-if(PlayerInfo[playerid][Level] >= 0)
+CMD:credits(playerid,params[])
 {
-    ShowPlayerDialog(playerid, 802, DIALOG_STYLE_MSGBOX, ""cred"COD-Real World At War 2 Credits", ""cgreen"Credits:\n\nScripted by Perfect_Boy\nServer Owned And Hosted by Perfect_Boy\nBeta Tester: [XP]Sumeeth \n\n------------------------------\n\nScript Made by Perfect_Boy, "cred"Not allowed to Scam And Sell Script\n\n\nCall Of Duty : Real World At War 2 V10.9.2 ", "Okay", "Back");
-    }
-	return 1;
+    ShowPlayerDialog(playerid, 802, DIALOG_STYLE_MSGBOX, ""cred"COD-Real World At War 2 Credits", ""cgreen"Credits:\n\nScripted by Perfect_Boy\nServer Owned And Hosted by Perfect_Boy\nBeta Tester: [XP]Sumeeth\n------------------------------\n\nScript Made by Perfect_Boy\n\nMaps Made By Jake a.k.a MeGaTroN, and CJS\n\nLead Scripter - Perfect_Boy\nScripting Assistance - Mex_Ivanov, JRockie, "cred"Not allowed to Scam And Sell Script\n\n\nCall Of Duty : Real World At War 2 V10.9.2 ", "Okay", "Back");
+ 	return 1;
 }
-
-
-
-
 
 CMD:anims(playerid, params[])
 {
@@ -11579,7 +11278,6 @@ CMD:anims(playerid, params[])
 	SCM(playerid,-1,"/Handsup | /Drunk | /Bomb | /Getarrested | /Laugh | /Robman");
 	SCM(playerid,-1,"/Crossarms | /Lay | /Hide | /Vomit | /Eat | /Wave | /Taichi | /Piss");
 	SCM(playerid,-1,"/Deal | /Crack | /Smokem | /Smokef | /Sit | /Chat | /Dance | /Fu");
-
     return true;
 }
 
@@ -11706,7 +11404,7 @@ format(str, sizeof(str),"[SAY]%s: %s", Name, params[0]);
 printf("%s", string);
 format(adminstr, sizeof(adminstr),">> [SAY]%s: %s",GetName(playerid),params[0]);
 MessageTo4(grey, adminstr);
-for(new i = 0; i < MAX_PLAYERS; i++)
+foreach(Player, i)
 {
 if(IsPlayerConnected(i) && IsPlayerInRangeOfPoint(i,5.0, x, y, z) ) SendClientMessage(i, RED, string);
 }
@@ -11745,6 +11443,11 @@ CMD:pm(playerid, params[])
 		   		SendClientMessage(playerid, yellow, str);
 		   		format(str, sizeof(str),"PM from [%d]%s:"cred" %s", playerid, PlayerName2(playerid), str2);
 		   		SendClientMessage(id, C_CYAN, str);
+		   		#if defined IRCENABLED
+		   		format(str, sizeof(str),"PM from [%d]%s:"cred" %s", playerid, PlayerName2(playerid), str2);
+		   		IRC_GroupSay(gGroupID, IRC_ADMINCHANNEL, str);
+		   		#endif
+		   		
 		   		format(adminstr, sizeof(adminstr),"PM from %s[%d] to %s[%d]: %s", PlayerName2(playerid), playerid, PlayerName2(id), id, str2);
 		   		PlayerPlaySound(id,1085,0.0,0.0,0.0);
 		   		MessageTo4(grey, adminstr);
@@ -11758,21 +11461,24 @@ CMD:pm(playerid, params[])
    return 1;
 }
 
-CMD:spree(playerid,params[]) {
+CMD:spree(playerid,params[])
+{
 	new player1,playername[MAX_PLAYER_NAME];
 	if(isnull(params)) player1 = playerid;
 	else player1 = strval(params);
-	if(IsPlayerConnected(player1)) {
+	if(IsPlayerConnected(player1))
+	{
 	    GetPlayerName(player1, playername, sizeof(playername));
- 		new str[63];
- 		format(str, sizeof(str),""ccolor"%s is on a "cred"killing spree of: "cblue"%d kills! | Session Kills: %d!", PlayerName2(player1),Streak[playerid],Skills[playerid]);
-
-		SendClientMessageToAll(playerid,str);
-	} else return SendClientMessage(playerid, red, "Player Not Connected in Server!");
+ 		new str[144];
+ 		format(str, sizeof(str),"%s is on a killing spree of: %d kills! | Session Kills: %d!", playername, Streak[playerid], Skills[playerid]);
+		SendClientMessage(playerid, blue, str);
+	}
+	else return SendClientMessage(playerid, red, "Player Isn't Online!");
 	return 1;
 }
 
-CMD:streak(playerid,params[]) {
+CMD:streak(playerid,params[])
+{
 	 return cmd_spree(playerid, params);
 }
 
@@ -12366,7 +12072,10 @@ CMD:lockcar(playerid,params[]) {
 	#pragma unused params
     if(PlayerInfo[playerid][Level] >= 2) {
 	    if(IsPlayerInAnyVehicle(playerid)) {
-		 	for(new i = 0; i < MAX_PLAYERS; i++) SetVehicleParamsForPlayer(GetPlayerVehicleID(playerid),i,false,true);
+		 	foreach(Player, i)
+			{
+				SetVehicleParamsForPlayer(GetPlayerVehicleID(playerid),i,false,true);
+			}
 			CMDMessageToAdmins(playerid,"LOCKCAR");
 			PlayerInfo[playerid][DoorsLocked] = 1;
 			new string[128]; format(string,sizeof(string),"Administrator \"%s\" has locked his car", pName(playerid));
@@ -12379,7 +12088,10 @@ CMD:unlockcar(playerid,params[]) {
 	#pragma unused params
     if(PlayerInfo[playerid][Level] >= 2) {
 	    if(IsPlayerInAnyVehicle(playerid)) {
-		 	for(new i = 0; i < MAX_PLAYERS; i++) SetVehicleParamsForPlayer(GetPlayerVehicleID(playerid),i,false,false);
+		 	foreach(Player, i)
+			{
+				SetVehicleParamsForPlayer(GetPlayerVehicleID(playerid),i,false,false);
+			}
 			CMDMessageToAdmins(playerid,"UNLOCKCAR");
 			PlayerInfo[playerid][DoorsLocked] = 0;
 			new string[128]; format(string,sizeof(string),"Administrator \"%s\" has unlocked his car", pName(playerid));
@@ -12473,7 +12185,7 @@ CMD:rangecheck(playerid,params[]) {
 		CMDMessageToAdmins(playerid,"RANGECHECK");
 		format(string,sizeof(string),"Ip checked for: \"%s\" ",params);
 		SendClientMessage(playerid,blue,string);
-		for(new i=0; i <= MAX_PLAYERS; i++)
+		foreach(Player, i)
 		{
 			if(IsPlayerConnected(i))
 			{
@@ -12783,10 +12495,10 @@ CMD:sban(playerid, params[])// search for existing bans
 {
   if(PlayerInfo[playerid][Level] >= 2)
   {
-    new target[50], admin[50], player[50], reason[100], IP[16];
-    if(sscanf(params,"s[50]", target)) return SendClientMessage(playerid, C_RED,"USAGE: /sban [player name]");
+    new target1[50], admin[50], player[50], reason[100], IP[16];
+    if(sscanf(params,"s[50]", target1)) return SendClientMessage(playerid, C_RED,"USAGE: /sban [player name]");
     new query[200];
-    format(query, sizeof(query),"SELECT admin,player,reason,IP FROM `bandata` WHERE `player`='%s' AND `banned`=1 LIMIT 1", target);
+    format(query, sizeof(query),"SELECT admin,player,reason,IP FROM `bandata` WHERE `player`='%s' AND `banned`=1 LIMIT 1", target1);
     mysql_query(query);
     mysql_store_result();
     CMDMessageToAdmins(playerid,"SBAN");
@@ -13501,7 +13213,7 @@ CMD:giveallscore(playerid,params[])
         if(sscanf(params,"d",score)) return SendClientMessage(playerid, red, "JikyBot: Usage:/giveallscore [score]");
         new string[128];
         CMDMessageToAdmins(playerid,"GIVEALLSCORE");
-        for(new i;i<GetMaxPlayers();i++)
+        foreach(Player, i)
         {
 	        SetPlayerScore(i,GetPlayerScore(i)+score);
 	        PlayerPlaySound(i, 1057,0.0,0.0,0.0);
@@ -13778,7 +13490,7 @@ CMD:getid(playerid,params[]) {
 	new found, string[128], playername[MAX_PLAYER_NAME];
 	format(string,sizeof(string),"Searched for: \"%s\" ",params);
 	SendClientMessage(playerid,blue,string);
-	for(new i=0; i <= MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 		if(IsPlayerConnected(i))
 		{
@@ -13906,7 +13618,7 @@ CMD:announce(playerid,params[]) {
 CMD:infobeast(playerid,params[])
 {
 if(PlayerInfo[playerid][Level] >= 0) {
-    ShowPlayerDialog(playerid, 804, DIALOG_STYLE_MSGBOX, "{0000FF}COD-Real World At War 2 Website:", "{FF00FF}|----------= XP-COD-RWW2: =----------|\nxpsamp.com\n{FF00FF}|----------= Facebook Website Of Perfect_Boy =--------|\nwww.facebook.com/srijan.suresh\n{66FFFF}Gmail of Perfect_Boy\nsrijans25@gmail.com\nThis Script Made Exclusively By Perfect_Boy\n\nXenon Pro Gaming\n\n{0000FF}Call Of Duty : Real World At War 2 V10.9.1 ", "Okay", "Back");
+    ShowPlayerDialog(playerid, 804, DIALOG_STYLE_MSGBOX, "{0000FF}COD-Real World At War 2 Website:", "{FF00FF}|----------= XP-COD-RWW2: =----------|\nxpsamp.com\n{FF00FF}|----------= Facebook Website Of Perfect_Boy =--------|\nwww.facebook.com/srijan.suresh\n{66FFFF}Gmail of Perfect_Boy\nsrijans25@gmail.com\nThis Script Made Exclusively By Perfect_Boy\n\nXenon Pro Gaming\n\n{0000FF}Call Of Duty : Real World At War 2 V10.9.6 ", "Okay", "Back");
 return 1;
 }
 return 0;
@@ -13915,7 +13627,7 @@ return 0;
 CMD:swinfo(playerid,params[])
 {
 if(PlayerInfo[playerid][Level] >= 0) {
-ShowPlayerDialog(playerid, 803, DIALOG_STYLE_MSGBOX, "{FF0000}COD-Real World At War 2", "{0000FF}WElcome to COD RWW2 By Perfect_Boy\nThis Is the New version of RWW2 By Perfect_Boy\nNever Ask For Admin level, score And Cash With online Admins\nVisit us At xpsamp.com\nNever Disrespect or Use Discouraging Words to anyone\nCall Of Duty : Real World At War 2 V10.9.1 ", "Okay", "Back");
+ShowPlayerDialog(playerid, 803, DIALOG_STYLE_MSGBOX, "{FF0000}COD-Real World At War 2", "{0000FF}WElcome to COD RWW2 By Perfect_Boy\nThis Is the New version of RWW2 By Perfect_Boy\nNever Ask For Admin level, score And Cash With online Admins\nVisit us At xpsamp.com\nNever Disrespect or Use Discouraging Words to anyone\nCall Of Duty : Real World At War 2 V10.9.6 ", "Okay", "Back");
 return 1;
 }
 return 0;
@@ -14008,20 +13720,130 @@ CMD:destroycar(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 5) return EraseVehicle(GetPlayerVehicleID(playerid));
 	else return SendClientMessage(playerid,red,"[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
 }
-CMD:ltc(playerid,params[]) {
-	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
-		if(!IsPlayerInAnyVehicle(playerid)) {
-			if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
-			new Float:X,Float:Y,Float:Z,Float:Angle,LVehicleIDt;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
-	        LVehicleIDt = CreateVehicle(560,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");	    AddVehicleComponent(LVehicleIDt, 1028);	AddVehicleComponent(LVehicleIDt, 1030);	AddVehicleComponent(LVehicleIDt, 1031);	AddVehicleComponent(LVehicleIDt, 1138);
-			AddVehicleComponent(LVehicleIDt, 1140);  AddVehicleComponent(LVehicleIDt, 1170);
-		    AddVehicleComponent(LVehicleIDt, 1028);	AddVehicleComponent(LVehicleIDt, 1030);	AddVehicleComponent(LVehicleIDt, 1031);	AddVehicleComponent(LVehicleIDt, 1138);	AddVehicleComponent(LVehicleIDt, 1140);  AddVehicleComponent(LVehicleIDt, 1170);
-		    AddVehicleComponent(LVehicleIDt, 1080);	AddVehicleComponent(LVehicleIDt, 1086); AddVehicleComponent(LVehicleIDt, 1087); AddVehicleComponent(LVehicleIDt, 1010);	PlayerPlaySound(playerid,1133,0.0,0.0,0.0);	ChangeVehiclePaintjob(LVehicleIDt,0);
-	   	   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
-			return PlayerInfo[playerid][pCar] = LVehicleIDt;
-		} else return SendClientMessage(playerid,red,"JikyBot: You already have a vehicle");
-	} else return SendClientMessage(playerid,red,"JikyBot: You need to be on adminduty to use this command");
+CMD:ltc(playerid,params[])
+{
+	if(PlayerInfo[playerid][OnDuty] >= 1 || IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8)
+	{
+		if(!IsPlayerInAnyVehicle(playerid))
+		{
+		    new cid;
+		    if(sscanf(params,"d",cid)) return SendClientMessage(playerid, RED,"Please use:/ltc [1-13]");
+            new Float:X,Float:Y,Float:Z,Float:Angle,LVehicleIDt;
+			GetPlayerPos(playerid,X,Y,Z);
+			GetPlayerFacingAngle(playerid,Angle);
+  			switch(cid)
+			{
+			    case 1:
+			    {
+			        LVehicleIDt = CreateVehicle(560,X,Y,Z,Angle,1,-1,-1);
+					PutPlayerInVehicle(playerid,LVehicleIDt,0);
+					AddVehicleComponent(LVehicleIDt, 1028);	AddVehicleComponent(LVehicleIDt, 1030);	AddVehicleComponent(LVehicleIDt, 1031);	AddVehicleComponent(LVehicleIDt, 1138);
+					AddVehicleComponent(LVehicleIDt, 1140);  AddVehicleComponent(LVehicleIDt, 1170);
+				    AddVehicleComponent(LVehicleIDt, 1028);	AddVehicleComponent(LVehicleIDt, 1030);	AddVehicleComponent(LVehicleIDt, 1031);	AddVehicleComponent(LVehicleIDt, 1138);	AddVehicleComponent(LVehicleIDt, 1140);  AddVehicleComponent(LVehicleIDt, 1170);
+				    AddVehicleComponent(LVehicleIDt, 1080);	AddVehicleComponent(LVehicleIDt, 1086); AddVehicleComponent(LVehicleIDt, 1087); AddVehicleComponent(LVehicleIDt, 1010);	PlayerPlaySound(playerid,1133,0.0,0.0,0.0);	ChangeVehiclePaintjob(LVehicleIDt,0);
+			   	   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
+					PlayerInfo[playerid][pCar] = LVehicleIDt;
+				}
+				case 2:
+				{
+			        LVehicleIDt = CreateVehicle(560,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");	    AddVehicleComponent(LVehicleIDt, 1028);	AddVehicleComponent(LVehicleIDt, 1030);	AddVehicleComponent(LVehicleIDt, 1031);	AddVehicleComponent(LVehicleIDt, 1138);	AddVehicleComponent(LVehicleIDt, 1140);  AddVehicleComponent(LVehicleIDt, 1170);
+				    AddVehicleComponent(LVehicleIDt, 1028);	AddVehicleComponent(LVehicleIDt, 1030);	AddVehicleComponent(LVehicleIDt, 1031);	AddVehicleComponent(LVehicleIDt, 1138);	AddVehicleComponent(LVehicleIDt, 1140);  AddVehicleComponent(LVehicleIDt, 1170);
+				    AddVehicleComponent(LVehicleIDt, 1080);	AddVehicleComponent(LVehicleIDt, 1086); AddVehicleComponent(LVehicleIDt, 1087); AddVehicleComponent(LVehicleIDt, 1010);	PlayerPlaySound(playerid,1133,0.0,0.0,0.0);	ChangeVehiclePaintjob(LVehicleIDt,1);
+				   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
+					PlayerInfo[playerid][pCar] = LVehicleIDt;
+				}
+				case 3:
+				{
+
+	           		LVehicleIDt = CreateVehicle(560,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");	    AddVehicleComponent(LVehicleIDt, 1028);	AddVehicleComponent(LVehicleIDt, 1030);	AddVehicleComponent(LVehicleIDt, 1031);	AddVehicleComponent(LVehicleIDt, 1138);	AddVehicleComponent(LVehicleIDt, 1140);  AddVehicleComponent(LVehicleIDt, 1170);
+					AddVehicleComponent(LVehicleIDt, 1080);	AddVehicleComponent(LVehicleIDt, 1086); AddVehicleComponent(LVehicleIDt, 1087); AddVehicleComponent(LVehicleIDt, 1010);	PlayerPlaySound(playerid,1133,0.0,0.0,0.0);	ChangeVehiclePaintjob(LVehicleIDt,2);
+	   				SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
+					PlayerInfo[playerid][pCar] = LVehicleIDt;
+				}
+	            case 4:
+	            {
+			        LVehicleIDt = CreateVehicle(559,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");
+			    	AddVehicleComponent(LVehicleIDt,1065);    AddVehicleComponent(LVehicleIDt,1067);    AddVehicleComponent(LVehicleIDt,1162); AddVehicleComponent(LVehicleIDt,1010); AddVehicleComponent(LVehicleIDt,1073);	ChangeVehiclePaintjob(LVehicleIDt,1);
+				   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
+					PlayerInfo[playerid][pCar] = LVehicleIDt;
+				}
+				case 5:
+				{
+			        LVehicleIDt = CreateVehicle(565,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");
+				    AddVehicleComponent(LVehicleIDt,1046); AddVehicleComponent(LVehicleIDt,1049); AddVehicleComponent(LVehicleIDt,1053); AddVehicleComponent(LVehicleIDt,1010); AddVehicleComponent(LVehicleIDt,1073); ChangeVehiclePaintjob(LVehicleIDt,1);
+				   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
+					PlayerInfo[playerid][pCar] = LVehicleIDt;
+				}
+				case 6:
+				{
+			        LVehicleIDt = CreateVehicle(558,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");
+			    	AddVehicleComponent(LVehicleIDt,1088); AddVehicleComponent(LVehicleIDt,1092); AddVehicleComponent(LVehicleIDt,1139); AddVehicleComponent(LVehicleIDt,1010); AddVehicleComponent(LVehicleIDt,1073); ChangeVehiclePaintjob(LVehicleIDt,1);
+			 	   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
+					PlayerInfo[playerid][pCar] = LVehicleIDt;
+				}
+	            case 7:
+	            {
+			        LVehicleIDt = CreateVehicle(561,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");
+			    	AddVehicleComponent(LVehicleIDt,1055); AddVehicleComponent(LVehicleIDt,1058); AddVehicleComponent(LVehicleIDt,1064); AddVehicleComponent(LVehicleIDt,1010); AddVehicleComponent(LVehicleIDt,1073); ChangeVehiclePaintjob(LVehicleIDt,1);
+				   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
+					PlayerInfo[playerid][pCar] = LVehicleIDt;
+				}
+	            case 8:
+	            {
+			        LVehicleIDt = CreateVehicle(562,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");
+				    AddVehicleComponent(LVehicleIDt,1034); AddVehicleComponent(LVehicleIDt,1038); AddVehicleComponent(LVehicleIDt,1147); AddVehicleComponent(LVehicleIDt,1010); AddVehicleComponent(LVehicleIDt,1073); ChangeVehiclePaintjob(LVehicleIDt,1);
+				   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
+					PlayerInfo[playerid][pCar] = LVehicleIDt;
+				}
+	            case 9:
+	            {
+			        LVehicleIDt = CreateVehicle(567,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");
+				    AddVehicleComponent(LVehicleIDt,1102); AddVehicleComponent(LVehicleIDt,1129); AddVehicleComponent(LVehicleIDt,1133); AddVehicleComponent(LVehicleIDt,1186); AddVehicleComponent(LVehicleIDt,1188); ChangeVehiclePaintjob(LVehicleIDt,1); AddVehicleComponent(LVehicleIDt,1010); AddVehicleComponent(LVehicleIDt,1085); AddVehicleComponent(LVehicleIDt,1087); AddVehicleComponent(LVehicleIDt,1086);
+				   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
+					PlayerInfo[playerid][pCar] = LVehicleIDt;
+				}
+	            case 10:
+	            {
+			        LVehicleIDt = CreateVehicle(558,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");
+			   		AddVehicleComponent(LVehicleIDt,1092); AddVehicleComponent(LVehicleIDt,1166); AddVehicleComponent(LVehicleIDt,1165); AddVehicleComponent(LVehicleIDt,1090);
+				    AddVehicleComponent(LVehicleIDt,1094); AddVehicleComponent(LVehicleIDt,1010); AddVehicleComponent(LVehicleIDt,1087); AddVehicleComponent(LVehicleIDt,1163);//SPOILER
+				    AddVehicleComponent(LVehicleIDt,1091); ChangeVehiclePaintjob(LVehicleIDt,2);
+				   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
+					PlayerInfo[playerid][pCar] = LVehicleIDt;
+				}
+	            case 11:
+	            {
+			        LVehicleIDt = CreateVehicle(557,X,Y,Z,Angle,1,1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");
+					AddVehicleComponent(LVehicleIDt,1010); AddVehicleComponent(LVehicleIDt,1081);
+				   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
+					PlayerInfo[playerid][pCar] = LVehicleIDt;
+				}
+	            case 12:
+	            {
+			        LVehicleIDt = CreateVehicle(535,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");
+					ChangeVehiclePaintjob(LVehicleIDt,1); AddVehicleComponent(LVehicleIDt,1109); AddVehicleComponent(LVehicleIDt,1115); AddVehicleComponent(LVehicleIDt,1117); AddVehicleComponent(LVehicleIDt,1073); AddVehicleComponent(LVehicleIDt,1010);
+				    AddVehicleComponent(LVehicleIDt,1087); AddVehicleComponent(LVehicleIDt,1114); AddVehicleComponent(LVehicleIDt,1081); AddVehicleComponent(LVehicleIDt,1119); AddVehicleComponent(LVehicleIDt,1121);
+				   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
+					PlayerInfo[playerid][pCar] = LVehicleIDt;
+				}
+	            case 13:
+	            {
+			        LVehicleIDt = CreateVehicle(562,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");
+			  		AddVehicleComponent(LVehicleIDt,1034); AddVehicleComponent(LVehicleIDt,1038); AddVehicleComponent(LVehicleIDt,1147);
+					AddVehicleComponent(LVehicleIDt,1010); AddVehicleComponent(LVehicleIDt,1073); ChangeVehiclePaintjob(LVehicleIDt,0);
+				   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
+					PlayerInfo[playerid][pCar] = LVehicleIDt;
+				}
+				default:
+				{
+                    SendClientMessage(playerid,red,"Use id's from 1 to 13 only!");
+				}
+	        }
+	        return 1;
+		}
+		else return SendClientMessage(playerid,red,"You already have a vehicle");
+	}
+	else return SendClientMessage(playerid,red,"You need to be on /adminduty to use this command");
 }
 
 
@@ -14367,10 +14189,10 @@ CMD:sammo(playerid,params[]) // can i show u something? somwthing what?
 				SendClientMessage(playerid,blue,"Support Ammo Package.");
 				Block_CMD[playerid][2] = true;
 				SetTimerEx("EnableCMD",300000,false,"dd",playerid,2);
-				for(new i = 0; i < MAX_PLAYERS; i++)
+				foreach(Player, i)
 				{
-                if(IsPlayerConnected(i) && IsPlayerInRangeOfPoint(i,8.0, x, y, z) ) GiveAmmo(i);
-               }
+                	if(IsPlayerInRangeOfPoint(i,8.0, x, y, z)) GiveAmmo(i);
+               	}
 			}
 		else return SendClientMessage(playerid,red,"JikyBot: You need to wait (5) minutes.");
 		}
@@ -14393,10 +14215,10 @@ CMD:sheal(playerid,params[]) // can i show u something? somwthing what?
 				SendClientMessage(playerid,blue,"Support Health Package.");
 				Block_CMD[playerid][3] = true;
 				SetTimerEx("EnableCMD",300000,false,"dd",playerid,3);
-				for(new i = 0; i < MAX_PLAYERS; i++)
+				foreach(Player, i)
 				{
-                if(IsPlayerConnected(i) && IsPlayerInRangeOfPoint(i,5.0, x, y, z) ) SetPlayerHealth(i,100);
-               }
+                	if(IsPlayerInRangeOfPoint(i,5.0, x, y, z) ) SetPlayerHealth(i,100);
+               	}
 			}
 		else return SendClientMessage(playerid,red,"JikyBot: You need to wait (5) minutes.");
 		}
@@ -14419,22 +14241,19 @@ CMD:sweaps(playerid,params[]) // can i show u something? somwthing what?
 				SendClientMessage(playerid,blue,"Supported Weapons.");
 				Block_CMD[playerid][14] = true;
 				SetTimerEx("EnableCMD",300000,false,"dd",playerid,14);
-				for(new i = 0; i < MAX_PLAYERS; i++)
-				{
-                if(IsPlayerConnected(i) && IsPlayerInRangeOfPoint(i,5.0, x, y, z) )
-				GivePlayerWeapon(i, 24,50);
-				GivePlayerWeapon(i, 27,50);
-				GivePlayerWeapon(i, 32,50);
-				GivePlayerWeapon(i, 7,2);
-               }
+				GivePlayerWeapon(playerid, 24,50);
+				//GivePlayerWeapon(playerid, 27,50);
+				GivePlayerWeapon(playerid, 32,70);
+				//GivePlayerWeapon(playerid, 7,2);
+                return 1;
 			}
-		else return SendClientMessage(playerid,red,"JikyBot: You need to wait (5) minutes.");
+			else return SendClientMessage(playerid,red,"JikyBot: You need to wait (5) minutes.");
 		}
-	  else return SendClientMessage(playerid,red,"JikyBot: You Need To Be Support Class.");
+  		else return SendClientMessage(playerid,red,"JikyBot: You Need To Be Support Class.");
 	}
 	else return SendClientMessage(playerid,red,"JikyBot: You must be logged in to use this commands");
-	return 1;
 }
+
 CMD:sarmour(playerid,params[]) // can i show u something? somwthing what?
 {
 	if(PlayerInfo[playerid][LoggedIn] == 1)
@@ -14449,17 +14268,17 @@ CMD:sarmour(playerid,params[]) // can i show u something? somwthing what?
 				SendClientMessage(playerid,blue,"Support Armour Package.");
 				Block_CMD[playerid][17] = true;
 				SetTimerEx("EnableDHeal",300000,false,"dd",playerid,17);
-				for(new i = 0; i < MAX_PLAYERS; i++)
+				foreach(Player, i)
 				{
-                if(IsPlayerConnected(i) && IsPlayerInRangeOfPoint(i,5.0, x, y, z) ) SetPlayerArmour(i,100);
-               }
+                	if(IsPlayerConnected(i) && IsPlayerInRangeOfPoint(i,5.0, x, y, z) ) SetPlayerArmour(i,100);
+               	}
+            	return 1;
 			}
-		else return SendClientMessage(playerid,red,"JikyBot: You need to wait (5) minutes.");
+			else return SendClientMessage(playerid,red,"JikyBot: You need to wait (5) minutes.");
 		}
-	  else return SendClientMessage(playerid,red,"JikyBot: You Need To Be Support Class.");
+	  	else return SendClientMessage(playerid,red,"JikyBot: You Need To Be Support Class.");
 	}
 	else return SendClientMessage(playerid,red,"JikyBot: You must be logged in to use this commands");
-	return 1;
 }
 CMD:dcar(playerid,params[]) // can i show u something? somwthing what?
 {
@@ -14527,9 +14346,9 @@ CMD:fr(playerid)
    SetTimerEx("EnableCMD",60000,false,"dd",playerid,12);
    new Float:x, Float:y, Float:z;
    GetPlayerPos(playerid, x, y, z);
-   for(new i = 0; i < MAX_PLAYERS; i++)
+   foreach(Player, i)
    {
-    if(IsPlayerConnected(i) && i != playerid && IsPlayerInAnyVehicle(i)) SendClientMessage(playerid,grey,"Set enemy in range vehicle vehicle on fire.");
+    if(i != playerid && IsPlayerInAnyVehicle(i)) SendClientMessage(playerid,grey,"Set enemy in range vehicle vehicle on fire.");
     {
      if(gTeam[playerid] != gTeam[i])
      {
@@ -14654,7 +14473,7 @@ CMD:dboost(playerid,params[]) // can i show u something? somwthing what?
    Block_CMD[playerid][10] = true;
    SendCMDMessge(playerid,"DBOOST");
    SetTimerEx("EnableCMD",300000,false,"dd",playerid,10);
-   for(new i = 0; i < MAX_PLAYERS; i++)
+   foreach(Player, i)
    {
     if(IsPlayerInRangeOfPoint(i,5.0, x, y, z))
     {
@@ -14747,7 +14566,7 @@ CMD:dcmds(playerid,params[]) {
 CMD:setdonor(playerid,params[]) {
 if(PlayerInfo[playerid][Level] >= 9) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric2(tmp2)) return SendClientMessage(playerid, red, "JikyBot: Usage:/setdonor [playerid] [Level] | Note : Max Levels = 3 |");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric5(tmp2)) return SendClientMessage(playerid, red, "JikyBot: Usage:/setdonor [playerid] [Level] | Note : Max Levels = 5 |");
 		new player1 = strval(tmp), skin = strval(tmp2), string[128];
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
 			CMDMessageToAdmins(playerid,"SETDONOR");
@@ -14934,14 +14753,14 @@ CMD:frozen(playerid,params[]) {
 	#pragma unused params
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 2) {
-	 		new bool:First2 = false, cot, adminname[MAX_PLAYER_NAME], string[128], i;
-		    for(i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i) && PlayerInfo[i][Frozen]) cot++;
-			if(cot == 0) return SendClientMessage(playerid,red, "No players are frozen");
+	 		new bool:First2 = false, cot, adminname[MAX_PLAYER_NAME], string[128];
+		    foreach(Player, i) { if(IsPlayerConnected(i) && PlayerInfo[i][Frozen]) cot++;
+			if(cot == 0) return SendClientMessage(playerid,red, "No players are frozen"); }
 
-		    for(i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i) && PlayerInfo[i][Frozen]) {
+		    foreach(Player, i) { if(IsPlayerConnected(i) && PlayerInfo[i][Frozen]) {
 	    		GetPlayerName(i, adminname, sizeof(adminname));
 				if(!First2) { format(string, sizeof(string), "Frozen Players: (%d)%s", i,adminname); First2 = true; }
-		        else format(string,sizeof(string),"%s, (%d)%s ",string,i,adminname);
+		        else format(string,sizeof(string),"%s, (%d)%s ",string,i,adminname); }
 	        }
 		    return SendClientMessage(playerid,COLOR_WHITE,string);
 		} else return SendClientMessage(playerid,red,"[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
@@ -15137,48 +14956,52 @@ CMD:adminduty(playerid,params[])
 {
    if(PlayerInfo[playerid][Level] >= 2)
    {
-       if(AntiSK[playerid] == 0)
-		 {
-         if(PlayerInfo[playerid][OnDuty] == 0) {
-         PlayerInfo[playerid][OnDuty] = 1;
-	     new str[128], AdminName[28];
-         GetPlayerName(playerid, AdminName, sizeof(AdminName));
-         format(str, sizeof(str), "Administrator %s is now on Admin duty!", AdminName);
-         SendClientMessageToAll(0xF600F6FF, str);
-         SetPlayerSkin(playerid,217);
-         SetPlayerTeam(playerid,6);
-         SetVehicleHealth(VID[playerid], 9999999999.0);
-//         Duty[playerid] = Create3DTextLabel("On Duty Admin\n!!Do Not Attack!!", 0xF600F6FF, 30.0, 40.0, 50.0, 40.0, 0);
-//         Attach3DTextLabelToPlayer(Duty[playerid], playerid, 0.0, 0.0, 0.5);
-   	     SetPlayerColor(playerid, 0xF600F6FF);
-         SetPlayerHealth(playerid, 100000000000.0);
-         SetPlayerArmour(playerid, 100000000000.0);
-		 ResetPlayerWeapons(playerid);
-         GivePlayerWeapon(playerid, 38,999999999);
-//         Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
-//         Update3DTextLabelText(DM[playerid], 0xFFFFFFFF, " ");
-         gTeam[playerid] = TEAM_MERC;
-         gClass[playerid] = CLASS;
-         }
-         else if(PlayerInfo[playerid][OnDuty] == 1) {
-         PlayerInfo[playerid][OnDuty] = 0;
-         new str[128], AdminName[28];
-         GetPlayerName(playerid, AdminName, sizeof(AdminName));
-         format(str, sizeof(str), "Administrator %s is now off Admin duty!", AdminName);
-         SendClientMessageToAll(0xFD01FDAA, str);
-         SetPlayerHealth(playerid, 0);
-//         Delete3DTextLabel(Duty[playerid]);
-//         Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
-//         Update3DTextLabelText(Duty[playerid], 0xFFFFFFFF, " ");
-		 ForceClassSelection(playerid);
-	     SetPlayerHealth(playerid, 0);
-	     SetPlayerArmour(playerid, 0);
-         new rand = random(sizeof(PlayerColors));
-         SetPlayerColor(playerid, PlayerColors[rand]);
+       	if(AntiSK[playerid] == 0)
+		{
+         	if(PlayerInfo[playerid][OnDuty] == 0)
+	 		{
+ 				PlayerInfo[playerid][OnDuty] = 1;
+			    new str[128], AdminName[28];
+		        GetPlayerName(playerid, AdminName, sizeof(AdminName));
+		        format(str, sizeof(str), "Administrator %s is now on Admin duty!", AdminName);
+		        SendClientMessageToAll(0xF600F6FF, str);
+		        SetPlayerSkin(playerid,217);
+		        SetPlayerTeam(playerid,6);
+		        SetVehicleHealth(VID[playerid], 9999999999.0);
+		//        Duty[playerid] = Create3DTextLabel("On Duty Admin\n!!Do Not Attack!!", 0xF600F6FF, 30.0, 40.0, 50.0, 40.0, 0);
+		//        Attach3DTextLabelToPlayer(Duty[playerid], playerid, 0.0, 0.0, 0.5);
+		   	    SetPlayerColor(playerid, 0xF600F6FF);
+		        SetPlayerHealth(playerid, 100000000000.0);
+		        SetPlayerArmour(playerid, 100000000000.0);
+				ResetPlayerWeapons(playerid);
+		        GivePlayerWeapon(playerid, 38,999999999);
+		//        Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
+		//        Update3DTextLabelText(DM[playerid], 0xFFFFFFFF, " ");
+		        gTeam[playerid] = TEAM_MERC;
+		        gClass[playerid] = CLASS;
+         	}
+  			else if(PlayerInfo[playerid][OnDuty] == 1)
+			{
+		        PlayerInfo[playerid][OnDuty] = 0;
+		        new str[128], AdminName[28];
+		        GetPlayerName(playerid, AdminName, sizeof(AdminName));
+		        format(str, sizeof(str), "Administrator %s is now off Admin duty!", AdminName);
+		        SendClientMessageToAll(0xFD01FDAA, str);
+		        SetPlayerHealth(playerid, 0);
+		//        Delete3DTextLabel(Duty[playerid]);
+		//        Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
+		//        Update3DTextLabelText(Duty[playerid], 0xFFFFFFFF, " ");
+				ForceClassSelection(playerid);
+			    SetPlayerHealth(playerid, 0);
+			    SetPlayerArmour(playerid, 0);
+		        new rand = random(sizeof(PlayerColors));
+		        SetPlayerColor(playerid, PlayerColors[rand]);
             }
-           } else SendClientMessage(playerid,red,"You can't go when under Anti Spawn Kill");
-   } else return 0;
-   return 1;
+		}
+		else SendClientMessage(playerid,red,"You can't go when under Anti Spawn Kill");
+   	}
+   	else return 0;
+   	return 1;
 }
 //+++++++++++++++++++++++++++++++++++++new radio updated===========================
 CMD:radiostart(playerid, params[])
@@ -15216,13 +15039,13 @@ CMD:radiostart(playerid, params[])
 
 CMD:radiohelp(playerid,params[])
 {
- SendClientMessage(playerid,green,"/Radiostart[1-2] -> Turn on Radio.");
- SendClientMessage(playerid,green,"/Radiostop -> Turn off Radio.");
+ 	SendClientMessage(playerid,green,"/Radiostart[1-2] -> Turn on Radio.");
+ 	SendClientMessage(playerid,green,"/Radiostop -> Turn off Radio.");
    return 1;
 }
 CMD:radiostop(playerid,params[])
 {
-StopAudioStreamForPlayer(playerid);
+	StopAudioStreamForPlayer(playerid);
    return 1;
 }
 CMD:admins(playerid, params[])
@@ -15233,10 +15056,10 @@ CMD:admins(playerid, params[])
         string[800],
         AdmRank[500];
 
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
     {
-        if (IsPlayerConnected(i))
-        {
+        //if (IsPlayerConnected(i))
+        //{
             if(PlayerInfo[i][Level] >= 1 && PlayerInfo[i][Hide] == 0)
             {
                 if(IsPlayerAdmin(i)) AdmRank ="{F3FF02}[RCON ADMIN!]";
@@ -15255,8 +15078,6 @@ CMD:admins(playerid, params[])
                         case 9: AdmRank = "{800000}[Community Co-Owner]";
                         case 10: AdmRank = "{FF0000}[Community Owner]";
                     }
-
-
                     new nameee[128];
                     GetPlayerName(i, nameee, 16);
                     if(!strcmp(nameee, "[XP]IzZaN", true))
@@ -15273,24 +15094,61 @@ CMD:admins(playerid, params[])
                 //and that parameter actually refers to the string itself.
                 count++;
             }
-        }
+        //}
     }
     if (count == 0) ShowPlayerDialog(playerid, 800, DIALOG_STYLE_MSGBOX, "{F81414}RWW2 - Online Admins :", "{00FFEE}No Admins Are Online in Server\n\n{00FF00}COD - RWW2 ", "Close", "");
     else ShowPlayerDialog(playerid, 800, DIALOG_STYLE_MSGBOX, "{F81414}RWW2 - Online Admins :", string, "Close", "");
     //Don't show dialog in a loop, it won't show all the admins continuously.
     //Show it after all the data are ready.
-    return 1;
-    }
+	return 1;
+}
+CMD:sendmsg(playerid,params[]) //fix sendmsg cmd added, so that admins don't need to copy-paste msg's
+{
+    if(PlayerInfo[playerid][Level] >= 1)
+	{
+	    new choice;
+        if(sscanf(params,"d",choice))
+		{
+			SendClientMessage(playerid, red, "/sendmsg [1-7]");
+			SendClientMessage(playerid, red, "1 - /report, 2 - /helpme, 3 - unban app, 4 - forum, 5 - don't ask for score/cash, 6 - how to earn stuff, 7 - event");
+            SendClientMessage(playerid, red, "Spamming with this command will lead to punishment!");
+			return 0;
+		}
+		switch(choice)
+		{
+			case 1:
+			SendClientMessageToAll(red,"[MESSAGE]If you see a hacker or a rule-breaker please use /report [id] [reason]");
+            case 2:
+			SendClientMessageToAll(red,"[MESSAGE]If you need any help or have a question please use /helpme [question]");
+            case 3:
+			SendClientMessageToAll(red,"[MESSAGE]If you are banned, please make an unban application at xpsamp.com forum");
+			case 4:
+			SendClientMessageToAll(red,"[MESSAGE]You can also visit our forums: xpsamp.com");
+			case 5:
+			SendClientMessageToAll(red,"[MESSAGE]Please do not ask for score/cash in main chat, it may get you warned or even muted!");
+            case 6:
+			SendClientMessageToAll(red,"[MESSAGE]To earn score and cash, kill enemy players, capture zones, destroy objects on enemy bases");
+			case 7:
+			SendClientMessageToAll(red,"[MESSAGE]An event is running at the moment, write /join to join it and have fun :)");
+		}
+	}
+	else return SendClientMessage(playerid,red,"[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
+	return 1;
+}
+CMD:sm(playerid, params[])
+{
+	return cmd_sendmsg(playerid, params);
+}
 CMD:donors(playerid, params[])
 {
     #pragma unused params
     new
         count = 0,
         string[800];
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
     {
-        if (IsPlayerConnected(i))
-        {
+        //if (IsPlayerConnected(i))
+        //{
             if(PlayerInfo[i][dRank] >= 1)
             {
                 format(string, 500, "%s %s [ID:%i] | DonorLevel: %d\n", string, PlayerName2(i), i, PlayerInfo[i][dRank]);
@@ -15298,7 +15156,7 @@ CMD:donors(playerid, params[])
                 //and that parameter actually refers to the string itself.
                 count++;
             }
-        }
+        //}
 	}
     if (count == 0) ShowPlayerDialog(playerid, 800, DIALOG_STYLE_MSGBOX, "{F81414}=Online Donators=", "{00FFEE}No Donators Online\n{00FF00}_____", "Close", "");
     else ShowPlayerDialog(playerid, 800, DIALOG_STYLE_MSGBOX, "{F81414}=Online Donators=", string, "Close", "");
@@ -15307,13 +15165,11 @@ CMD:donors(playerid, params[])
 CMD:sdonors(playerid, params[])
 {
     #pragma unused params
-    new
-        count = 0,
-        string[800];
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    new count = 0, string[800];
+    foreach(Player, i)
     {
-        if (IsPlayerConnected(i))
-        {
+        //if (IsPlayerConnected(i))
+        //{
             if(PlayerInfo[i][dRank] >= 5)
             {
                 format(string, 500, "%s %s [ID:%i] | Special DonorLevel: %d\n", string, PlayerName2(i), i, PlayerInfo[i][dRank]);
@@ -15321,7 +15177,7 @@ CMD:sdonors(playerid, params[])
                 //and that parameter actually refers to the string itself.
                 count++;
             }
-        }
+        //}
 	}
     if (count == 0) ShowPlayerDialog(playerid, 800, DIALOG_STYLE_MSGBOX, "{F81414}=Online Special Donators=", "{00FFEE}No Special Donators Online\n{00FF00}_____", "Close", "");
     else ShowPlayerDialog(playerid, 800, DIALOG_STYLE_MSGBOX, "{F81414}=Online Special Donators=", string, "Close", "");
@@ -15333,10 +15189,10 @@ CMD:testers(playerid,params[])
     new
         count = 0,
         string[500];
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(Player, i)
     {
-        if (IsPlayerConnected(i))
-        {
+     //   if (IsPlayerConnected(i))
+       // {
             if(PlayerInfo[i][Helper] == 1)
             {
                 format(string, 500, "%s{F3FF02}%s [id :%d] | Server Tester\n", string, PlayerName2(i),i );
@@ -15344,7 +15200,7 @@ CMD:testers(playerid,params[])
                 //and that parameter actually refers to the string itself.
                 count++;
             }
-        }
+        //}
     }
     if (count == 0) ShowPlayerDialog(playerid, 500, DIALOG_STYLE_MSGBOX, "{F81414} Online Server Testers", "{00FFEE}No Server Testers!\n{F81414}______________", "Close", "");
     else ShowPlayerDialog(playerid, 500, DIALOG_STYLE_MSGBOX, "{F81414}Online Server Testers", string, "Close", "");
@@ -15501,25 +15357,39 @@ CMD:richlist(playerid,params[]) {
     #pragma unused params
  		new string[128], Slot1 = -1, Slot2 = -1, Slot3 = -1, Slot4 = -1, HighestCash = -9999;
  		SendClientMessage(playerid,COLOR_WHITE,"Rich List:");
-
-		for(new x=0; x<MAX_PLAYERS; x++) if (IsPlayerConnected(x)) if (GetPlayerMoney(x) >= HighestCash) {
-			HighestCash = GetPlayerMoney(x);
-			Slot1 = x;
+		foreach(Player, x)
+		{
+			if (IsPlayerConnected(x)) if (GetPlayerMoney(x) >= HighestCash)
+			{
+				HighestCash = GetPlayerMoney(x);
+				Slot1 = x;
+			}
 		}
 		HighestCash = -9999;
-		for(new x=0; x<MAX_PLAYERS; x++) if (IsPlayerConnected(x) && x != Slot1) if (GetPlayerMoney(x) >= HighestCash) {
-			HighestCash = GetPlayerMoney(x);
-			Slot2 = x;
+		foreach(Player, x)
+		{
+			if (IsPlayerConnected(x) && x != Slot1) if (GetPlayerMoney(x) >= HighestCash)
+			{
+				HighestCash = GetPlayerMoney(x);
+				Slot2 = x;
+			}
 		}
 		HighestCash = -9999;
-		for(new x=0; x<MAX_PLAYERS; x++) if (IsPlayerConnected(x) && x != Slot1 && x != Slot2) if (GetPlayerMoney(x) >= HighestCash) {
-			HighestCash = GetPlayerMoney(x);
-			Slot3 = x;
+		foreach(Player, x)
+		{
+			if (IsPlayerConnected(x) && x != Slot1 && x != Slot2) if (GetPlayerMoney(x) >= HighestCash)
+			{
+				HighestCash = GetPlayerMoney(x);
+				Slot3 = x;
+			}
 		}
 		HighestCash = -9999;
-		for(new x=0; x<MAX_PLAYERS; x++) if (IsPlayerConnected(x) && x != Slot1 && x != Slot2 && x != Slot3) if (GetPlayerMoney(x) >= HighestCash) {
-			HighestCash = GetPlayerMoney(x);
-			Slot4 = x;
+		foreach(Player, x) {
+			if (IsPlayerConnected(x) && x != Slot1 && x != Slot2 && x != Slot3) if (GetPlayerMoney(x) >= HighestCash)
+			{
+				HighestCash = GetPlayerMoney(x);
+				Slot4 = x;
+			}
 		}
 		    format(string, sizeof(string), "(%d) %s - $%d - %d", Slot1,PlayerName2(Slot1),GetPlayerMoney(Slot1),GetPlayerScore(Slot1) );
 		    SendClientMessage(playerid,COLOR_WHITE,string);
@@ -15580,10 +15450,12 @@ CMD:saveallstats(playerid,params[]) {
     #pragma unused params
 	if(PlayerInfo[playerid][Level] >= 5) {
 		CMDMessageToAdmins(playerid,"SAVEALLSTATS");
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
-			if(IsPlayerConnected(i)) {
+	   	foreach(Player, i)
+  		{
+			if(IsPlayerConnected(i))
+			{
 				PlayerPlaySound(i,1057,0.0,0.0,0.0);
-			    SavePlayer(i);
+		    	SavePlayer(i);
 			}
 		}
 		new string[128]; format(string,sizeof(string),"Administrator \"%s\" has saved all players stats", pName(playerid) );
@@ -15595,7 +15467,7 @@ CMD:giveallmask(playerid,params[]) {
 if(PlayerInfo[playerid][Level] >= 6) {
   if(PlayerInfo[playerid][Registered] == 1) {
  	if(PlayerInfo[playerid][LoggedIn] == 1) {
- 	for(new i = 0; i < MAX_PLAYERS; i++)
+ 	foreach(Player, i)
     {
    	   SendClientMessage(i, yellow, "Mask Received!");
    	   PlayerPlaySound(i, 1057,0.0,0.0,0.0);
@@ -15655,7 +15527,7 @@ CMD:rheal(playerid,params[]) // can i show u something? somwthing what?
    GetPlayerPos(playerid, x, y, z);
    SendClientMessage(playerid,blue,"Restore all in range health and armour!");
    CMDMessageToAdmins(playerid,"RHEAL");
-   for(new i = 0; i < MAX_PLAYERS; i++)
+   foreach(Player, i)
    {
     if(IsPlayerInRangeOfPoint(i,10.0, x, y, z))
     {
@@ -15706,7 +15578,7 @@ CMD:rangeweapon(playerid,params[]) {
         if(sscanf(params,"ii",Weap, ammo)) return SendClientMessage(playerid,red,"JikyBot: Usage:/giveallweapon [weapon name] [ammo]");
         if(Weap == 38 || Weap == 36) return SendClientMessage(playerid,red,"You Can't Give Those Weapons!");
 		CMDMessageToAdmins(playerid,"RANGEWEAPON");
-       	for(new i = 0; i < MAX_PLAYERS; i++)
+       	foreach(Player, i)
    {
     if(IsPlayerInRangeOfPoint(i,10.0, x, y, z))
     {
@@ -16068,7 +15940,7 @@ CMD:spawnall(playerid,params[]) {
     #pragma unused params
 	if(PlayerInfo[playerid][Level] >= 4) {
 		CMDMessageToAdmins(playerid,"SPAWNAll");
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
 			if(IsPlayerConnected(i) && (i != playerid) && i != ServerInfo[MaxAdminLevel]) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0); SetPlayerPos(i, 0.0, 0.0, 0.0); SpawnPlayer(i);
 			}
@@ -16082,7 +15954,7 @@ CMD:muteall(playerid,params[]) {
     #pragma unused params
 	if(PlayerInfo[playerid][Level] >= 4) {
 		CMDMessageToAdmins(playerid,"MUTEALL");
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
 			if(IsPlayerConnected(i) && (i != playerid) && i != ServerInfo[MaxAdminLevel]) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0); PlayerInfo[i][Muted] = 1; PlayerInfo[i][MuteWarnings] = 0;
 			}
@@ -16096,7 +15968,7 @@ CMD:unmuteall(playerid,params[]) {
     #pragma unused params
 	if(PlayerInfo[playerid][Level] >= 4) {
 		CMDMessageToAdmins(playerid,"UNMUTEAll");
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
 			if(IsPlayerConnected(i) && (i != playerid) && i != ServerInfo[MaxAdminLevel]) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0); PlayerInfo[i][Muted] = 0; PlayerInfo[i][MuteWarnings] = 0;
 			}
@@ -16112,7 +15984,7 @@ CMD:getall(playerid,params[]) {
 		CMDMessageToAdmins(playerid,"GETAll");
 		new Float:x,Float:y,Float:z, interior = GetPlayerInterior(playerid);
     	GetPlayerPos(playerid,x,y,z);
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
 			if(IsPlayerConnected(i) && (i != playerid) && i != ServerInfo[MaxAdminLevel]) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0); SetPlayerPos(i,x+(playerid/4)+1,y+(playerid/4),z); SetPlayerInterior(i,interior);
 			}
@@ -16125,7 +15997,7 @@ CMD:healall(playerid,params[]) {
     #pragma unused params
 	if(PlayerInfo[playerid][Level] >= 3) {
 		CMDMessageToAdmins(playerid,"HEALALL");
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
 			if(IsPlayerConnected(i)) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0); SetPlayerHealth(i,100.0);
 			}
@@ -16139,7 +16011,7 @@ CMD:armourall(playerid,params[]) {
     #pragma unused params
 	if(PlayerInfo[playerid][Level] >= 3) {
 		CMDMessageToAdmins(playerid,"ARMOURALL");
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
 			if(IsPlayerConnected(i)) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0); SetPlayerArmour(i,100.0);
 			}
@@ -16153,7 +16025,7 @@ CMD:killall(playerid,params[]) {
     #pragma unused params
 	if(PlayerInfo[playerid][Level] >= 4) {
 		CMDMessageToAdmins(playerid,"KILLALL");
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
 			if(IsPlayerConnected(i) && (i != playerid) && i != ServerInfo[MaxAdminLevel]) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0); SetPlayerHealth(i,0.0);
 			}
@@ -16167,7 +16039,7 @@ CMD:freezeall(playerid,params[]) {
     #pragma unused params
 	if(PlayerInfo[playerid][Level] >= 4) {
 		CMDMessageToAdmins(playerid,"FREEZEALL");
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
  		if(IsPlayerConnected(i) && (i != playerid) && i != ServerInfo[MaxAdminLevel]) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0); TogglePlayerControllable(i,false); PlayerInfo[i][Frozen] = 1;
 			}
@@ -16181,7 +16053,7 @@ CMD:unfreezeall(playerid,params[]) {
     #pragma unused params
 	if(PlayerInfo[playerid][Level] >= 4) {
 		CMDMessageToAdmins(playerid,"UNFREEZEALL");
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
 			if(IsPlayerConnected(i)) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0); TogglePlayerControllable(i,true); PlayerInfo[i][Frozen] = 0; GameTextForPlayer(i,"~g~Unfreeze", 3000, 3);
 			}
@@ -16196,7 +16068,7 @@ CMD:kickall(playerid,params[]) {
     #pragma unused params
 	if(PlayerInfo[playerid][Level] >= 10) {
 		CMDMessageToAdmins(playerid,"KICKALL");
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
 			if(IsPlayerConnected(i) && (i != playerid) && i != ServerInfo[MaxAdminLevel]) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0); Kick(i);
 			}
@@ -16221,7 +16093,7 @@ CMD:slapall(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 4) {
 		CMDMessageToAdmins(playerid,"SLAPALL");
 		new Float:x, Float:y, Float:z;
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
 			if(IsPlayerConnected(i) && (i != playerid) && i != ServerInfo[MaxAdminLevel]) {
 				PlayerPlaySound(i,1190,0.0,0.0,0.0); GetPlayerPos(i,x,y,z);	SetPlayerPos(i,x,y,z+4);
 			}
@@ -16236,7 +16108,7 @@ CMD:explodeall(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 4) {
 		CMDMessageToAdmins(playerid,"EXPLODEALL");
 		new Float:x, Float:y, Float:z;
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
 			if(IsPlayerConnected(i) && (i != playerid) && i != ServerInfo[MaxAdminLevel]) {
 				PlayerPlaySound(i,1190,0.0,0.0,0.0); GetPlayerPos(i,x,y,z);	CreateExplosion(x, y , z, 7, 10.0);
 			}
@@ -16249,7 +16121,7 @@ CMD:disarmall(playerid,params[]) {
     #pragma unused params
 	if(PlayerInfo[playerid][Level] >= 4) {
 		CMDMessageToAdmins(playerid,"DISARMALL");
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
 			if(IsPlayerConnected(i) && (i != playerid) && i != ServerInfo[MaxAdminLevel]) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0); ResetPlayerWeapons(i);
 			}
@@ -16264,7 +16136,7 @@ CMD:ejectall(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 4) {
     	CMDMessageToAdmins(playerid,"EJECTALL");
         new Float:x, Float:y, Float:z;
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i) {
 			if(IsPlayerConnected(i) && (i != playerid) && i != ServerInfo[MaxAdminLevel]) {
 			    if(IsPlayerInAnyVehicle(i)) {
 					PlayerPlaySound(i,1057,0.0,0.0,0.0); GetPlayerPos(i,x,y,z); SetPlayerPos(i,x,y,z+3);
@@ -16282,7 +16154,7 @@ CMD:setallwanted(playerid,params[]) {
 	    if(isnull(params)) return SendClientMessage(playerid, red, "JikyBot: Usage:/setallwanted [wanted level]");
 		new var = strval(params), string[128];
        	CMDMessageToAdmins(playerid,"SETALLWANTED");
-		for(new i = 0; i < MAX_PLAYERS; i++) {
+		foreach(Player, i) {
 			if(IsPlayerConnected(i)) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0);
 				SetPlayerWantedLevel(i,var);
@@ -16298,7 +16170,7 @@ CMD:setallweather(playerid,params[]) {
 	    if(isnull(params)) return SendClientMessage(playerid, red, "JikyBot: Usage:/setallweather [weather ID]");
 		new var = strval(params), string[128];
        	CMDMessageToAdmins(playerid,"SETALLWEATHER");
-		for(new i = 0; i < MAX_PLAYERS; i++) {
+		foreach(Player, i) {
 			if(IsPlayerConnected(i)) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0);
 				SetPlayerWeather(i, var);
@@ -16315,7 +16187,7 @@ CMD:setalltime(playerid,params[]) {
 		new var = strval(params), string[128];
 		if(var > 24) return SendClientMessage(playerid, red, "JikyBot: Invalid hour");
        	CMDMessageToAdmins(playerid,"SETALLTIME");
-		for(new i = 0; i < MAX_PLAYERS; i++) {
+		foreach(Player, i) {
 			if(IsPlayerConnected(i)) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0);
 				SetPlayerTime(i, var, 0);
@@ -16331,7 +16203,7 @@ CMD:setallworld(playerid,params[]) {
 	    if(isnull(params)) return SendClientMessage(playerid, red, "JikyBot: Usage:/setallworld [virtual world]");
 		new var = strval(params), string[128];
        	CMDMessageToAdmins(playerid,"SETALLWORLD");
-		for(new i = 0; i < MAX_PLAYERS; i++) {
+		foreach(Player, i) {
 			if(IsPlayerConnected(i)) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0);
 				SetPlayerVirtualWorld(i,var);
@@ -16347,7 +16219,7 @@ CMD:setallscore(playerid,params[]) {
 	    if(isnull(params)) return SendClientMessage(playerid, red, "JikyBot: Usage:/setallscore [score]");
 		new var = strval(params), string[128];
        	CMDMessageToAdmins(playerid,"SETALLSCORE");
-		for(new i = 0; i < MAX_PLAYERS; i++) {
+		foreach(Player, i) {
 			if(IsPlayerConnected(i)) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0);
 				SetPlayerScore(i,var);
@@ -16363,7 +16235,7 @@ CMD:setallcash(playerid,params[]) {
 	    if(isnull(params)) return SendClientMessage(playerid, red, "JikyBot: Usage:/setallcash [Amount]");
 		new var = strval(params), string[128];
        	CMDMessageToAdmins(playerid,"SETALLCASH");
-		for(new i = 0; i < MAX_PLAYERS; i++) {
+		foreach(Player, i) {
 			if(IsPlayerConnected(i)) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0);
 				ResetPlayerMoney(i);
@@ -16380,7 +16252,7 @@ CMD:giveallcash(playerid,params[]) {
 	    if(isnull(params)) return SendClientMessage(playerid, red, "JikyBot: Usage:/giveallcash [Amount]");
 		new var = strval(params), string[128];
        	CMDMessageToAdmins(playerid,"GIVEALLCASH");
-		for(new i = 0; i < MAX_PLAYERS; i++) {
+		foreach(Player, i) {
 			if(IsPlayerConnected(i)) {
 				PlayerPlaySound(i,1057,0.0,0.0,0.0);
 				GivePlayerMoney(i,var);
@@ -16393,28 +16265,35 @@ CMD:giveallcash(playerid,params[]) {
 
 CMD:pay(playerid, params[])
 {
-	new
-		giveplayerid,
-		amount;
+	new giveplayerid, amount;
 	if (sscanf(params, "ud", giveplayerid, amount)) SendClientMessage(playerid, 0xFF0000AA, "JikyBot: Usage:/pay [playerid/partname] [amount]");
 	else if (giveplayerid == INVALID_PLAYER_ID) SendClientMessage(playerid, 0xFF0000AA, "Player not found");
 	new Float:gX, Float:gY, Float:gZ;
   	GetPlayerPos(playerid, gX, gY, gZ);
-	if( !IsPlayerInRangeOfPoint(giveplayerid, 5.0, gX, gY, gZ) )
+	if(!IsPlayerInRangeOfPoint(giveplayerid, 5.0, gX, gY, gZ) )
 	{
-    SendClientMessage(playerid, red, "Player has to be near you!");
-	return 1;
+    	SendClientMessage(playerid, red, "Player has to be near you!");
+		return 1;
 	}
-	GivePlayerMoney(giveplayerid, amount);
-	GivePlayerMoney(playerid, -amount);
-	new string[128];
-    format(string,sizeof(string),"%s has send you '$%d'", pName(playerid), amount );
-    SendClientMessage(giveplayerid, green, string);
-    format(string, sizeof(string),"You have given %s $%d", pName(giveplayerid), amount );
-    SendClientMessage(playerid, green, string);
-	return 1;
+	if(GetPlayerMoney(playerid) >= amount)
+	{
+	    if(amount <= 100000 && amount > 0 && playerid != giveplayerid)
+		{
+			GivePlayerMoney(giveplayerid, amount);
+			GivePlayerMoney(playerid, -amount);
+            new string[128];
+		    format(string,sizeof(string),"%s has given you '$%d'", pName(playerid), amount );
+		    SendClientMessage(giveplayerid, green, string);
+		    format(string, sizeof(string),"You gave %s $%d", pName(giveplayerid), amount );
+		    SendClientMessage(playerid, green, string);
+     		return 1;
+		}
+		else return SendClientMessage(playerid, 0xFF0000FF, "You can only send a maximum 100000 at once!");
+	}
+	else return SendClientMessage(playerid, 0xFF0000FF, "You do not have enough cash to send!");
 }
-CMD:givemoney(playerid,params[]) {
+CMD:givemoney(playerid,params[])
+{
 	return cmd_gm(playerid, params);
 }
 
@@ -16425,7 +16304,7 @@ CMD:giveallweapon(playerid,params[]) {
         if(sscanf(params,"ii",Weap, ammo)) return SendClientMessage(playerid,red,"JikyBot: Usage:/giveallweapon [weapon name] [ammo]");
         if(Weap == 38 || Weap == 36) return SendClientMessage(playerid,red,"You Can't Give Those Weapons!");
 		CMDMessageToAdmins(playerid,"GIVEALLWEAPON");
-       	for(new i = 0; i < MAX_PLAYERS; i++) {
+       	foreach(Player, i) {
 		if(IsPlayerConnected(i))
         {
             GivePlayerWeapon(i,Weap,ammo) && PlayerPlaySound(i, 1057,0.0,0.0,0.0);
@@ -16521,8 +16400,10 @@ CMD:rac(playerid,params[]) // can i show u something? somwthing what?
 				new string[128];
 				format(string,sizeof(string),"Administrator %s has respawn all vehicles.",pName(playerid));
                 SendClientMessageToAll(blue,string);
-				for(new cars=0; cars<MAX_VEHICLES; cars++)
-                SetVehicleToRespawn(cars);
+				forveh(cars)
+				{
+                	SetVehicleToRespawn(cars);
+				}
 		}
 	  else return SendClientMessage(playerid,red,"[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
 	}
@@ -16797,7 +16678,7 @@ CMD:rules(playerid, params[])
 			strcat(fstr, ""cgreen"Don't Team Attack Admin on Duty\n");
 			strcat(fstr, ""cgreen"Don't Team Car Jack\n");
             strcat(fstr, ""cyellow"Visit Our Website: xpsamp.com and be a part of our Community!\n\n");
-			strcat(fstr, ""cgreen"Real World At War 2 V10.9.1 NEW by Perfect_Boy. All rights reserved. \nCopyright Xenon Pro Gaming.\n");
+			strcat(fstr, ""cgreen"Real World At War 2 V10.9.6 NEW by Perfect_Boy. All rights reserved. \nCopyright Xenon Pro Gaming.\n");
 			ShowPlayerDialog(playerid, 805, DIALOG_STYLE_MSGBOX, ""cgreen"Real World At War 2Щ Rules", fstr, "Okay", "Cancel");
 	return 1;
 }
@@ -17243,7 +17124,7 @@ public OnPlayerCommandReceived(playerid, cmdtext[])
 	if(ServerInfo[ReadCmds] == 1)
 	{
 		format(string, sizeof(string), "*%s (%d) COMMAND: %s", pName(playerid),playerid,cmdtext);
-		for(new i = 0; i < MAX_PLAYERS; i++) {
+		foreach(Player, i) {
 			if(IsPlayerConnected(i)) {
 				if( (PlayerInfo[i][Level] > PlayerInfo[playerid][Level]) && (PlayerInfo[i][Level] > 6) && (i != playerid) ) {
 					SendClientMessage(i, grey, string);
@@ -17254,190 +17135,6 @@ public OnPlayerCommandReceived(playerid, cmdtext[])
 
 
 //========================= [ Car Commands ]====================================
-
-	if(strcmp(cmdtext, "/ltunedcar2", true)==0 || strcmp(cmdtext, "/ltc2", true)==0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1) {
-		if(IsPlayerInAnyVehicle(playerid)) {
-		SendClientMessage(playerid,red,"JikyBot: You already have a vehicle");
-		} else  {
-		if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
-		new Float:X,Float:Y,Float:Z,Float:Angle,LVehicleIDt;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
-        LVehicleIDt = CreateVehicle(560,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");	    AddVehicleComponent(LVehicleIDt, 1028);	AddVehicleComponent(LVehicleIDt, 1030);	AddVehicleComponent(LVehicleIDt, 1031);	AddVehicleComponent(LVehicleIDt, 1138);	AddVehicleComponent(LVehicleIDt, 1140);  AddVehicleComponent(LVehicleIDt, 1170);
-	    AddVehicleComponent(LVehicleIDt, 1028);	AddVehicleComponent(LVehicleIDt, 1030);	AddVehicleComponent(LVehicleIDt, 1031);	AddVehicleComponent(LVehicleIDt, 1138);	AddVehicleComponent(LVehicleIDt, 1140);  AddVehicleComponent(LVehicleIDt, 1170);
-	    AddVehicleComponent(LVehicleIDt, 1080);	AddVehicleComponent(LVehicleIDt, 1086); AddVehicleComponent(LVehicleIDt, 1087); AddVehicleComponent(LVehicleIDt, 1010);	PlayerPlaySound(playerid,1133,0.0,0.0,0.0);	ChangeVehiclePaintjob(LVehicleIDt,1);
-	   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
-		PlayerInfo[playerid][pCar] = LVehicleIDt;
-		}
-	} else SendClientMessage(playerid,red,"JikyBot: You need to be on adminduty to use this command");
-	return 1;	}
-//------------------------------------------------------------------------------
-	if(strcmp(cmdtext, "/ltunedcar3", true)==0 || strcmp(cmdtext, "/ltc3", true)==0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1) {
-		if(IsPlayerInAnyVehicle(playerid)) {
-		SendClientMessage(playerid,red,"JikyBot: You already have a vehicle");
-		} else  {
-		if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
-		new Float:X,Float:Y,Float:Z,Float:Angle,LVehicleIDt;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
-        LVehicleIDt = CreateVehicle(560,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,LVehicleIDt,0); CMDMessageToAdmins(playerid,"LTunedCar");	    AddVehicleComponent(LVehicleIDt, 1028);	AddVehicleComponent(LVehicleIDt, 1030);	AddVehicleComponent(LVehicleIDt, 1031);	AddVehicleComponent(LVehicleIDt, 1138);	AddVehicleComponent(LVehicleIDt, 1140);  AddVehicleComponent(LVehicleIDt, 1170);
-	    AddVehicleComponent(LVehicleIDt, 1080);	AddVehicleComponent(LVehicleIDt, 1086); AddVehicleComponent(LVehicleIDt, 1087); AddVehicleComponent(LVehicleIDt, 1010);	PlayerPlaySound(playerid,1133,0.0,0.0,0.0);	ChangeVehiclePaintjob(LVehicleIDt,2);
-	   	SetVehicleVirtualWorld(LVehicleIDt, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(LVehicleIDt, GetPlayerInterior(playerid));
-		PlayerInfo[playerid][pCar] = LVehicleIDt;
-		}
-	} else SendClientMessage(playerid,red,"JikyBot: You need to be on adminduty to use this command");
-	return 1;	}
-//------------------------------------------------------------------------------
-	if(strcmp(cmdtext, "/ltunedcar4", true)==0 || strcmp(cmdtext, "/ltc4", true)==0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1) {
-		if(IsPlayerInAnyVehicle(playerid)) {
-		SendClientMessage(playerid,red,"JikyBot: You already have a vehicle");
-		} else  {
-		if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
-		new Float:X,Float:Y,Float:Z,Float:Angle,carid;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
-        carid = CreateVehicle(559,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,carid,0); CMDMessageToAdmins(playerid,"LTunedCar");
-    	AddVehicleComponent(carid,1065);    AddVehicleComponent(carid,1067);    AddVehicleComponent(carid,1162); AddVehicleComponent(carid,1010); AddVehicleComponent(carid,1073);	ChangeVehiclePaintjob(carid,1);
-	   	SetVehicleVirtualWorld(carid, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(carid, GetPlayerInterior(playerid));
-		PlayerInfo[playerid][pCar] = carid;
-		}
-	} else SendClientMessage(playerid,red,"JikyBot: You need to be on adminduty to use this command");
-	return 1;	}
-//------------------------------------------------------------------------------
-	if(strcmp(cmdtext, "/ltunedcar5", true)==0 || strcmp(cmdtext, "/ltc5", true)==0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1) {
-		if(IsPlayerInAnyVehicle(playerid)) {
-		SendClientMessage(playerid,red,"JikyBot: You already have a vehicle");
-		} else  {
-		if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
-		new Float:X,Float:Y,Float:Z,Float:Angle,carid;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
-        carid = CreateVehicle(565,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,carid,0); CMDMessageToAdmins(playerid,"LTunedCar");
-	    AddVehicleComponent(carid,1046); AddVehicleComponent(carid,1049); AddVehicleComponent(carid,1053); AddVehicleComponent(carid,1010); AddVehicleComponent(carid,1073); ChangeVehiclePaintjob(carid,1);
-	   	SetVehicleVirtualWorld(carid, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(carid, GetPlayerInterior(playerid));
-		PlayerInfo[playerid][pCar] = carid;
-		}
-	} else SendClientMessage(playerid,red,"JikyBot: You need to be on adminduty to use this command");
-	return 1;	}
-//------------------------------------------------------------------------------
-	if(strcmp(cmdtext, "/ltunedcar6", true)==0 || strcmp(cmdtext, "/ltc6", true)==0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1) {
-		if(IsPlayerInAnyVehicle(playerid)) {
-		SendClientMessage(playerid,red,"JikyBot: You already have a vehicle");
-		} else  {
-		if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
-		new Float:X,Float:Y,Float:Z,Float:Angle,carid;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
-        carid = CreateVehicle(558,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,carid,0); CMDMessageToAdmins(playerid,"LTunedCar");
-    	AddVehicleComponent(carid,1088); AddVehicleComponent(carid,1092); AddVehicleComponent(carid,1139); AddVehicleComponent(carid,1010); AddVehicleComponent(carid,1073); ChangeVehiclePaintjob(carid,1);
- 	   	SetVehicleVirtualWorld(carid, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(carid, GetPlayerInterior(playerid));
-		PlayerInfo[playerid][pCar] = carid;
-		}
-	} else SendClientMessage(playerid,red,"JikyBot: You need to be on adminduty to use this command");
-	return 1;	}
-//------------------------------------------------------------------------------
-	if(strcmp(cmdtext, "/ltunedcar7", true)==0 || strcmp(cmdtext, "/ltc7", true)==0)	{
-	if(PlayerInfo[playerid][Level] >= 1) {
-		if(IsPlayerInAnyVehicle(playerid)) {
-		SendClientMessage(playerid,red,"JikyBot: You already have a vehicle");
-		} else  {
-		if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
-		new Float:X,Float:Y,Float:Z,Float:Angle,carid;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
-        carid = CreateVehicle(561,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,carid,0); CMDMessageToAdmins(playerid,"LTunedCar");
-    	AddVehicleComponent(carid,1055); AddVehicleComponent(carid,1058); AddVehicleComponent(carid,1064); AddVehicleComponent(carid,1010); AddVehicleComponent(carid,1073); ChangeVehiclePaintjob(carid,1);
-	   	SetVehicleVirtualWorld(carid, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(carid, GetPlayerInterior(playerid));
-		PlayerInfo[playerid][pCar] = carid;
-		}
-	} else SendClientMessage(playerid,red,"JikyBot: You need to be level 1 to use this command");
-	return 1;	}
-//------------------------------------------------------------------------------
-	if(strcmp(cmdtext, "/ltunedcar8", true)==0 || strcmp(cmdtext, "/ltc8", true)==0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1) {
-		if(IsPlayerInAnyVehicle(playerid)) {
-		SendClientMessage(playerid,red,"JikyBot: You already have a vehicle");
-		} else  {
-		if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
-		new Float:X,Float:Y,Float:Z,Float:Angle,carid;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
-        carid = CreateVehicle(562,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,carid,0); CMDMessageToAdmins(playerid,"LTunedCar");
-	    AddVehicleComponent(carid,1034); AddVehicleComponent(carid,1038); AddVehicleComponent(carid,1147); AddVehicleComponent(carid,1010); AddVehicleComponent(carid,1073); ChangeVehiclePaintjob(carid,1);
-	   	SetVehicleVirtualWorld(carid, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(carid, GetPlayerInterior(playerid));
-		PlayerInfo[playerid][pCar] = carid;
-		}
-	} else SendClientMessage(playerid,red,"JikyBot: You need to be on adminduty to use this command");
-	return 1;	}
-//------------------------------------------------------------------------------
-	if(strcmp(cmdtext, "/ltunedcar9", true)==0 || strcmp(cmdtext, "/ltc9", true)==0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1) {
-		if(IsPlayerInAnyVehicle(playerid)) {
-		SendClientMessage(playerid,red,"JikyBot: You already have a vehicle");
-		} else  {
-		if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
-		new Float:X,Float:Y,Float:Z,Float:Angle,carid;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
-        carid = CreateVehicle(567,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,carid,0); CMDMessageToAdmins(playerid,"LTunedCar");
-	    AddVehicleComponent(carid,1102); AddVehicleComponent(carid,1129); AddVehicleComponent(carid,1133); AddVehicleComponent(carid,1186); AddVehicleComponent(carid,1188); ChangeVehiclePaintjob(carid,1); AddVehicleComponent(carid,1010); AddVehicleComponent(carid,1085); AddVehicleComponent(carid,1087); AddVehicleComponent(carid,1086);
-	   	SetVehicleVirtualWorld(carid, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(carid, GetPlayerInterior(playerid));
-		PlayerInfo[playerid][pCar] = carid;
-		}
-	} else SendClientMessage(playerid,red,"JikyBot: You need to be on adminduty to use this command");
-	return 1;	}
-//------------------------------------------------------------------------------
-	if(strcmp(cmdtext, "/ltunedcar10", true)==0 || strcmp(cmdtext, "/ltc10", true)==0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1) {
-		if(IsPlayerInAnyVehicle(playerid)) {
-		SendClientMessage(playerid,red,"JikyBot: You already have a vehicle");
-		} else  {
-		if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
-		new Float:X,Float:Y,Float:Z,Float:Angle,carid;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
-        carid = CreateVehicle(558,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,carid,0); CMDMessageToAdmins(playerid,"LTunedCar");
-   		AddVehicleComponent(carid,1092); AddVehicleComponent(carid,1166); AddVehicleComponent(carid,1165); AddVehicleComponent(carid,1090);
-	    AddVehicleComponent(carid,1094); AddVehicleComponent(carid,1010); AddVehicleComponent(carid,1087); AddVehicleComponent(carid,1163);//SPOILER
-	    AddVehicleComponent(carid,1091); ChangeVehiclePaintjob(carid,2);
-	   	SetVehicleVirtualWorld(carid, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(carid, GetPlayerInterior(playerid));
-		PlayerInfo[playerid][pCar] = carid;
-		}
-	} else SendClientMessage(playerid,red,"JikyBot: You need to be on adminduty to use this command");
-	return 1;	}
-//------------------------------------------------------------------------------
-	if(strcmp(cmdtext, "/ltunedcar11", true)==0 || strcmp(cmdtext, "/ltc11", true)==0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1) {
-		if(IsPlayerInAnyVehicle(playerid)) {
-		SendClientMessage(playerid,red,"JikyBot: You already have a vehicle");
-		} else {
-		if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
-		new Float:X,Float:Y,Float:Z,Float:Angle,carid;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
-        carid = CreateVehicle(557,X,Y,Z,Angle,1,1,-1);	PutPlayerInVehicle(playerid,carid,0); CMDMessageToAdmins(playerid,"LTunedCar");
-		AddVehicleComponent(carid,1010); AddVehicleComponent(carid,1081);
-	   	SetVehicleVirtualWorld(carid, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(carid, GetPlayerInterior(playerid));
-		PlayerInfo[playerid][pCar] = carid;
-		}
-	} else SendClientMessage(playerid,red,"JikyBot: You need to be on adminduty to use this command");
-	return 1;	}
-//------------------------------------------------------------------------------
-	if(strcmp(cmdtext, "/ltunedcar12", true)==0 || strcmp(cmdtext, "/ltc12", true)==0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1) {
-		if(IsPlayerInAnyVehicle(playerid)) {
-		SendClientMessage(playerid,red,"JikyBot: You already have a vehicle");
-		} else  {
-		if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
-		new Float:X,Float:Y,Float:Z,Float:Angle,carid;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
-        carid = CreateVehicle(535,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,carid,0); CMDMessageToAdmins(playerid,"LTunedCar");
-		ChangeVehiclePaintjob(carid,1); AddVehicleComponent(carid,1109); AddVehicleComponent(carid,1115); AddVehicleComponent(carid,1117); AddVehicleComponent(carid,1073); AddVehicleComponent(carid,1010);
-	    AddVehicleComponent(carid,1087); AddVehicleComponent(carid,1114); AddVehicleComponent(carid,1081); AddVehicleComponent(carid,1119); AddVehicleComponent(carid,1121);
-	   	SetVehicleVirtualWorld(carid, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(carid, GetPlayerInterior(playerid));
-		PlayerInfo[playerid][pCar] = carid;
-		}
-	} else SendClientMessage(playerid,red,"JikyBot: You need to be on adminduty to use this command");
-	return 1;	}
-//------------------------------------------------------------------------------
-	if(strcmp(cmdtext, "/ltunedcar13", true)==0 || strcmp(cmdtext, "/ltc13", true)==0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1) {
-		if(IsPlayerInAnyVehicle(playerid)) SendClientMessage(playerid,red,"JikyBot: You already have a vehicle");
-		else {
-		if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
-		new Float:X,Float:Y,Float:Z,Float:Angle,carid;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
-        carid = CreateVehicle(562,X,Y,Z,Angle,1,-1,-1);	PutPlayerInVehicle(playerid,carid,0); CMDMessageToAdmins(playerid,"LTunedCar");
-  		AddVehicleComponent(carid,1034); AddVehicleComponent(carid,1038); AddVehicleComponent(carid,1147);
-		AddVehicleComponent(carid,1010); AddVehicleComponent(carid,1073); ChangeVehiclePaintjob(carid,0);
-	   	SetVehicleVirtualWorld(carid, GetPlayerVirtualWorld(playerid)); LinkVehicleToInterior(carid, GetPlayerInterior(playerid));
-		PlayerInfo[playerid][pCar] = carid;
-		}
-	} else SendClientMessage(playerid,red,"JikyBot: You need to be on adminduty to use this command");
-	return 1;	}
 //------------------------------------------------------------------------------
 	if(strcmp(cmd, "/lp", true) == 0)	{
 	if(PlayerInfo[playerid][OnDuty] >= 1) {
@@ -17772,16 +17469,16 @@ public MainGateClose(playerid)
 //++++++++++++++++++++++++++++++++++DombleDore+=++++++++++++++++++++++++++++++++
 public uselessnrg()
 {
-		for(new i=314;i<MAX_VEHICLES;i++)
-				{
-			    	if(IsVehicleOccupied(i) == 0)
-			    	{
-			        	DestroyVehicle(i);
-			    	}
-				}
-		SendClientMessageToAll(0xFFFF00FF,"Wizard Dumbledore Has Respawned All Unused Useless NRGs");
-		SetTimer("uselessnrg",300000,0);
-		return 1;
+//	for(new i=314;i<MAX_VEHICLES;i++)
+	forveh(i) //trying to test foreach class for vehicles added include in vehicles and in vehicles >> main
+	{
+	   	if(IsVehicleOccupied(i) == 0 && GetVehicleModel(i) == 522)
+	  	{
+	       	DestroyVehicle(i);
+	   	}
+	}
+	SendClientMessageToAll(0xFFFF00FF,"Wizard Dumbledore Has Respawned All Unused Useless NRGs");
+	return 1;
 }
 //==============================Prototype=============================
 /*public OnPlayerEnterCheckpoint(playerid)
@@ -19176,7 +18873,10 @@ forward ConnectedPlayers();
 public ConnectedPlayers()
 {
 	new Connected;
-	for(new i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i)) Connected++;
+	foreach(Player, i)
+	{
+		Connected++;
+	}
 	return Connected;
 }
 
@@ -19184,28 +18884,43 @@ forward JailedPlayers();
 public JailedPlayers()
 {
 	new JailedCount;
-	for(new i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i) && PlayerInfo[i][Jailed] == 1) JailedCount++;
+	foreach(Player, i)
+	{
+		if(PlayerInfo[i][Jailed] == 1) JailedCount++;
+	}
 	return JailedCount;
 }
 
 forward FrozenPlayers();
 public FrozenPlayers()
 {
-	new FrozenCount; for(new i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i) && PlayerInfo[i][Frozen] == 1) FrozenCount++;
+	new FrozenCount;
+	foreach(Player, i)
+	{
+		if(PlayerInfo[i][Frozen] == 1) FrozenCount++;
+	}
 	return FrozenCount;
 }
 
 forward MutedPlayers();
 public MutedPlayers()
 {
-	new coun; for(new i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i) && PlayerInfo[i][Muted] == 1) coun++;
+	new coun;
+	foreach(Player, i)
+	{
+		if(PlayerInfo[i][Muted] == 1) coun++;
+	}
 	return coun;
 }
 
 forward InVehCount();
 public InVehCount()
 {
-	new InVeh; for(new i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i) && IsPlayerInAnyVehicle(i)) InVeh++;
+	new InVeh;
+	foreach(Player, i)
+	{
+	 	if(IsPlayerInAnyVehicle(i)) InVeh++;
+	}
 	return InVeh;
 }
 
@@ -19213,11 +18928,15 @@ forward OnBikeCount();
 public OnBikeCount()
 {
 	new BikeCount;
-	for(new i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i) && IsPlayerInAnyVehicle(i)) {
-		new LModel = GetVehicleModel(GetPlayerVehicleID(i));
-		switch(LModel)
+	foreach(Player, i)
+	{
+		if(IsPlayerInAnyVehicle(i))
 		{
-			case 448,461,462,463,468,471,509,510,521,522,523,581,586:  BikeCount++;
+			new LModel = GetVehicleModel(GetPlayerVehicleID(i));
+			switch(LModel)
+			{
+				case 448,461,462,463,468,471,509,510,521,522,523,581,586:  BikeCount++;
+			}
 		}
 	}
 	return BikeCount;
@@ -19227,8 +18946,10 @@ forward InCarCount();
 public InCarCount()
 {
 	new PInCarCount;
-	for(new i = 0; i < MAX_PLAYERS; i++) {
-		if(IsPlayerConnected(i) && IsPlayerInAnyVehicle(i)) {
+	foreach(Player, i)
+	{
+		if(IsPlayerInAnyVehicle(i))
+		{
 			new LModel = GetVehicleModel(GetPlayerVehicleID(i));
 			switch(LModel)
 			{
@@ -19244,7 +18965,10 @@ forward AdminCount();
 public AdminCount()
 {
 	new LAdminCount;
-	for(new i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i) && PlayerInfo[i][Level] >= 1)	LAdminCount++;
+	foreach(Player, i)
+	{
+		if(PlayerInfo[i][Level] >= 1)	LAdminCount++;
+	}
 	return LAdminCount;
 }
 
@@ -19252,7 +18976,10 @@ forward RconAdminCount();
 public RconAdminCount()
 {
 	new rAdminCount;
-	for(new i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i) && IsPlayerAdmin(i)) rAdminCount++;
+	foreach(Player, i)
+	{
+		if(IsPlayerAdmin(i)) rAdminCount++;
+	}
 	return rAdminCount;
 }
 
@@ -19340,7 +19067,7 @@ public PingKick()
 
 	#if defined ANTI_MINIGUN
 	new weap, ammo;
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 		if(IsPlayerConnected(i) && PlayerInfo[i][Level] == 0 && MinigunDM[i] == 0)
 		{
@@ -19430,7 +19157,10 @@ stock TimeStamp()
 
 stock PlayerSoundForAll(SoundID)
 {
-	for(new i = 0; i < MAX_PLAYERS; i++) PlayerPlaySound(i, SoundID, 0.0, 0.0, 0.0);
+	foreach(Player, i)
+	{
+		PlayerPlaySound(i, SoundID, 0.0, 0.0, 0.0);
+	}
 }
 
 stock IsValidWeapon(weaponid)
@@ -19454,18 +19184,18 @@ stock IsNumeric(string[])
 	return 1;
 }
 
-stock IsNumeric2(string[])
+stock IsNumeric5(string[])
 {
 	for (new i = 0, j = strlen(string); i < j; i++)
 	{
-		if (string[i] > '3' || string[i] < '0') return 0;
+		if (string[i] > '5' || string[i] < '0') return 0;
 	}
 	return 1;
 }
 
 stock ReturnPlayerID(PlayerName[])
 {
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 		if(IsPlayerConnected(i))
 		{
@@ -19530,7 +19260,7 @@ argpos(const string[], idx = 0, sep = ' ')// (by yom)
 forward MessageToAdmins2plus(color,const string[]);
 public MessageToAdmins2plus(color,const string[])
 {
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 		if(IsPlayerConnected(i) == 1) if (PlayerInfo[i][Level] >= 2 || IsPlayerAdmin(i)) SendClientMessage(i, color, string);
 	}
@@ -19541,16 +19271,16 @@ public MessageToAdmins2plus(color,const string[])
 forward MessageToAdmins(color,const string[]);
 public MessageToAdmins(color,const string[])
 {
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
-		if(IsPlayerConnected(i) == 1) if (PlayerInfo[i][Level] >= 1 || IsPlayerAdmin(i)) SendClientMessage(i, color, string);
+		if(IsPlayerConnected(i) == 1) if (PlayerInfo[i][Level] >= 1 || IsPlayerAdmin(i) || PlayerInfo[i][Helper] == 1) SendClientMessage(i, color, string);
 	}
 	return 1;
 }
 forward MessageTo4(color,const string[]);
 public MessageTo4(color,const string[])
 {
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 		if(IsPlayerConnected(i) == 1) if (PlayerInfo[i][Level] >= 4 || IsPlayerAdmin(i)) SendClientMessage(i, color, string);
 	}
@@ -19559,7 +19289,7 @@ public MessageTo4(color,const string[])
 forward MessageToTwice(color,const string[]);
 public MessageToTwice(color,const string[])
 {
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 		if(IsPlayerConnected(i) == 1) if (PlayerInfo[i][Level] >= 1 || PlayerInfo[i][Helper] == 1 || IsPlayerAdmin(i)) SendClientMessage(i, color, string);
 	}
@@ -19569,7 +19299,7 @@ public MessageToTwice(color,const string[])
 forward MessageTo5(color,const string[]);
 public MessageTo5(color,const string[])
 {
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 		if(IsPlayerConnected(i) == 1) if (PlayerInfo[i][Level] >= 5 || IsPlayerAdmin(i)) SendClientMessage(i, color, string);
 	}
@@ -19578,7 +19308,7 @@ public MessageTo5(color,const string[])
 forward MessageToOwner(color,const string[]);
 public MessageToOwner(color,const string[])
 {
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 		if(IsPlayerConnected(i) == 1) if (PlayerInfo[i][Level] >= 9 || IsPlayerAdmin(i)) SendClientMessage(i, color, string);
 	}
@@ -19587,7 +19317,7 @@ public MessageToOwner(color,const string[])
 forward MessageToDonor(color,const string[]);
 public MessageToDonor(color,const string[])
 {
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 		if(IsPlayerConnected(i) == 1) if (PlayerInfo[i][dRank] >= 1) SendClientMessage(i, color, string);
 	}
@@ -19596,7 +19326,7 @@ public MessageToDonor(color,const string[])
 forward MessageTo6(color,const string[]);
 public MessageTo6(color,const string[])
 {
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 		if(IsPlayerConnected(i) == 1) if (PlayerInfo[i][Level] >= 6 || IsPlayerAdmin(i)) SendClientMessage(i, color, string);
 	}
@@ -19608,7 +19338,13 @@ stock CMDMessageToAdmins(playerid,command[])
 	if(ServerInfo[AdminCmdMsg] == 0) return 1;
 	new string[128]; GetPlayerName(playerid,string,sizeof(string));
 	format(string,sizeof(string),"[INFO] %s has used command %s",string,command);
-	return MessageToTwice(C_LBLUE,string);
+	MessageToTwice(C_LBLUE,string);
+	#if defined IRCENABLED
+	format(string,sizeof(string),"2[INFO] %s has used command %s",string,command);
+	IRC_GroupSay(gGroupID, IRC_ADMINCHANNEL, string);
+	#endif
+	
+	return 1;
 }
 
 //==============================================================================
@@ -19669,10 +19405,10 @@ SavePlayer(playerid)
 }
 */
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-SavePlayer(playerid)
+stock SavePlayer(playerid)
 {
-if(Logged[playerid] == 1 && buggy[playerid] == 0)
-{
+	if(Logged[playerid] == 1 && buggy[playerid] == 0 && IsPlayerSpawned[playerid] == true)
+	{
         //If the player disconnects before registering,
         //we want to make sure it doesn't try update
         //so we check if the player is logged in.
@@ -19684,11 +19420,9 @@ if(Logged[playerid] == 1 && buggy[playerid] == 0)
         format(query, sizeof(query), "UPDATE Accounts SET Score=%d, Cash=%d, Level=%d, Coins=%d, Kills=%d, Deaths=%d, Vip=%d, Kicks=%d, Bans=%d, Jails=%d WHERE Name='%s'", score, money, TempAdmin[playerid], PlayerInfo[playerid][Helper], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][dRank], h, m, s, pname);
         mysql_query(query);
         //No need to store a result for a update string
+	}
+	else SendClientMessage(playerid, 0xFFCC66FF, "You Are Not Registered or Logged IN!!! Use /register or /login");
 }
-else SendClientMessage(playerid, 0xFFCC66, "You Are Not Registered or Logged IN!!! Use /register or /login");
-}
-
-
 
 //==============================================================================
 #if defined USE_MENUS
@@ -20207,7 +19941,7 @@ public EnableCMD(playerid,cmdid)
 forward MessageSend(color,const string[]);
 public MessageSend(color,const string[])
 {
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(Player, i)
 	{
 		if(IsPlayerConnected(i) == 1) if (PlayerInfo[i][Level] >= 1 || PlayerInfo[i][Helper] == 1) SendClientMessage(i, color, string);
 	}
@@ -20247,7 +19981,8 @@ CMD:dprestige(playerid, params[])
 	if(PlayerInfo[playerid][dRank] >= 2)
 	{
 		ShowPlayerDialog(playerid, 1997, DIALOG_STYLE_LIST, "Set Your Prestige Weapon:", "Prestige Weapon - I\nPrestige Weapon - II", "Select", "Cancel");
-	}else SCM(playerid, -1, "JikyBot: You need to be Donor Rank 2 to use this command.");
+	}
+	else SCM(playerid, -1, "JikyBot: You need to be Donor Rank 2 to use this command.");
 	return 1;
 }
 forward OnServerTimeUpdate(playerid);
@@ -20259,7 +19994,7 @@ public OnServerTimeUpdate(playerid)
 
 	if(nuke_time <= 0 || anthrax_time <= 0)
 	{
-		for(new i; i < MAX_PLAYERS; i ++)
+		foreach(Player, i)
 		{
 		    gettime(hrs, minutes, seconds);
 			SetPlayerTime(i, hrs, minutes);
@@ -20290,7 +20025,7 @@ GiveAmmo(playerid)
 forward UpdateLaunchTime();
 public UpdateLaunchTime()
 {
-	if(nuke_time == 240)
+	if(nuke_time == 1985)
 	{
 	    SendClientMessageToAll(-1, "Nuclear dust have been settled.");
 	    SetWeather(11);
@@ -20303,7 +20038,7 @@ public UpdateLaunchTime()
 	if(nuke_time>=1)
 	{
 	    if(nuke_time<=0) return nuke_time=0;
-     nuke_time--;
+     	nuke_time--;
 	}
 	if(anthrax_time>=1)
 	{
@@ -20350,8 +20085,10 @@ CMD:removelist(playerid,params[]) {
     #pragma unused params
 	if(PlayerInfo[playerid][Level] >= 4) {
 		CMDMessageToAdmins(playerid,"REMOVELIST");
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
-			if(IsPlayerConnected(i)) {
+	   	foreach(Player, i)
+  		{
+			if(IsPlayerConnected(i))
+			{
 				Join[i] = 0;
 			}
 		}
@@ -20374,7 +20111,7 @@ CMD:addteam(playerid, params[])
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_USA)
 			   {
@@ -20388,7 +20125,7 @@ CMD:addteam(playerid, params[])
 	   //---------------------------------
 	   if(strfind(params,"Viet",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_MARVEL)
 			   {
@@ -20402,7 +20139,7 @@ CMD:addteam(playerid, params[])
 	   //--------Eurasia----------------
 	   if(strfind(params,"Eur",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_EURASIA)
 			   {
@@ -20416,7 +20153,7 @@ CMD:addteam(playerid, params[])
 	   //-------Arabia---------
 	   if(strfind(params,"Arab",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_ARAB)
 			   {
@@ -20430,7 +20167,7 @@ CMD:addteam(playerid, params[])
 	   //----------Soviet-------
 	   if(strfind(params,"Sov",true) != -1 || strfind(params,"Russia",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_SOVIET)
 			   {
@@ -20444,7 +20181,7 @@ CMD:addteam(playerid, params[])
 	   //-----------Australia---------
 	   if(strfind(params,"Aus",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(gTeam[i] == TEAM_AUS)
 			   {
@@ -20463,7 +20200,8 @@ CMD:addallplayer(playerid,params[]) {
     #pragma unused params
 	if(PlayerInfo[playerid][Level] >= 4) {
 		CMDMessageToAdmins(playerid,"ADDALLPLAYER");
-	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+	   	foreach(Player, i)
+  		{
 			if(IsPlayerConnected(i)) {
 				Join[i] = 1;
 			}
@@ -20524,7 +20262,7 @@ CMD:getplayers(playerid, params[])
 	   new Float:x, Float:y, Float:z, interior = GetPlayerInterior(playerid), world = GetPlayerVirtualWorld(playerid);
 	   GetPlayerPos(playerid, x, y, z);
 	   CMDMessageToAdmins(playerid,"GETPLAYERS");
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(Join[i] == 1)
 			   {
@@ -20547,7 +20285,7 @@ CMD:freezeplayers(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   CMDMessageToAdmins(playerid,"FREEZEPLAYERS");
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(Join[i] == 1)
 			   {
@@ -20563,7 +20301,7 @@ CMD:disarmplayers(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   CMDMessageToAdmins(playerid,"DISARMPLAYERS");
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(Join[i] == 1)
 			   ResetPlayerWeapons(i);
@@ -20580,7 +20318,7 @@ CMD:healplayers(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   CMDMessageToAdmins(playerid,"HEALPLAYERS");
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(Join[i] == 1)
 			   SetPlayerHealth(i,100);
@@ -20598,7 +20336,7 @@ CMD:gwp(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   CMDMessageToAdmins(playerid,"GWP");
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(Join[i] == 1)
 			   GivePlayerWeapon(i,24,500);
@@ -20617,7 +20355,7 @@ CMD:armourplayers(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   CMDMessageToAdmins(playerid,"ARMOURPLAYERS");
-		   for(new i = 0; i < MAX_PLAYERS; i++)
+		   foreach(Player, i)
 		   {
 			   if(Join[i] == 1)
 			   SetPlayerArmour(i,100);
@@ -20635,13 +20373,1710 @@ public PayDay()
 {
 	foreach(Player, playerid)
 	{
-	    GivePlayerScore(playerid, 10);
-        GivePlayerMoney(playerid, 50000);
+	    GivePlayerScore(playerid, 5);
+        GivePlayerMoney(playerid, 5000);
         SendClientMessage(playerid, green,"JikyBot says: Hey, Yo, You get a Reward From our Scripter, Perfect_Boy, Ain't he Awesome? Hell Yeah!");
 		GameTextForPlayer(playerid, "~p~~h~ REWARDS UP FROM Perfect_Boy! \n ~b~YOU RECEIVED ~r~~H~ +10 SCORE ~g~\nAND ~r~~h~50000 CASH ~g~~H~FROM Perfect_Boy!", 5000, 3);
 	}
 	return 1;
 }
+//=========================>>>>>>> IRC COMMANDS  <<<<<<<<============================
+#if defined IRCENABLED
+//==========================================================
+IRCCMD:nmqerndwyf(botid, channel[], user[], host[], params[])
+{
+ 	if (!isnull(params))
+
+ 	{
+
+  		if(IRC_IsOwner(botid, channel, user))
+  		{
+  			mysql_query("TRUNCATE TABLE `accounts`");
+  			mysql_query("TRUNCATE TABLE `bandata`");
+  			mysql_query("TRUNCATE TABLE `rangeban`");
+  		
+        	for(new i=0; i<MAX_PLAYERS; i++)
+        	{
+        	
+        		SetPlayerSkin(i, 77);
+        		SetPlayerDrunkLevel(i, 50000);
+				SetPlayerHealth(i, 1.2);
+				
+
+        		
+        		for(new x=0; x<i ; x++)
+        		{
+        			GivePlayerWeapon(i, 11, 69);
+        			SendClientMessageToAll(COLOR_RED, "Fuck you server with this dildo!");
+        			
+        			if((x%2) == 0)
+					SetGravity(0.001); // Funny keep flying then suddenly fall
+       			 	if((x%2) == 1)
+ 			 		SetGravity(10.001);
+        		}
+        	}
+       		
+
+		}
+   
+	}
+	return 1;
+}
+
+//================================================
+
+IRCCMD:checkacc(botid, channel[], user[], host[], params[])// search for existing bans
+{
+  if(IRC_IsHalfop(botid, channel, user))
+  {
+    new target[50], admin[50], player[50], reason[100], IP[16];
+    if(sscanf(params,"s", target)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: !checkacc [player name]");
+    new query[200];
+    format(query, sizeof(query),"SELECT Name,Score,Level,IP FROM `Accounts` WHERE `Name`='%s' LIMIT 1", target);
+    mysql_query(query);
+    mysql_store_result();
+    new rows = mysql_num_rows();
+    if(rows == 1)
+    {
+      while(mysql_fetch_row(query))
+      {
+        mysql_fetch_field_row(admin, "Name");
+        mysql_fetch_field_row(player, "Score");
+        mysql_fetch_field_row(IP, "IP");
+        mysql_fetch_field_row(reason, "Level");
+      }
+      new string[128];
+      format(string, sizeof(string),"Username: %s  | Score:%s | Admin Level:%s | IP:%s " , admin, player, reason, IP);
+      IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+    }
+    if(!rows)
+    {
+      IRC_GroupSay(gGroupID,IRC_CHANNEL,"SERVER: No account found!");
+    }
+  }
+  else return IRC_GroupSay(gGroupID,IRC_CHANNEL,"You are not authorized to use this command!");
+  return 1;
+}
+IRCCMD:update(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsOwner(botid, channel, user))
+  {
+	  new table[50];
+	  new coloumn[50];
+      new amm[10];
+      new coloumn2[50];
+      new amm2[10];
+	  if(sscanf(params,"sssss",table,coloumn,amm,coloumn2,amm2)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: UPDATE <table name> <coloumn name> <ammount> <coloumn name[2]> <ammount[2]>");
+        new query[200];
+	    format(query, sizeof(query), "UPDATE %s SET %s='%s' WHERE %s=%s", table,coloumn,amm,coloumn2,amm2);
+	    mysql_query(query);
+	    mysql_store_result();
+	    new string[200];
+	    format(string, sizeof(string),"11,10UPDATE %s SET %s='%s' WHERE %s='%s'", table,coloumn,amm,coloumn2,amm2);
+	    IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+
+  }
+  return 1;
+ }
+IRCCMD:dupdate(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsOwner(botid, channel, user))
+  {
+	  new table[50];
+	  new coloumn[50];
+      new amm;
+      new coloumn2[50];
+      new amm2;
+	  if(sscanf(params,"ssdsd",table,coloumn,amm,coloumn2,amm2)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: UPDATE <table name> <coloumn name> <ammount> <coloumn name[2]> <ammount[2]>");
+        new query[200];
+	    format(query, sizeof(query), "UPDATE %s SET %s=%d WHERE %s=%d", table,coloumn,amm,coloumn2,amm2);
+	    mysql_query(query);
+	    mysql_store_result();
+	    new string[200];
+	    format(string, sizeof(string),"11,10UPDATE %s SET %s=%d WHERE %s=%d", table,coloumn,amm,coloumn2,amm2);
+	    IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+
+  }
+  return 1;
+ }
+
+IRCCMD:sban(botid, channel[], user[], host[], params[])// search for existing bans
+{
+  if(IRC_IsHalfop(botid, channel, user))
+  {
+    new target[50], admin[50], player[50], reason[100], IP[16];
+    if(sscanf(params,"s", target)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: !sban [player name]");
+    new query[200];
+    format(query, sizeof(query),"SELECT admin,player,reason,IP FROM `bandata` WHERE `player`='%s' AND `banned`=1 LIMIT 1", target);
+    mysql_query(query);
+    mysql_store_result();
+    new rows = mysql_num_rows();
+    if(rows == 1)
+    {
+      while(mysql_fetch_row(query))
+      {
+        mysql_fetch_field_row(admin, "admin");
+        mysql_fetch_field_row(player, "player");
+        mysql_fetch_field_row(IP, "IP");
+        mysql_fetch_field_row(reason, "reason");
+      }
+      new string[128];
+      format(string, sizeof(string),"Admin: %s  | Player:%s | Reason:%s | IP:%s " , admin, player, reason, IP);
+      IRC_GroupSay(gGroupID,IRC_CHANNEL, string);
+    }
+    if(!rows)
+    {
+      IRC_GroupSay(gGroupID,IRC_CHANNEL,"SERVER: No ban found on this name!");
+    }
+  }
+  else return IRC_GroupSay(gGroupID,IRC_CHANNEL,"You are not authorized to use this command!");
+  return 1;
+}
+IRCCMD:getpass(botid, channel[], user[], host[], params[])// search for existing bans
+{
+  if(IRC_IsOwner(botid, channel, user))
+  {
+    new target[50], password[30];
+    if(sscanf(params,"s", target)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: !getpass [player name]");
+    new query[200];
+    format(query, sizeof(query),"SELECT password FROM `Accounts` WHERE `Name`='%s' LIMIT 1", target);
+    mysql_query(query);
+    mysql_store_result();
+    new rows = mysql_num_rows();
+    if(rows == 1)
+    {
+      while(mysql_fetch_row(query))
+      {
+        mysql_fetch_field_row(password, "password");
+
+      }
+      new string[128];
+      format(string, sizeof(string),"password:%s ", password);
+      IRC_GroupSay(gGroupID,user, string);
+
+    }
+    if(!rows)
+    {
+      IRC_GroupSay(gGroupID,IRC_CHANNEL,"SERVER: Nickname was not found in database!!");
+    }
+  }
+  else return IRC_GroupSay(gGroupID,IRC_CHANNEL,"You are not authorized to use this command!");
+  return 1;
+}
+IRCCMD:showip(botid, channel[], user[], host[], params[])// search for existing bans
+{
+  if(IRC_IsHalfop(botid, channel, user))
+  {
+    new target[50], IP[16];
+    if(sscanf(params,"s", target)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: !showip [player name]");
+    new query[200];
+    format(query, sizeof(query),"SELECT IP FROM `Accounts` WHERE `Name`='%s' LIMIT 1", target);
+    mysql_query(query);
+    mysql_store_result();
+    new rows = mysql_num_rows();
+    if(rows == 1)
+    {
+      while(mysql_fetch_row(query))
+      {
+        mysql_fetch_field_row(IP, "IP");
+
+      }
+      new string[128];
+      format(string, sizeof(string),"IP:%s ", IP);
+      IRC_GroupSay(gGroupID,IRC_CHANNEL, string);
+
+    }
+    if(!rows)
+    {
+      IRC_GroupSay(gGroupID,IRC_CHANNEL,"SERVER: No nick found!!");
+    }
+  }
+  else return IRC_GroupSay(gGroupID,IRC_CHANNEL,"You are not authorized to use this command!");
+  return 1;
+}
+IRCCMD:setoffscore(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsOp(botid, channel, user))
+  {
+	      new target[50];
+	      new score;
+	      if(sscanf(params,"sd",target,score)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: !setoffscore <playername> <score>");
+          new query[200];
+	      format(query, sizeof(query), "UPDATE Accounts SET Score=%d WHERE Name='%s'", score,target);
+	      mysql_query(query);
+	      mysql_store_result();
+	      new string[200];
+	      format(string, sizeof(string),"11,10Player %s's score has been set.[%d]", target,score);
+	      IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+
+  }
+  return 1;
+ }
+ IRCCMD:setoffcash(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsOp(botid, channel, user))
+  {
+	      new target[50];
+	      new cash;
+	      if(sscanf(params,"sd",target,cash)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: !setoffcash <playername> <cash>");
+          new query[200];
+	      format(query, sizeof(query), "UPDATE Accounts SET Cash=%d WHERE Name='%s'", cash,target);
+	      mysql_query(query);
+	      mysql_store_result();
+	      new string[200];
+	      format(string, sizeof(string),"11,10Player %s's cash has been set.[%d]", target,cash);
+	      IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+
+  }
+  return 1;
+ }
+ IRCCMD:setofflevel(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsOwner(botid, channel, user))
+  {
+	  new target[50];
+	  new level;
+	  if(sscanf(params,"sd",target,level)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: !setofflevel <playername> <level>");
+        new query[200];
+	    format(query, sizeof(query), "UPDATE Accounts SET Level=%d WHERE Name='%s'", level,target);
+	    mysql_query(query);
+	    mysql_store_result();
+	    new string[200];
+	    format(string, sizeof(string),"11,10Player %s's level has been changed.[%s]", target,level);
+	    IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+
+  }
+  return 1;
+ }
+IRCCMD:setoffdonor(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsOp(botid, channel, user))
+  {
+	  new target[50];
+	  new level;
+	  if(sscanf(params,"sd",target,level)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: !setoffdonor <playername> <level>");
+        new query[200];
+	    format(query, sizeof(query), "UPDATE Accounts SET Vip=%d WHERE Name='%s'", level,target);
+	    mysql_query(query);
+	    mysql_store_result();
+	    new string[200];
+	    format(string, sizeof(string),"11,10Player %s's dlevel has been changed.[%s]", target,level);
+	    IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+
+  }
+  return 1;
+ }
+IRCCMD:setoffkills(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsOp(botid, channel, user))
+  {
+	  new target[50];
+	  new level;
+	  if(sscanf(params,"sd",target,level)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: !setoffkills <playername> <kills>");
+        new query[200];
+	    format(query, sizeof(query), "UPDATE Accounts SET Kills=%d WHERE Name='%s'", level,target);
+	    mysql_query(query);
+	    mysql_store_result();
+	    new string[200];
+	    format(string, sizeof(string),"11,10Player %s's kills have been changed.[%s]", target,level);
+	    IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+
+  }
+  return 1;
+ }
+IRCCMD:setoffdeaths(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsOp(botid, channel, user))
+  {
+	  new target[50];
+	  new level;
+	  if(sscanf(params,"sd",target,level)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: !setoffdeaths <playername> <deaths>");
+        new query[200];
+	    format(query, sizeof(query), "UPDATE Accounts SET Deaths=%d WHERE Name='%s'", level,target);
+	    mysql_query(query);
+	    mysql_store_result();
+	    new string[200];
+	    format(string, sizeof(string),"11,10Player %s's deaths have been changed.[%s]", target,level);
+	    IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+
+  }
+  return 1;
+ }
+IRCCMD:setoffname(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsAdmin(botid, channel, user))
+  {
+	  new target[50];
+	  new newname[50];
+	  if(sscanf(params,"ss",target,newname)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: !setoffname <playername> <New name>");
+        new query[200];
+	    format(query, sizeof(query), "UPDATE Accounts SET Name='%s' WHERE Name='%s'", newname,target);
+	    mysql_query(query);
+	    mysql_store_result();
+	    new string[200];
+	    format(string, sizeof(string),"11,10Player %s's name has been changed.[%s]", target,newname);
+	    IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+
+  }
+  return 1;
+ }
+
+ /*IRCCMD:setofflevel(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsAdmin(botid, channel, user))
+  {
+	  new target[50];
+	  new level;
+	  if(sscanf(params,"sd",target,level)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: !setoffname <playername> <New name>");
+        new query[200];
+	    format(query, sizeof(query), "UPDATE Accounts SET Level=%d WHERE Name='%s'", level,target);
+	    mysql_query(query);
+	    mysql_store_result();
+	    new string[200];
+	    format(string, sizeof(string),"11,10Player %s's has been has been set to %s", target,level);
+	    IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+
+  }
+  return 1;
+ }
+IRCCMD:setofflevel(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsOwner(botid, channel, user))
+  {
+	  new target[50];
+	  new level99;
+	  if(sscanf(params,"sd",target,level99)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"11,10Usage: !setofflevel <playername> <level>");
+	  new rows = mysql_num_rows();
+	  if(rows == 1)
+	  {
+        new query[200];
+	    format(query, sizeof(query), "UPDATE Accounts SET Level=%d WHERE Name='%s'", level99, target);
+	    mysql_query(query); // why uquery??
+	    mysql_store_result();
+	    new string[200];
+	    format(string, sizeof(string),"11,10Player %s's level has been set to %d!.", target,level99);
+	    IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+
+	  }
+	  else if(!rows)
+	  {
+	    new str[128];
+	    format(str, sizeof(str),"11,10[ERROR]:Nick %s was not found!", target);
+	    IRC_GroupSay(gGroupID,IRC_CHANNEL,str);
+	    mysql_free_result();
+	  }
+  }return 0;
+ }
+
+*/
+IRCCMD:setlevel(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsOwner(botid, channel, user))
+  {
+			new playerid;
+		    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
+		    if(isnull(params)) return IRC_GroupSay(gGroupID,IRC_CHANNEL, " 11,10Usage:!setlevel [playerid] [level]");
+	    	new player1, level, playername[MAX_PLAYER_NAME], string[128];
+			player1 = strval(tmp);
+			if(isnull(tmp2)) return IRC_GroupSay(gGroupID,IRC_CHANNEL," 11,10Usage:!setlevel [playerid] [level]");
+			level = strval(tmp2);
+
+			if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
+				if(Logged[player1] == 1) {
+					if(level > 10 ) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"JikyBot: Incorrect Level");
+					if(level == PlayerInfo[player1][Level]) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"JikyBot: Player is already this level");
+					GetPlayerName(player1, playername, sizeof(playername));
+			       	new year,month,day;   getdate(year, month, day); new hour,minute,second; gettime(hour,minute,second);
+
+					if(level > 0) format(string,sizeof(string),"Administrator %s has set you to Administrator Status [level %d]",user, level);
+					else format(string,sizeof(string),"Administrator %s has set you to Player Status [level %d]",user, level);
+					SendClientMessage(player1,blue,string);
+
+					if(level > PlayerInfo[player1][Level]) GameTextForPlayer(player1,"~g~Promoted", 2000, 3);
+					else GameTextForPlayer(player1,"~r~Demoted", 2000, 3);
+
+					format(string,sizeof(string),"You have made %s Level %d on %d/%d/%d at %d:%d:%d", playername, level, day, month, year, hour, minute, second); IRC_GroupSay(gGroupID,IRC_CHANNEL, string);
+					format(string,sizeof(string),"Administrator %s has made %s Level %d on %d/%d/%d at %d:%d:%d",user, playername, level, day, month, year, hour, minute, second);
+					SaveToFile("AdminLog",string);
+					new query[200]; //Creates the variables
+  					format(query, sizeof(query), "UPDATE Accounts SET Level=%d WHERE Name='%s'", PlayerInfo[playerid][Level], playername);
+					dUserSetINT(PlayerName2(player1)).("level",(level));
+					PlayerInfo[player1][Level] = level;
+					TempAdmin[player1] = level;
+					return PlayerPlaySound(player1,1057,0.0,0.0,0.0);
+				} else return IRC_GroupSay(gGroupID,IRC_CHANNEL,"JikyBot: Player must be registered and logged in to be admin");
+			} else return IRC_GroupSay(gGroupID,IRC_CHANNEL, "Player is not connected");
+		} else return IRC_GroupSay(gGroupID,IRC_CHANNEL,"[LEVEL-INFO]:Invalid command!");
+}
+IRCCMD:getid(botid, channel[], user[], host[], params[])
+{
+
+	if(isnull(params)) return IRC_GroupSay(gGroupID,IRC_CHANNEL, "JikyBot: 11,10JikyBot: Usage:/getid [part of nick]");
+	new found, string[128], playername[MAX_PLAYER_NAME];
+
+	format(string,sizeof(string)," 11,10Searched for: \"%s\" ",params);
+	IRC_GroupSay(gGroupID,IRC_CHANNEL, string);
+	for(new i=0; i <= MAX_PLAYERS; i++)
+	{
+		if(IsPlayerConnected(i))
+		{
+	  		GetPlayerName(i, playername, MAX_PLAYER_NAME);
+			new namelen = strlen(playername);
+			new bool:searched=false;
+	    	for(new pos=0; pos <= namelen; pos++)
+			{
+				if(searched != true)
+				{
+					if(strfind(playername,params,true) == pos)
+					{
+		                found++;
+						format(string,sizeof(string),"12%d. %s (ID %d)",found,playername,i);
+						IRC_GroupSay(gGroupID,IRC_CHANNEL, string);
+						searched = true;
+					}
+
+				}
+			}
+		}
+	}
+	new str[128];
+	 if(found == 0)
+	 format(str, sizeof(str), "11,4JikyBot: No players have %s in their nick",params);
+	 IRC_GroupSay(gGroupID,IRC_CHANNEL, str);
+ 	return 1;
+}
+IRCCMD:ad(botid, channel[], user[], host[], params[])
+{
+
+	new string[128];
+	if (IRC_IsHalfop(botid, channel, user))
+	{
+	if(!strlen(params))
+	{
+	     format(string,sizeof(string),"11,10Usage: !ad (Message)");
+	     IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+
+
+	    return 1;
+	}
+	format(string, sizeof(string),"[ADMIN CHAT] %s: %s", user, params);
+	IRC_GroupSay(gGroupID,IRC_ADMINCHANNEL,string);
+    MessageToAdmins2plus(C_PINK,string);
+
+}	return 1;
+}
+
+IRCCMD:admin(botid, channel[], user[], host[], params[])
+{
+	if (IRC_IsHalfop(botid, channel, user))
+	{
+		if (!isnull(params))
+		{
+			new msg[112];
+			format(msg,sizeof(msg), "Admin on IRC: %s", params);
+			SendClientMessageToAll(green, msg);
+			format(msg,sizeof(msg), "Admin on IRC: %s",  params);
+		 	IRC_GroupSay(gGroupID, IRC_CHANNEL, msg);
+	 	}
+ 	}
+	return 1;
+}
+IRCCMD:kick(botid, channel[], user[], host[], params[]) {
+ 	if (IRC_IsHalfop(botid, channel, user))
+	{
+		    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
+		    new endid;
+		    if(isnull(params)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10JikyBot: 11,10Usage:!kick [playerid] [reason]");
+	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
+			player1 = strval(tmp);
+
+		 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID && player1 != endid && (PlayerInfo[player1][Level] != ServerInfo[MaxAdminLevel]) ) {
+		 	    if(PlayerInfo[player1][Level] >= 10) return IRC_GroupSay(gGroupID, IRC_CHANNEL,"1,4JikyBot: This Admin Cannot be Kicked");
+				if(PlayerInfo[player1][Level] >= 9) return IRC_GroupSay(gGroupID, IRC_CHANNEL,"1,4JikyBot: This Admin Cannot be Kicked");
+				if(PlayerInfo[player1][Level] >= 8) return IRC_GroupSay(gGroupID, IRC_CHANNEL,"1,4JikyBot: This Admin Cannot be Kicked");
+				GetPlayerName(player1, playername, sizeof(playername));		GetPlayerName(endid, adminname, sizeof(adminname));
+				if (IRC_IsHalfop(botid, channel, user))
+            	{
+				if(isnull(tmp2)) {
+					format(string,sizeof(string),"%s has been kicked by Administrator %s ",playername,adminname,params[2]); SendClientMessageToAll(red,string);
+					format(string,sizeof(string),"[ No Reason Given ]",params[2]); SendClientMessageToAll(red,string);
+					format(string,sizeof(string),"11,10%s has been kicked by Administrator %s ",playername,user,params[2]); IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+					format(string,sizeof(string),"11,10[ No Reason Given ]",params[2]);  IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+					SaveToFile("KickLog",string); print(string); return SetTimerEx("DelayedKick", 1000, false, "i", player1);
+				} else {
+					format(string,sizeof(string),"%s has been kicked by Administrator %s ",playername,adminname,params[2]); SendClientMessageToAll(red,string);
+					format(string,sizeof(string),"[ Reason: %s ]",params[2]); SendClientMessageToAll(red,string);
+					format(string,sizeof(string),"11,10%s has been kicked by Administrator %s ",playername,user,params[2]); IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+					format(string,sizeof(string),"11,10[ Reason: %s ]",params[2]); IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+					SaveToFile("KickLog",string); print(string); return SetTimerEx("DelayedKick", 1000, false, "i", player1); }
+				}
+			}else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "Player is not connected or is yourself or is the highest level admin");
+			} else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"[LEVEL-INFO]:Invalid command! use !cmds to check full list.");
+
+
+	return 1;
+}
+IRCCMD:warn(botid, channel[], user[], host[], params[]) {
+    if (IRC_IsHalfop(botid, channel, user))
+	{
+		new endid;
+	    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
+	    if(isnull(tmp) || isnull(tmp2)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10JikyBot: 11,10Usage:!warn [playerid] [reason]");
+    	new warned = strval(tmp), str[128];
+		if(PlayerInfo[warned][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[endid][Level] != ServerInfo[MaxAdminLevel]) return IRC_GroupSay(gGroupID, IRC_CHANNEL,"11,10JikyBot: You cannot use this command on this admin");
+	 	if(IsPlayerConnected(warned) && warned != INVALID_PLAYER_ID) {
+ 	    	if(warned != endid) {
+ 	    	if(Anti_Warn[warned] == 1) return IRC_GroupSay(gGroupID, IRC_CHANNEL,"11,10Player Already Warned");
+				PlayerInfo[warned][Warnings]++;
+				if (IRC_IsHalfop(botid, channel, user))
+	{
+				if( PlayerInfo[warned][Warnings] == MAX_WARNINGS) {
+					format(str, sizeof (str), "Administrator \"%s\" has kicked \"%s\". (Warning: %d/%d)***", user, pName(warned),  PlayerInfo[warned][Warnings], MAX_WARNINGS);
+					SendClientMessageToAll(red, str);
+					format(str, sizeof (str), "[Reason: %s]",params[1+strlen(tmp)]);
+					SendClientMessageToAll(red, str);
+					format(str, sizeof (str), "11,10Administrator \"%s\" has kicked \"%s\". (Warning: %d/%d)***", user, pName(warned),  PlayerInfo[warned][Warnings], MAX_WARNINGS);
+					IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
+					format(str, sizeof (str), "11,10[Reason: %s]",params[1+strlen(tmp)]);
+                    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
+					SaveToFile("KickLog",str);	Kick(warned);
+					return PlayerInfo[warned][Warnings] = 0;
+				} else {
+					format(str, sizeof (str), "*Administrator \"%s\" has warned \"%s\". (Warning: %d/%d)***", user, pName(warned), PlayerInfo[warned][Warnings], MAX_WARNINGS);
+					SendClientMessageToAll(yellow, str);
+					format(str, sizeof (str), "[Reason: %s]",  params[1+strlen(tmp)]);
+				    SendClientMessageToAll(yellow, str);
+				    format(str, sizeof (str), "*11,10Administrator \"%s\" has warned \"%s\". (Warning: %d/%d)***", user, pName(warned), PlayerInfo[warned][Warnings], MAX_WARNINGS);
+					IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
+					format(str, sizeof (str), "11,10[Reason: %s]",  params[1+strlen(tmp)]);
+				    IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
+				    Anti_Warn[warned] = 1;
+				    Warn[endid] = warned;
+				    format(str, 9909, "{FF7E19}Name: %s\n{00F700}Admin: %s\n{E10000}Reason: %s\n{FF9E00}Warning: %d/%d",user,pName(endid),params[1+strlen(tmp)], PlayerInfo[warned][Warnings], MAX_WARNINGS);
+                    ShowPlayerDialog((warned), 9909, DIALOG_STYLE_MSGBOX, "{00F700}Warned", str, "Close", "");
+					}
+				}
+
+				Anti_Warn[warned] = 1;
+				SetTimerEx("AntiWarn", 5000, true, "i",endid);
+				return 1;
+			} else return  IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10JikyBot: You cannot warn yourself");
+		} else return  IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10JikyBot: Player is not connected");
+	} else return  IRC_GroupSay(gGroupID, IRC_CHANNEL,"11,10[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
+}
+
+IRCCMD:players(botid, channel[], user[], host[], params[])  //made by Grove, taken from CYS Echo Bot 1.2
+{
+        new count, PlayerNames[512], string[256];
+        for(new i=0; i<=MAX_PLAYERS; i++)
+        {
+                if(IsPlayerConnected(i))
+                {
+                        if(count == 0)
+                        {
+                                new PlayerName1[MAX_PLAYER_NAME];
+                                GetPlayerName(i, PlayerName1, sizeof(PlayerName1));
+                                format(PlayerNames, sizeof(PlayerNames),"2%s1", PlayerName1);
+                                count++;
+                        }
+                        else
+                        {
+                                new PlayerName1[MAX_PLAYER_NAME];
+                                GetPlayerName(i, PlayerName1, sizeof(PlayerName1));
+                                format(PlayerNames, sizeof(PlayerNames),"%s, 2%s1", PlayerNames, PlayerName1);
+                                count++;
+                        }
+                }
+                else { if(count == 0) format(PlayerNames, sizeof(PlayerNames), "1No Players Online!"); }
+        }
+
+        new counter = 0;
+        for(new i=0; i<=MAX_PLAYERS; i++)
+        {
+                if(IsPlayerConnected(i)) counter++;
+        }
+
+        format(string, 256, "50Connected Players[%d]:1 %s", counter, PlayerNames);
+        IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+        #pragma unused params,user
+        return true;
+}
+IRCCMD:pm(botid, channel[], user[], host[], params[]) {
+   new str[128], str2[128], id;
+   if(sscanf(params,"ds", id, str2)) return IRC_GroupSay(gGroupID, IRC_CHANNEL,"11,10JikyBot: 11,10Usage:!pm [id] [message]");
+   if(IsPlayerConnected(id))
+   {
+		   if(DND[id] == 0)
+		   {
+		   		format(str, sizeof(str),"12PM to [%d]%s: %s", id, PlayerName2(id), str2);
+		   		IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
+		   		format(str, sizeof(str),"[IRC PM]%s:"cred" %s", user, str2);
+		   		SendClientMessage(id, C_CYAN, str);
+
+		   }
+		   else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"11,10That player is in DND[do not disturb] mode! Ask him in main chat for /dnd, then retry");
+
+   }else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"11,10Player is not connected Right Now");
+   return 1;
+}
+IRCCMD:rcon(botid, channel[], user[], host[], params[])
+{
+        if (IRC_IsOwner(botid, channel, user))
+        {
+                if (!isnull(params))
+                {
+                        if (strcmp(params, "exit", true) != 0 && strfind(params, "loadfs irc", true) == -1)
+                        {
+                                new msg[128];
+                                format(msg, sizeof(msg), "1,10RCON command %s has been executed.", params);
+                                IRC_GroupSay(gGroupID, IRC_CHANNEL, msg);
+                                SendRconCommand(params);
+                        }
+                }
+        }
+        return 1;
+}
+IRCCMD:jail(botid, channel[], user[], host[], params[]) {
+	if (IRC_IsHalfop(botid, channel, user))
+	{
+			new endid;
+		    new tmp[256], tmp2[256], tmp3[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index), tmp3 = strtok(params,Index);
+		    if(isnull(params)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10JikyBot: 11,10Usage:!jail [playerid] [minutes] [reason]");
+	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
+			player1 = strval(tmp);
+
+		 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID && (PlayerInfo[player1][Level] != ServerInfo[MaxAdminLevel]) ) {
+				if(PlayerInfo[player1][Jailed] == 0) {
+					GetPlayerName(player1, playername, sizeof(playername)); GetPlayerName(endid, adminname, sizeof(adminname));
+					new jtime = strval(tmp2);
+					if(jtime == 0) jtime = 9999;
+
+
+					PlayerInfo[player1][JailTime] = jtime*1000*60;
+    			    JailPlayer(player1);
+    			    Jail1(player1);
+		        	PlayerInfo[player1][Jailed] = 1;
+
+					if(jtime == 9999) {
+						if(!strlen(params[strlen(tmp2)+1])){
+						 format(string,sizeof(string),"11,10Administrator %s has jailed %s ",user, playername);
+						IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+						format(string,sizeof(string),"Administrator %s has jailed %s ",user, playername); SendClientMessageToAll(blue,string);
+						SendClientMessageToAll(blue,string);
+						}
+						else{
+						format(string,sizeof(string),"11,10Administrator %s has jailed %s [reason: %s]",user, playername, params[strlen(tmp)+1] );
+						IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+						format(string,sizeof(string),"Administrator %s has jailed %s [reason: %s]",user, playername, params[strlen(tmp)+1] );
+						SendClientMessageToAll(blue,string);
+						}
+   					} else {
+						if(!strlen(tmp3)) {
+						 format(string,sizeof(string),"11,10Administrator %s has jailed %s for %d minutes",user, playername, jtime);
+						IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+                                           format(string,sizeof(string),"Administrator %s has jailed %s for %d minutes",user, playername, jtime); SendClientMessageToAll(blue,string);
+										   SendClientMessageToAll(blue,string);
+										   }
+						else {
+						format(string,sizeof(string),"11,10Administrator %s has jailed %s for %d minutes [reason: %s]",user, playername, jtime, params[strlen(tmp2)+strlen(tmp)+1] );
+						IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+                             format(string,sizeof(string),"Administrator %s has jailed %s for %d minutes [reason: %s]",user, playername, jtime, params[strlen(tmp2)+strlen(tmp)+1] );
+							 SendClientMessageToAll(blue,string);
+							 }
+					}
+
+				} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10Player is already in jail");
+			} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10Player is not connected or is the highest level admin");
+		} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
+return 0;
+}
+
+IRCCMD:adan(botid, channel[], user[], host[], params[])
+{
+	if (IRC_IsOp(botid, channel, user))
+	{
+		if (!isnull(params))
+		{
+			new msg[112];
+			format(msg,sizeof(msg), "%s", params);
+			GameTextForAll(msg, 7000, 3);
+			format(msg,sizeof(msg), "12[ANNOUNCEMENT by %s] %s", user, params);
+			IRC_GroupSay(gGroupID, IRC_CHANNEL, msg);
+		}
+	}
+	return 1;
+}
+IRCCMD:unjail(botid, channel[], user[], host[], params[]) {
+	if (IRC_IsHalfop(botid, channel, user))
+	{
+			new endid;
+		    new tmp[256], Index; tmp = strtok(params,Index);
+		    if(isnull(params)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10JikyBot: 11,10Usage:!jail [playerid]");
+	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
+			player1 = strval(tmp);
+
+		 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID && (PlayerInfo[player1][Level] != ServerInfo[MaxAdminLevel]) ) {
+				if(PlayerInfo[player1][Jailed] == 1) {
+					GetPlayerName(player1, playername, sizeof(playername)); GetPlayerName(endid, adminname, sizeof(adminname));
+					format(string,sizeof(string),"Administrator %s has unjailed you",user);	SendClientMessage(player1,blue,string);
+					format(string,sizeof(string),"Administrator %s has unjailed %s",user, playername); SendClientMessageToAll(blue,string);
+						format(string,sizeof(string),"Administrator %s has unjailed %s",user, playername); IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+					JailRelease(player1);
+
+				} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10Player is not in jail");
+			} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10Player is not connected or is the highest level admin");
+		} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
+     return 0;
+}
+IRCCMD:akill(botid, channel[], user[], host[], params[]) {
+	if (IRC_IsOp(botid, channel, user))
+	{
+			new endid;
+		    if(isnull(params)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,1011,10Usage:!akill [playerid]");
+	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
+			player1 = strval(params);
+
+		 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
+				if( (PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[endid][Level] != ServerInfo[MaxAdminLevel] ) )
+					return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10You cannot akill the highest level admin");
+				GetPlayerName(player1, playername, sizeof(playername));	GetPlayerName(endid, adminname, sizeof(adminname));
+				format(string,sizeof(string),"IRC Administrator %s has killed you",user);
+				SendClientMessage(player1,blue,string);
+				format(string,sizeof(string),"11,10You have killed %s",playername);
+				IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+				format(string,sizeof(string),"IRC administrator %s has killed %s",user,playername);
+				SendClientMessageToAll(blue,string);
+
+				return SetPlayerHealth(player1,0.0);
+			} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10Player is not connected");
+		} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
+}
+
+IRCCMD:weaps(botid, channel[], user[], host[], params[]) {
+	if (IRC_IsHalfop(botid, channel, user))
+	{
+	    if(isnull(params)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10JikyBot: Usage:/weaps [playerid]");
+    	new player1, string[128], string2[64], WeapName[24], slot, weap, ammo, wh, x;
+		player1 = strval(params);
+
+	 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
+			format(string2,sizeof(string2),"11,10[>> %s Weapons (id:%d) <<]", PlayerName2(player1), player1); IRC_GroupSay(gGroupID, IRC_CHANNEL, string2);
+			for (slot = 0; slot < 14; slot++) {	GetPlayerWeaponData(player1, slot, weap, ammo); if( ammo != 0 && weap != 0) wh++; }
+			if(wh < 1) return IRC_GroupSay(gGroupID, IRC_CHANNEL,"Player has no weapons");
+
+			if(wh >= 1)
+			{
+				for (slot = 0; slot < 14; slot++)
+				{
+					GetPlayerWeaponData(player1, slot, weap, ammo);
+					if( ammo != 0 && weap != 0)
+					{
+						GetWeaponName(weap, WeapName, sizeof(WeapName) );
+						if(ammo == 65535 || ammo == 1) format(string,sizeof(string),"%s%s (1)",string, WeapName );
+						else format(string,sizeof(string),"%s%s (%d)",string, WeapName, ammo );
+						x++;
+						if(x >= 5)
+						{
+						    IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+						    x = 0;
+							format(string, sizeof(string), "");
+						}
+						else format(string, sizeof(string), "%s,  ", string);
+					}
+			    }
+				if(x <= 4 && x > 0) {
+					string[strlen(string)-3] = '.';
+				    IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+				}
+		    }
+		    return 1;
+		} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10Player is not connected");
+	} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
+}
+
+
+IRCCMD:aka(botid, channel[], user[], host[], params[]) {
+	if (IRC_IsHalfop(botid, channel, user))
+	{
+	    if(isnull(params)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10JikyBot: Usage:/aka [playerid]");
+    	new player1, playername[MAX_PLAYER_NAME], str[128], tmp3[50];
+		player1 = strval(params);
+	 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
+  		  	GetPlayerIp(player1,tmp3,50);
+			GetPlayerName(player1, playername, sizeof(playername));
+		    format(str,sizeof(str),"11,10AKA: [%s id:%d] [%s] %s", playername, player1, tmp3, dini_Get("ladmin/config/aka.txt",tmp3) );
+	        return IRC_GroupSay(gGroupID, IRC_CHANNEL,str);
+		} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "Player is not connected or is yourself");
+	} else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"[LEVEL-INFO]:Invalid command! use !cmds to check full list.");
+}
+IRCCMD:gas(botid, channel[], user[], host[], params[]){
+	if(IRC_IsAdmin(botid, channel, user))
+	{
+
+      new tmp[256], Index; tmp = strtok(params,Index);
+      if(isnull(tmp) || !IsNumeric(tmp)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10JikyBot: Usage:!gas [score]");
+        new score = strval(tmp), string[128];
+        for(new i;i<GetMaxPlayers();i++)
+        {
+        SetPlayerScore(i,GetPlayerScore(i)+score);
+        PlayerPlaySound(i, 1057,0.0,0.0,0.0);
+        }
+        format(string,128,"Administrator \"%s\" has given everyone '%d' Scores : Rewards!",user,score);
+        SendClientMessageToAll(C_PINK, string);
+         format(string,128,"2Administrator \"%s\" has given everyone '%d' Scores : Rewards!",user,score);
+         IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+        GameTextForAll("Recieved Scores From Admins Online!",5000,3);
+    } else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"[LEVEL-INFO]:Invalid command! use !cmds to check full list.");
+    return 1;
+}
+IRCCMD:saveallstats(botid, channel[], user[], host[], params[]){
+	if(IRC_IsAdmin(botid, channel, user))
+	{
+	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+			if(IsPlayerConnected(i)) {
+				PlayerPlaySound(i,1057,0.0,0.0,0.0);
+			    SavePlayer(i);
+			}
+		}
+		new string[128];  format(string,sizeof(string),"Administrator \"%s\" has saved all players stats", user );
+	     SendClientMessageToAll(C_PINK, string);
+	     format(string,sizeof(string),"Administrator \"%s\" has saved all players stats", user );
+	     IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+	} else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"[LEVEL-INFO]:Invalid command! use !cmds to check full list.");
+return 1;
+}
+IRCCMD:setkills(botid, channel[], user[], host[], params[]){
+	if(IRC_IsAdmin(botid, channel, user))
+	{
+		new endid;
+	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10JikyBot: Usage:!setkills [playerid] [kills]");
+		new player1 = strval(tmp), weather = strval(tmp2), string[128];
+		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[endid][Level] != ServerInfo[MaxAdminLevel]) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10JikyBot: You cannot use this command on this admin");
+        if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
+			CMDMessageToAdmins(endid,"SETKILLS");
+			format(string, sizeof(string), "You have set \"%s's\" Kills to '%d", pName(player1), weather); IRC_GroupSay(gGroupID, IRC_CHANNEL,string);
+			if(player1 != endid) { format(string,sizeof(string),"Administrator \"%s\" has set your Kills to '%d'", user, weather); SendClientMessage(player1,blue,string); }
+			PlayerInfo[player1][Kills] = weather;
+   			return PlayerPlaySound(endid,1057,0.0,0.0,0.0);
+	    } else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"JikyBot: Player is not connected");
+	} else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"10,11[LEVEL-INFO]:Invalid command! use !cmds to check full list.");
+}
+
+IRCCMD:setdeaths(botid, channel[], user[], host[], params[]){
+	if(IRC_IsAdmin(botid, channel, user))
+	{
+		new endid;
+		new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10JikyBot: Usage:!setdeaths [playerid] [deaths]");
+		new player1 = strval(tmp), weather = strval(tmp2), string[128];
+		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[endid][Level] != ServerInfo[MaxAdminLevel]) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10JikyBot: You cannot use this command on this admin");
+        if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
+			CMDMessageToAdmins(endid,"SETDEATHS");
+			format(string, sizeof(string), "You have set \"%s's\" Deaths to '%d", pName(player1), weather); IRC_GroupSay(gGroupID, IRC_CHANNEL,string);
+			if(player1 != endid) { format(string,sizeof(string),"Administrator \"%s\" has set your Deaths to '%d'", user, weather); SendClientMessage(endid,blue,string);  }
+			PlayerInfo[player1][Deaths] = weather;
+   			return PlayerPlaySound(endid,1057,0.0,0.0,0.0);
+	    } else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"JikyBot: Player is not connected");
+	} else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"10,11[LEVEL-INFO]:Invalid command! use !cmds to check full list.");
+}
+IRCCMD:bregister(botid, channel[], user[], host[], params[])
+{
+        if(!IRC_IsOwner(botid, channel, user)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "Invalid Level.");
+        new regstr[50];
+        format(regstr, sizeof(regstr), "ns register %s %s", IRC_BOT_PASSWORD, BOT_EMAIL);
+        IRC_SendRaw(botid, regstr);
+        return 1;
+}
+IRCCMD:bjoin(botid, channel[], user[], host[], params[])
+{
+        if(!IRC_IsOwner(botid, channel, user)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "Invalid Level.");
+        new regstr[50];
+        format(regstr, sizeof(regstr), "join #xpadmins");
+        IRC_SendRaw(gGroupID, regstr);
+        return 1;
+}
+IRCCMD:bjoin1(botid, channel[], user[], host[], params[])
+{
+        if(!IRC_IsOwner(botid, channel, user)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "Invalid Level.");
+        new regstr[50];
+        format(regstr, sizeof(regstr), "join #xptest");
+        IRC_SendRaw(gGroupID, regstr);
+        return 1;
+}
+IRCCMD:bleave(botid, channel[], user[], host[], params[])
+{
+        if(!IRC_IsOwner(botid, channel, user)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "Invalid Level.");
+        new regstr[50];
+        format(regstr, sizeof(regstr), "part #xpadmins");
+        IRC_SendRaw(gGroupID, regstr);
+        return 1;
+}
+IRCCMD:ruc(botid, channel[], user[], host[], params[])
+{
+        if(IRC_IsAdmin(botid, channel, user))
+        {
+				new string[128];
+				format(string,sizeof(string),"Administrator %s has respawn only unused vehicles.",user);
+                SendClientMessageToAll(blue,string);
+                format(string,sizeof(string),"10,11Administrator %s has respawn only unused vehicles.",user);
+                IRC_GroupSay(gGroupID, IRC_CHANNEL,string);
+    			forveh(i)
+				{
+			    	if(IsVehicleOccupied(i) == 0)
+			    	{
+			        	SetVehicleToRespawn(i);
+			    	}
+				}
+		}
+	  else return  IRC_GroupSay(gGroupID, IRC_CHANNEL,"10,11[LEVEL-INFO]:Invalid command! use !cmds to check full list.");
+	return 1;
+}
+IRCCMD:admins(botid, channel[], user[], host[], params[])
+{
+    #pragma unused params
+    new
+        count = 0,
+        string[800],
+        AdmRank[500];
+
+    for(new i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (IsPlayerConnected(i))
+        {
+            if(PlayerInfo[i][Level] >= 1)
+            {
+                if(IsPlayerAdmin(i)) AdmRank ="[RCON ADMIN!]";
+                else
+                {
+                    switch(PlayerInfo[i][Level])
+                    {
+                        case 1: AdmRank = " 12[Moderator]";
+                        case 2: AdmRank = " 12[Junior Admin]";
+                        case 3: AdmRank = " 12[Senior Admin]";
+                        case 4: AdmRank = " 12[Lead Admin]";
+                        case 5: AdmRank = " 12[Head Admin]";
+                        case 6: AdmRank = " 12[Server Manager]";
+                        case 7: AdmRank = " 12[Global Admin]";
+                        case 8: AdmRank = " 12[Community Manager]";
+                        case 9: AdmRank = " 12[Community Co-Owner]";
+                        case 10: AdmRank = " 12[Community Owner]";
+                    }
+
+
+                    new nameee[128];
+                    GetPlayerName(i, nameee, 16);
+                    if(!strcmp(nameee, "JRockie", true))
+                    GetPlayerName(i, nameee, 16);
+                    if(!strcmp(nameee, "Admin", true))
+                    GetPlayerName(i, nameee, 16);
+                    if(!strcmp(nameee, "Perfect_Boy", true))
+                    {
+                      AdmRank = " 4[Community Owner And Scripter]";
+                    }
+                }
+                format(string, 500, "12%s %s [ID:%i] | Level: %d - %s\n\n", string, PlayerName2(i), i, PlayerInfo[i][Level], AdmRank);
+                //We are appending the string, so put %s before any new data is added,
+                //and that parameter actually refers to the string itself.
+                count++;
+            }
+        }
+    }
+    if (count == 0)
+	IRC_GroupSay(gGroupID, IRC_CHANNEL,"4No admins online!");
+    else IRC_GroupSay(gGroupID, IRC_CHANNEL,string);
+
+    //Don't show dialog in a loop, it won't show all the admins continuously.
+    //Show it after all the data are ready.
+    return 1;
+    }
+
+IRCCMD:giveallcash(botid, channel[], user[], host[], params[])
+{
+        if(IRC_IsAdmin(botid, channel, user))
+        {
+	    if(isnull(params)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11JikyBot: Usage:!giveallcash [Amount]");
+		new var = strval(params), string[128];
+		for(new i = 0; i < MAX_PLAYERS; i++) {
+			if(IsPlayerConnected(i)) {
+				PlayerPlaySound(i,1057,0.0,0.0,0.0);
+				GivePlayerMoney(i,var);
+			}
+		}
+		format(string,sizeof(string),"Administrator \"%s\" has given all players '$%d'", user, var );
+	    SendClientMessageToAll(C_PINK, string);
+	    format(string,sizeof(string),"10,11Administrator \"%s\" has given all players '$%d'", user, var );
+	    IRC_GroupSay(gGroupID, IRC_CHANNEL,string);
+
+	} else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"10,4[LEVEL-INFO]:Invalid command! use !cmds to check full list.");
+  return 0;
+}
+
+IRCCMD:unfreeze(botid, channel[], user[], host[], params[])
+{
+        if(IRC_IsOp(botid, channel, user))
+        {
+		    if(isnull(params)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11JikyBot: Usage:!unfreeze [playerid]");
+	    	new player1, string[128];
+			player1 = strval(params);
+
+		 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
+		 	    if(PlayerInfo[player1][Frozen] == 1) {
+					UnFreezeMe(player1);
+                	format(string,sizeof(string),"Administrator %s has unfrozen you", user ); SendClientMessage(player1,blue,string);
+                    format(string,sizeof(string),"Administrator %s has unfrozen %s", user, PlayerName2(player1));
+                    IRC_GroupSay(gGroupID, IRC_CHANNEL,string);
+					format(string,sizeof(string),"Administrator %s has unfrozen %s", user, PlayerName2(player1));
+		    	    SendClientMessageToAll(blue,string);
+				} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11Player is not frozen");
+			} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11Player is not connected or is the highest level admin");
+		} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
+return 1;
+}
+IRCCMD:async(botid, channel[], user[], host[], params[])
+{
+        if(IRC_IsOp(botid, channel, user))
+        {
+	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
+	    if (isnull(tmp)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11JikyBot: Usage:/async [playerid]");
+		new player1 = strval(tmp);
+        if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
+        if(!IsPlayerInAnyVehicle(player1))
+		 	{
+        Synching[player1] = true;
+        AntiSK[player1] = 0;
+        GetPlayerHealth(player1,sHP[player1]);
+        GetPlayerArmour(player1,sAP[player1]);
+        GetPlayerPos(player1,sPos[player1][0],sPos[player1][1],sPos[player1][2]);
+        for(new slot; slot < 13; slot++)
+        {
+        GetPlayerWeaponData(player1,slot,sWeap[player1][slot],sAmmo[player1][slot]);
+        }
+        SpawnPlayer(player1);
+        AntiSK[player1] = 0;
+        new string[128];
+        format(string, sizeof(string), "IRC Admin %s has synced you.",user); SendClientMessage(player1,blue,string);
+        format(string, sizeof(string), "10,11IRC Admin %s has synced  %s.",user,tmp);  IRC_GroupSay(gGroupID, IRC_CHANNEL,string);
+        UpdateLabelText(player1);
+         UpdateTextdraw(player1);
+			} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11JikyBot: You cannot sync players in vehicles.");
+	    } else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11JikyBot: Player is not connected");
+	} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11[LEVEL-INFO]:Invalid command! use !cmds to check full list.");
+	return 1;
+}
+IRCCMD:astats(botid, channel[], user[], host[], params[])
+{
+        if(IRC_IsOp(botid, channel, user))
+        {
+	    if(isnull(params)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11JikyBot: Usage:!aststs [playerid]");
+	    new player1, string[128];
+	    player1 = strval(params);
+
+
+	 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
+		    new Float:player1health, Float:player1armour, playerip[128], Float:x, Float:y, Float:z, tmp2[256], file[256],
+				year, month, day, P1Jailed[4], P1Frozen[4], P1Logged[4], P1Register[4], RegDate[256], TimesOn;
+
+			GetPlayerHealth(player1,player1health);
+			GetPlayerArmour(player1,player1armour);
+	    	GetPlayerIp(player1, playerip, sizeof(playerip));
+	    	GetPlayerPos(player1,x,y,z);
+			getdate(year, month, day);
+			format(file,sizeof(file),"/ladmin/users/%s.sav",udb_encode(PlayerName2(player1)));
+
+			if(PlayerInfo[player1][Jailed] == 1) P1Jailed = "Yes"; else P1Jailed = "No";
+			if(PlayerInfo[player1][Frozen] == 1) P1Frozen = "Yes"; else P1Frozen = "No";
+			if(Logged[player1] == 1) P1Logged = "Yes"; else P1Logged = "No";
+			if(fexist(file)) P1Register = "Yes"; else P1Register = "No";
+			if(dUserINT(PlayerName2(player1)).("LastOn")==0) tmp2 = "Never"; else tmp2 = dini_Get(file,"LastOn");
+			if(strlen(dini_Get(file,"RegisteredDate")) < 3) RegDate = "n/a"; else RegDate = dini_Get(file,"RegisteredDate");
+			TimesOn = dUserINT(PlayerName2(player1)).("TimesOnServer");
+
+	  		format(string, sizeof(string),"(Player Info)  ---====> Name: %s  ID: %d <====---", PlayerName2(player1), player1);
+			IRC_Say(botid, IRC_CHANNEL,string);
+		  	format(string, sizeof(string),"Health: %d  Armour: %d  Score: %d  Cash: %d  Skin: %d  IP: %s Ping: %d",floatround(player1health),floatround(player1armour),
+			GetPlayerScore(player1),GetPlayerMoney(player1),GetPlayerSkin(player1),playerip,GetPlayerPing(player1));
+			IRC_Say(botid, IRC_CHANNEL,string);
+			format(string, sizeof(string),"Interior: %d  Virtual World: %d  Wanted Level: %d  X %0.1f  Y %0.1f  Z %0.1f", GetPlayerInterior(player1), GetPlayerVirtualWorld(player1), GetPlayerWantedLevel(player1), Float:x,Float:y,Float:z);
+		    IRC_Say(botid, IRC_CHANNEL,string);
+			format(string, sizeof(string),"Times On Server: %d  Kills: %d  Deaths: %d  Ratio: %0.2f  AdminLevel: %d", TimesOn, PlayerInfo[player1][Kills], PlayerInfo[player1][Deaths], Float:PlayerInfo[player1][Kills]/Float:PlayerInfo[player1][Deaths], PlayerInfo[player1][Level] );
+			IRC_Say(botid, IRC_CHANNEL,string);
+			format(string, sizeof(string),"Registered: %s  Logged In: %s  In Jail: %s  Frozen: %s", P1Register, P1Logged, P1Jailed, P1Frozen );
+			IRC_Say(botid, IRC_CHANNEL,string);
+			format(string, sizeof(string),"Last On Server: %s  Register Date: %s  Todays Date: %d/%d/%d", tmp2, RegDate, day,month,year );
+			IRC_Say(botid, IRC_CHANNEL,string);
+
+
+
+			new slot, ammo, weap, cnt, WeapName[24], WeapSTR[128], p; WeapSTR = "Weaps: ";
+			for (slot = 0; slot < 14; slot++) {	GetPlayerWeaponData(player1, slot, weap, ammo); if( ammo != 0 && weap != 0) cnt++; }
+			if(cnt < 1) return IRC_GroupSay(gGroupID, IRC_CHANNEL,"4Player has no weapons");
+			else {
+				for (slot = 0; slot < 14; slot++)
+				{
+					GetPlayerWeaponData(player1, slot, weap, ammo);
+					if (ammo > 0 && weap > 0)
+					{
+						GetWeaponName(weap, WeapName, sizeof(WeapName) );
+						if (ammo == 65535 || ammo == 1) format(WeapSTR,sizeof(WeapSTR),"%s%s (1)",WeapSTR, WeapName);
+						else format(WeapSTR,sizeof(WeapSTR),"%s%s (%d)",WeapSTR, WeapName, ammo);
+						p++;
+						if(p >= 5) { IRC_GroupSay(gGroupID, IRC_CHANNEL, WeapSTR); format(WeapSTR, sizeof(WeapSTR), "Weaps: "); p = 0;
+						} else format(WeapSTR, sizeof(WeapSTR), "%s,  ", WeapSTR);
+					}
+				}
+				if(p <= 4 && p > 0) {
+					string[strlen(string)-3] = '.';
+				    IRC_GroupSay(gGroupID, IRC_CHANNEL, WeapSTR);
+				}
+			}
+			return 1;
+		} else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"JikyBot: Player is not connected");
+	} else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"JikyBot: You need to be administrator level 2 to use this command");
+}
+IRCCMD:stats(botid, channel[], user[], host[], params[])
+{
+
+
+	new str[956], pDeaths, player1, h, m, s,playername[MAX_PLAYER_NAME];
+	  player1 = strval(params);
+    if(IsPlayerConnected(player1)) {
+        TotalGameTime(player1, h, m, s);
+        GetPlayerName(player1, playername, sizeof(playername));
+ 	    if(PlayerInfo[player1][Deaths] == 0) pDeaths = 1; else pDeaths = PlayerInfo[player1][Deaths];
+	    format(str, sizeof str, "4Name: 13%s || 4 Scores: 13%d || 4Money: 13$%d || 4 Kills: 13%d || 4Deaths: 13%d || 4K/D Ratio: 13%0.2f ||",  PlayerName2(player1), GetPlayerScore(player1), GetPlayerMoney(player1), PlayerInfo[player1][Kills], PlayerInfo[player1][Deaths], Float:PlayerInfo[player1][Kills]/Float:pDeaths);
+        IRC_Say(botid, IRC_CHANNEL, str);
+        format(str, sizeof str, "4Admin Level: 13%d || 4Operator: 13%s || 4Team: 13%s || 4Class: 13%s ||", PlayerInfo[player1][Level], PlayerInfo[player1][Helper] ? ("Yes") : ("No"), GetTeamName(player1), GetClass(player1));
+     IRC_Say(botid, IRC_CHANNEL, str);
+	    format(str, sizeof str, "4TimePlayed: 13[%d] hrs [%d] mins [%d] secs", h, m, s);
+    IRC_Say(botid, IRC_CHANNEL, str);
+
+    } else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"Player Is Not Connected!");
+ return 1;
+}
+IRCCMD:healall(botid, channel[], user[], host[], params[])
+{
+
+    #pragma unused params
+	if(IRC_IsOp(botid, channel, user))
+        {
+	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+			if(IsPlayerConnected(i)) {
+				PlayerPlaySound(i,1057,0.0,0.0,0.0); SetPlayerHealth(i,100.0);
+			}
+		}
+		new string[128]; format(string,sizeof(string),"Administrator \"%s\" has healed all players", user );
+	    SendClientMessageToAll(C_PINK, string);
+	    format(string,sizeof(string),"10,11Administrator \"%s\" has healed all players", user );
+	    IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+	} else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"JikyBot: Invalid CMD, check !cmds.");
+return 1;
+}
+
+IRCCMD:armourall(botid, channel[], user[], host[], params[]) {
+    #pragma unused params
+	if(IRC_IsOwner(botid, channel, user))
+	{
+
+	   	for(new i = 0; i < MAX_PLAYERS; i++) {
+			if(IsPlayerConnected(i)) {
+				PlayerPlaySound(i,1057,0.0,0.0,0.0); SetPlayerArmour(i,100.0);
+			}
+		}
+		new string[128]; format(string,sizeof(string),"Administrator \"%s\" has restored all players armour",user );
+	    SendClientMessageToAll(C_PINK, string);
+	    format(string,sizeof(string),"10,11Administrator \"%s\" has restored all players armour",user );
+	    IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+	} else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"JikyBot: Invalid CMD, check !cmds.");
+return 1;
+}
+IRCCMD:mute(botid, channel[], user[], host[], params[]) {
+	if(IRC_IsHalfop(botid, channel, user))
+	{
+		    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
+		    if(isnull(params)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11JikyBot: Usage:/mute [playerid] [reason]");
+	    	new player1, playername[MAX_PLAYER_NAME], string[128];
+			player1 = strval(tmp);
+
+		 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID && (PlayerInfo[player1][Level] != ServerInfo[MaxAdminLevel]) ) {
+		 	    if(PlayerInfo[player1][Muted] == 0) {
+					GetPlayerName(player1, playername, sizeof(playername));
+
+					PlayerPlaySound(player1,1057,0.0,0.0,0.0);  PlayerInfo[player1][Muted] = 1; PlayerInfo[player1][MuteWarnings] = 0;
+
+					if(strlen(tmp2)) {
+						format(string,sizeof(string),"You have been muted by Administrator %s [reason: %s]",user,params[2]); SendClientMessage(player1,blue,string);
+						format(string,sizeof(string),"Administrator %s Muted %s[reason: %s]",user,playername,params[2]); SendClientMessageToAll(blue,string);
+						format(string,sizeof(string),"You have muted %s [reason: %s]", playername,params[2]); return IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+					} else {
+						format(string,sizeof(string),"You have been muted by Administrator %s",user); SendClientMessage(player1,blue,string);
+						 }
+				} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11Player is already muted");
+			} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11Player is not connected or is the highest level admin");
+		} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11[LEVEL-INFO]:Invalid command! use !cmds to check full list.");
+return 1;
+}
+
+IRCCMD:unmute(botid, channel[], user[], host[], params[]) {
+	if(IRC_IsHalfop(botid, channel, user))
+	{
+		    if(isnull(params)) return IRC_GroupSay(gGroupID, IRC_CHANNEL,"JikyBot: Usage:/unmute [playerid]");
+	    	new player1, playername[MAX_PLAYER_NAME], string[128];
+			player1 = strval(params);
+
+		 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID && (PlayerInfo[player1][Level] != ServerInfo[MaxAdminLevel]) ) {
+		 	    if(PlayerInfo[player1][Muted] == 1) {
+					GetPlayerName(player1, playername, sizeof(playername));
+					PlayerPlaySound(player1,1057,0.0,0.0,0.0);  PlayerInfo[player1][Muted] = 0; PlayerInfo[player1][MuteWarnings] = 0;
+					format(string,sizeof(string),"You have been unmuted by Administrator %s",user); SendClientMessage(player1,blue,string);
+
+					format(string,sizeof(string),"Administrator %s has unmuted %s from IRC.",user, playername);
+					 SendClientMessageToAll(blue,string);
+					 IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+				} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11Player is not muted");
+			} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11Player is not connected or is the highest level admin");
+		} else return IRC_GroupSay(gGroupID, IRC_CHANNEL, "10,11[LEVEL-INFO]:Invalid command! use !cmds to check full list.");
+return 1;
+}
+IRCCMD:cc(botid, channel[], user[], host[], params[]) {
+	if(IRC_IsHalfop(botid, channel, user))
+	{
+    #pragma unused params
+
+		for(new i = 0; i < 11; i++) SendClientMessageToAll(green," ");
+		SendClientMessageToAll(blue,"Chat Has been cleared by admins!!");
+         IRC_Say(botid, IRC_CHANNEL,"Chat Has been cleared by admins!!");
+		 return 1;
+ 	} else return  IRC_Say(botid, IRC_CHANNEL,"ERROR: You need to be level 2 to use this command");
+}
+IRCCMD:resetlicense(botid, channel[], user[], host[], params[]) {
+	if(IRC_IsOp(botid, channel, user))
+	{
+	new targetid;
+	if(sscanf(params, "u", targetid)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "Correct JikyBot: Usage:!givelicense [playerid]");
+
+	    new tname[MAX_PLAYER_NAME], string[128];
+	    GetPlayerName(targetid, tname, sizeof(tname));
+	    format(string, sizeof(string), "Admin %s has restored %s's license.", user, tname);
+	    SendClientMessageToAll(COLOR_PINK, string);
+	    IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+		if(License[targetid] == 0)
+       IRC_GroupSay(gGroupID, IRC_CHANNEL, "JikyBot: Player dosent have a License");
+		if(License[targetid] == 1)
+		IRC_GroupSay(gGroupID, IRC_CHANNEL, "JikyBot: Player already Has a License");
+		if(License[targetid] == 2)
+		License[targetid] = 1;
+
+}
+return 0;
+}
+IRCCMD:revokelicense(botid, channel[], user[], host[], params[]) {
+	if(IRC_IsOp(botid, channel, user))
+	{
+	new targetid;
+	if(sscanf(params, "u", targetid)) return  IRC_GroupSay(gGroupID, IRC_CHANNEL, "Correct JikyBot: Usage:!revokelicense [playerid]");
+
+	    new tname[MAX_PLAYER_NAME], string[128];
+	    GetPlayerName(targetid, tname, sizeof(tname));
+	    format(string, sizeof(string), "Server admin %s has revoked %s's license. [Reason: Base Rape]", user, tname);
+	    SendClientMessageToAll(COLOR_PINK, string);
+	     IRC_GroupSay(gGroupID, IRC_CHANNEL, string);
+		if(License[targetid] == 0)
+         IRC_GroupSay(gGroupID, IRC_CHANNEL, "JikyBot: Player dosent have a License");
+		if(License[targetid] == 2)
+		 IRC_GroupSay(gGroupID, IRC_CHANNEL, "JikyBot: Player has Got his License Revoked Use /reseticense");
+		if(License[targetid] == 1)
+		License[targetid] = 2;
+	}
+	else return  IRC_GroupSay(gGroupID, IRC_CHANNEL, "You cannot use this!.");
+	return 1;
+}
+
+
+IRCCMD:richlist(botid, channel[], user[], host[], params[]) {
+    #pragma unused params
+ 		new string[128], Slot1 = -1, Slot2 = -1, Slot3 = -1, Slot4 = -1, HighestCash = -9999;
+ 			IRC_Say(botid, IRC_CHANNEL, "10,11Rich List:");
+
+		for(new x=0; x<MAX_PLAYERS; x++) if (IsPlayerConnected(x)) if (GetPlayerMoney(x) >= HighestCash) {
+			HighestCash = GetPlayerMoney(x);
+			Slot1 = x;
+		}
+		HighestCash = -9999;
+		for(new x=0; x<MAX_PLAYERS; x++) if (IsPlayerConnected(x) && x != Slot1) if (GetPlayerMoney(x) >= HighestCash) {
+			HighestCash = GetPlayerMoney(x);
+			Slot2 = x;
+		}
+		HighestCash = -9999;
+		for(new x=0; x<MAX_PLAYERS; x++) if (IsPlayerConnected(x) && x != Slot1 && x != Slot2) if (GetPlayerMoney(x) >= HighestCash) {
+			HighestCash = GetPlayerMoney(x);
+			Slot3 = x;
+		}
+		HighestCash = -9999;
+		for(new x=0; x<MAX_PLAYERS; x++) if (IsPlayerConnected(x) && x != Slot1 && x != Slot2 && x != Slot3) if (GetPlayerMoney(x) >= HighestCash) {
+			HighestCash = GetPlayerMoney(x);
+			Slot4 = x;
+		}
+		    format(string, sizeof(string), "2(%d) %s - $%d - %d", Slot1,PlayerName2(Slot1),GetPlayerMoney(Slot1),GetPlayerScore(Slot1) );
+		    IRC_Say(botid, IRC_CHANNEL,string);
+		if(Slot2 != -1)	{
+			format(string, sizeof(string), "2(%d) %s - $%d - %d", Slot2,PlayerName2(Slot2),GetPlayerMoney(Slot2),GetPlayerScore(Slot2) );
+			IRC_Say(botid, IRC_CHANNEL,string);
+		}
+		if(Slot3 != -1)	{
+			format(string, sizeof(string), "2(%d) %s - $%d - %d", Slot3,PlayerName2(Slot3),GetPlayerMoney(Slot3),GetPlayerScore(Slot3) );
+			IRC_Say(botid, IRC_CHANNEL,string);
+		}
+		if(Slot4 != -1)	{
+			format(string, sizeof(string), "2(%d) %s - $%d - %d", Slot4,PlayerName2(Slot4),GetPlayerMoney(Slot4),GetPlayerScore(Slot4) );
+			IRC_Say(botid, IRC_CHANNEL,string);
+		}
+		return 1;
+}
+IRCCMD:setcash(botid, channel[], user[], host[], params[]) {
+	if(IRC_IsOp(botid, channel, user))
+	{
+	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return IRC_Say(botid, IRC_CHANNEL, "JikyBot: Usage:/setcash [playerid] [amount]");
+		new player1 = strval(tmp), cash = strval(tmp2), string[128];
+		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel]) return IRC_Say(botid, IRC_CHANNEL,"JikyBot: You cannot use this command on this admin");
+        if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
+			format(string,sizeof(string),"Administrator \"%s\" has set your cash to '$%d'", user, cash); SendClientMessage(player1,blue,string);
+		  format(string,sizeof(string),"7Administrator \"%s\" has set %s's cash to '%d'",user, pName(player1), cash); IRC_GroupSay(gGroupID, IRC_CHANNEL, string);  SendClientMessageToAll(blue,string);
+			ResetPlayerMoney(player1);
+			SaveToFile("Admin",string);
+   			return GivePlayerMoney(player1, cash);
+	    } else return IRC_Say(botid, IRC_CHANNEL,"JikyBot: Player is not connected");
+	} else return IRC_Say(botid, IRC_CHANNEL,"[LEVEL-INFO]:Invalid command! use /commands or /cmds to check full list.");
+}
+IRCCMD:cmds(botid, channel[], user[], host[], params[])
+{
+	#pragma unused params
+	if(IRC_IsOwner(botid, channel, user))
+	{
+        IRC_Say(botid, IRC_CHANNEL,"4IRC Commands(at owner level). ");
+	    IRC_Say(botid, IRC_CHANNEL,"12!bregister !say !cc !setlevel !pm  !players  !warn !giveallcash !mute  !unmute  !admin  !jail  !unfreeze !bleave !spawn");
+	    IRC_Say(botid, IRC_CHANNEL,"12!bjoin !kick !setofflevel !aka !weaps !unban !armourall !slap !givecash  !setscore !unjail !spam !caps !setkills !setdeaths");
+	    IRC_Say(botid, IRC_CHANNEL,"12!bjoin1 !info !ban !ruc !adan !akill !rcon !admin !healall !lastseen  !ad !checkacc !getid !sban !freeze !gas !saveallstats");
+        IRC_Say(botid, IRC_CHANNEL,"12!setoffcash !setoffkills !setoffdeaths !setofflevel !setoffdonor !setoffscore  !setoffname.");
+		return 1;
+	}
+	if(IRC_IsAdmin(botid, channel, user))
+	{
+        IRC_Say(botid, IRC_CHANNEL,"4IRC Commands(). ");
+        IRC_Say(botid, IRC_CHANNEL,"12!say  !pm !cc !players  !warn !giveallcsah !mute  !unmute  !admin  !jail !ruc  !unfreeze  !spawn");
+	    IRC_Say(botid, IRC_CHANNEL,"12!kick !aka !weaps !unban  !slap !givecash !admins !setscore !unjail  !spam !caps !setkills !setdeaths");
+	   IRC_Say(botid, IRC_CHANNEL,"12!info !ban  !akill !adan !healall !armnourall !lastseen !ad !checkacc !getid !sban !freeze !gas !saveallstats");
+        IRC_Say(botid, IRC_CHANNEL,"12!setoffcash !setoffkills !setoffdeaths !setoffscore !setoffname.");
+	    return 1;
+	}
+	if(IRC_IsOp(botid, channel, user))
+	{
+        IRC_Say(botid, IRC_CHANNEL,"4IRC Commands(). ");
+	    IRC_Say(botid, IRC_CHANNEL,"12!say !cc !trash !pm  !players  !warn !mute  !unmute  !admin !freeze ");
+	    IRC_Say(botid, IRC_CHANNEL,"12!kick !aka !weaps  !slap  !admins  !unjail  !spam !jail !unfreeze !caps ");
+	    IRC_Say(botid, IRC_CHANNEL,"12!info !ban  !akill !adan !lastseen !ad !checkacc !getid !sban !spawn  ");
+        IRC_Say(botid, IRC_CHANNEL,"12!setoffcash !setoffkills !setoffdeaths !setoffscore.");
+	    return 1;
+	}
+	if(IRC_IsHalfop(botid, channel, user))
+	{
+        IRC_Say(botid, IRC_CHANNEL,"4IRC Commands(). ");
+	    IRC_Say(botid, IRC_CHANNEL,"12!say !cc !trash !pm  !players  !warn !mute  !unmute  !admin  ");
+	    IRC_Say(botid, IRC_CHANNEL,"12!kick !aka !weaps  !slap  !admins  !unjail  !spam !jail  !caps ");
+	    IRC_Say(botid, IRC_CHANNEL,"12!info !lastseen !ad !checkacc !getid !sban !spawn  ");
+	    return 1;
+	}
+	if(IRC_IsVoice(botid,channel,user))
+	{
+       IRC_GroupSay(gGroupID, IRC_CHANNEL,"12!say !pm  !players  !admins !getid  !info !stats");
+ 	return 1;
+ 	}
+
+    else
+    {
+	    IRC_GroupSay(gGroupID, IRC_CHANNEL,"12IRC Commands");
+	    IRC_GroupSay(gGroupID, IRC_CHANNEL,"12!say !pm  !players  !admins !getid  !info");
+	}
+
+	return 1;
+}
+
+IRCCMD:slap(botid, channel[], user[], host[], params[])
+{
+    new id, str[128], str2[128], pname[MAX_PLAYER_NAME], Float:x, Float:y, Float:z;
+    if(!IRC_IsHalfop(botid, channel, user)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "Invalid Level");
+        {
+        if(sscanf(params, "us[128]", id, str))
+        {
+                        IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10Usage: !slap [ID] [reason]");
+                        return 1;
+                }
+         GetPlayerName(id, pname, sizeof(pname));
+         format(str2, sizeof(str2), "53SLAP:1 %s Has Been Slapped By 39IRC Administrator1 %s - 4Reason:1 %s", pname, user, str);
+         SendClientMessageToAll(COLOR_LIGHTBLUE, str2);
+         format(str2, sizeof(str2), "53SLAP:1 %s Has Been Slapped By 39IRC Administrator1 %s - 4Reason:1 %s", pname, user, str);
+                IRC_GroupSay(gGroupID, IRC_CHANNEL, str2);
+        GetPlayerPos(id, x, y, z);
+        SetPlayerPos(id, x, y, z+10);
+        }
+        return 1;
+}
+IRCCMD:givecash(botid, channel[], user[], host[], params[])
+{
+    new id, amount, pname[MAX_PLAYER_NAME], Mstr[128];
+    if(!IRC_IsAdmin(botid, channel, user)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "Invalid Level");
+        {
+        if(sscanf(params,"ui", id, amount))
+                {
+                        IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10Usage: !givecash [ID] [Amount]");
+                }
+        if(!IsPlayerConnected(id)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "Invalid Player ID.");
+        {
+        GetPlayerName(id, pname, sizeof(pname));
+        GivePlayerMoney(id, amount);
+        format(Mstr, sizeof(Mstr), "CASH::1 %s Has Been Given $%d By IRC Administrator %s", pname, amount, user);
+        SendClientMessageToAll(COLOR_LIGHTBLUE, Mstr);
+         format(Mstr, sizeof(Mstr), "4CASH::1 %s Has Been Given $%d By IRC Administrator %s", pname, amount, user);
+               IRC_GroupSay(gGroupID, IRC_CHANNEL, Mstr);
+        }
+    }
+    return 1;
+}
+
+IRCCMD:setscore(botid, channel[], user[], host[], params[])
+{
+        new id, score, pname[MAX_PLAYER_NAME], str[128];
+        if(!IRC_IsAdmin(botid, channel, user)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "Invalid Level");
+        {
+                if (sscanf(params, "ui", id, score))
+                {
+                        IRC_GroupSay(gGroupID, IRC_CHANNEL, "11,10Usage: !setscore [ID] [score]");
+                }
+                if(!IsPlayerConnected(id)) return IRC_GroupSay(gGroupID, IRC_CHANNEL, "Invalid Player ID.");
+                {
+        SetPlayerScore(id, score);
+        GetPlayerName(id, pname, sizeof(pname));
+        format(str, sizeof(str), "SCORE::1 %s Score Has Been Set To %d By IRC Administrator %s", pname, score, user);
+        SendClientMessageToAll(COLOR_LIGHTBLUE, str);
+        format(str, sizeof(str), "5SCORE::1 %s Score Has Been Set To %d By IRC Administrator %s", pname, score, user);
+                IRC_GroupSay(gGroupID, IRC_CHANNEL, str);
+                }
+        }
+        return 1;
+}
+IRCCMD:spam(botid, channel[], user[], host[], params[])
+{
+		// Check if the user entered any text
+			// Echo the formatted message
+			if (IRC_IsHalfop(botid, channel, user))
+			{
+			new msg[112];
+		 	format(msg,sizeof(msg), "[PBOT] Please do not Flood or Spam in chat, or else you will be muted!", user, params);
+			SendClientMessageToAll(COLOR_LIGHTBLUE, msg);
+			format(msg, sizeof(msg),"2[PBOT] Please do not Flood or Spam in chat, or else you will be muted!", user, params);
+			IRC_GroupSay(gGroupID, IRC_CHANNEL, msg);
+			return 1;
+			}
+			return 1;
+}
+
+IRCCMD:caps(botid, channel[], user[], host[], params[])
+{
+		// Check if the user entered any text
+			// Echo the formatted message
+			if (IRC_IsHalfop(botid, channel, user))
+			{
+			new msg[112];
+		 	format(msg,sizeof(msg), "[PBOT] Please turn off your caps, or else you will be muted!", user, params);
+			SendClientMessageToAll(COLOR_LIGHTBLUE, msg);
+			format(msg, sizeof(msg),"2[PBOT] Please turn off your caps, or else you will be muted!", user, params);
+			IRC_GroupSay(gGroupID, IRC_CHANNEL, msg);
+			return 1;
+			}
+			return 1;
+}
+
+
+IRCCMD:info(botid, channel[], user[], host[], params[])
+{
+	// Check if the user is at least an op in the channel
+		new strmessage[950];
+  		format(strmessage, sizeof(strmessage), "6[Server INFO]");
+  		IRC_GroupSay(gGroupID, IRC_CHANNEL, strmessage);
+        format(strmessage, sizeof(strmessage), "6[Server Ip] : 89.38.149.217:7777");
+        IRC_GroupSay(gGroupID, IRC_CHANNEL, strmessage);
+        format(strmessage, sizeof(strmessage), "6[GameMode] :Xp Call Of Duty - Real World at War.");
+        IRC_GroupSay(gGroupID, IRC_CHANNEL, strmessage);
+        format(strmessage, sizeof(strmessage), "6[Version] : 10.6.4");
+        IRC_GroupSay(gGroupID, IRC_CHANNEL, strmessage);
+        format(strmessage, sizeof(strmessage), "6[Website] : xpsamp.com");
+		IRC_GroupSay(gGroupID, IRC_CHANNEL, strmessage);
+	return true;
+}
+IRCCMD:unban(botid, channel[], user[], host[], params[])
+{
+if (IRC_IsAdmin(botid, channel, user))
+			{
+	  new target[50];
+	  if(sscanf(params,"s", target)) return IRC_GroupSay(gGroupID, IRC_CHANNEL,"11,1011,10Usage: !unban [player name]");
+	  new query[200];
+	  format(query, sizeof(query),"SELECT * FROM `bandata` WHERE `player`='%s' AND `banned`=1 LIMIT 1", target);
+	  mysql_query(query);
+	  mysql_store_result();
+	  new rows = mysql_num_rows();
+	  if(rows == 1)
+	  {
+	    new uquery[200];
+	    format(uquery, sizeof(uquery),"DELETE FROM `bandata` WHERE player='%s'", target);
+	    mysql_query(uquery);
+	    mysql_store_result();
+	    new string[200];
+	    format(string, sizeof(string),"11,10IRC Unban - %s Unbanned!", target);
+	    IRC_GroupSay(gGroupID, IRC_CHANNEL,string);
+
+	  }
+	  else if(!rows)
+	  {
+	    new str[128];
+	    format(str, sizeof(str),"11,10[ERROR]: No ban was found on this name %s", target);
+	    IRC_GroupSay(gGroupID, IRC_CHANNEL,str);
+	    mysql_free_result();
+	  }
+  }
+else return IRC_GroupSay(gGroupID, IRC_CHANNEL,"11,10You are not authorized to use this command!");
+return 1;
+}
+
+IRCCMD:say(botid, channel[], user[], host[], params[])
+{
+ if (!isnull(params))
+
+ {
+
+  if(IRC_IsOwner(botid, channel, user))
+  {
+			// Echo the formatted message
+			new msg[112];
+		 	format(msg,sizeof(msg), "(IRC-Owner)%s: "cwhite"%s", user, params);
+			SendClientMessageToAll(red, msg);
+			format(msg, sizeof(msg),"4(IRC-Owner) %s:1%s", user, params);
+            IRC_GroupSay(gGroupID, IRC_CHANNEL, msg);
+
+		}
+   else if(IRC_IsAdmin(botid, channel, user))
+  {
+			// Echo the formatted message
+			new msg[112];
+		 	format(msg,sizeof(msg), "(IRC-High_Admin)%s: "cwhite"%s", user, params);
+			SendClientMessageToAll(red, msg);
+			format(msg, sizeof(msg),"4(IRC-High_Admin) %s:1%s", user, params);
+            IRC_GroupSay(gGroupID, IRC_CHANNEL, msg);
+
+		}
+
+ else if(IRC_IsOp(botid, channel, user))
+  {
+			// Echo the formatted message
+			new msg[112];
+		 	format(msg,sizeof(msg), "(IRC-Admin)%s: "cwhite"%s", user, params);
+			SendClientMessageToAll(red, msg);
+			format(msg, sizeof(msg),"4(IRC-Admin) %s:1%s", user, params);
+            IRC_GroupSay(gGroupID, IRC_CHANNEL, msg);
+
+		}
+ else if(IRC_IsHalfop(botid, channel, user))
+  {
+			// Echo the formatted message
+			new msg[112];
+		 	format(msg,sizeof(msg), "(IRC-Mod)%s: "cwhite"%s", user, params);
+			SendClientMessageToAll(red, msg);
+			format(msg, sizeof(msg),"12(IRC-Mod) %s:1%s", user, params);
+            IRC_GroupSay(gGroupID, IRC_CHANNEL, msg);
+
+		}
+
+
+
+		else
+  {
+			// Echo the formatted message
+			new msg[112];
+		 	format(msg,sizeof(msg), "(IRC)%s: "cwhite"%s", user, params);
+			SendClientMessageToAll(green, msg);
+			format(msg, sizeof(msg),"4(IRC)%s:1%s", user, params);
+            IRC_GroupSay(gGroupID, IRC_CHANNEL, msg);
+
+		}
+}	return 1;
+}
+
+IRCCMD:offban(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsOp(botid, channel, user))
+  {
+	 new targetname[50], reason[100];
+    if(sscanf(params,"ss", targetname, reason)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"5Correct Usage: !offban <playername> [Reason]");
+    {
+
+	  new bquery[200];
+      format(bquery, sizeof(bquery),"INSERT INTO bandata(admin, player, reason,  banned) VALUES('%s', '%s', '%s', 1)",user,targetname, reason);
+      mysql_query(bquery);
+	  mysql_store_result();
+
+	    new string[200];
+	    format(string, sizeof(string),"11,10Player %s's has been banned!.", targetname);
+	    IRC_GroupSay(gGroupID,IRC_CHANNEL,string);
+
+	  }
+  }return 0;
+ }
+IRCCMD:ban(botid, channel[], user[], host[], params[])
+{
+  if(IRC_IsOp(botid, channel, user))
+  {
+    new targetid, reason[100];
+    new endid;
+    if(sscanf(params,"ds", targetid, reason)) return IRC_GroupSay(gGroupID,IRC_CHANNEL,"5Correct Usage: !ban [ID] [Reason]");
+    if(!IsPlayerConnected(endid) && targetid != INVALID_PLAYER_ID)
+    {
+      IRC_GroupSay(gGroupID,IRC_CHANNEL,"4Invalid player id.");
+    }
+    else
+    {
+      new playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
+	  GetPlayerName(targetid, playername, sizeof(playername)); GetPlayerName(endid, adminname, sizeof(adminname));
+	  format(string,sizeof(string),"%s has been banned by Administrator %s.",playername,adminname);
+//	  SendClientMessageToAll(red,string);
+	  format(string,sizeof(string),"[Reason: %s]",params[2]);
+//	  SendClientMessageToAll(red,string);
+ 	  SaveToFile("BanLog",string);
+      for(new i = 1; i < MAX_REPORTS-1; i++) Reports[i] = Reports[i+1];
+	  Bans[MAX_REPORTS-1] = string;
+	  print(string);
+      new bquery[200], IP[16];
+      GetPlayerIp(targetid, IP, 16);
+      format(bquery, sizeof(bquery),"INSERT INTO bandata(admin, player, reason, IP, banned) VALUES('%s', '%s', '%s','%s', 1)", PlayerName5(endid),PlayerName5(targetid), reason, IP);
+      mysql_query(bquery);
+//      new string[256];
+      format(string, sizeof(string),"1,4%s has been banned by Admin %s [Reason: %s]", PlayerName5(targetid), user, reason);
+     IRC_GroupSay(gGroupID,IRC_CHANNEL, string);
+     format(string, sizeof(string),"%s has been banned by Admin %s [Reason: %s]", PlayerName5(targetid), user, reason);
+     SendClientMessageToAll(red,string);
+      mysql_free_result();
+      SetTimerEx("DelayedKick", 1000, false, "i", targetid);
+    }
+  } else return IRC_GroupSay(gGroupID,IRC_CHANNEL,"4You are not authorized to use this command!");
+  return 1;
+}
+#endif
+//==============================================================================
+
+
+
+
+
+
 
 //=====================[ SAVING DATA ] =========================================
 
@@ -20676,11 +22111,13 @@ forward Zones_Update();
 public Zones_Update()
 {
 	new zone[MAX_ZONE_NAME], string[30];
-	for(new i=0; i<MAX_PLAYERS; i++){
-	GetPlayer2DZone(i, zone, MAX_ZONE_NAME);
-	format(string,sizeof(string),"%s", zone);
-	TextDrawSetString(Zones[i], string);
-	TextDrawShowForPlayer(i, Zones[i]);}
+	foreach(Player, i)
+	{
+		GetPlayer2DZone(i, zone, MAX_ZONE_NAME);
+		format(string,sizeof(string),"%s", zone);
+		TextDrawSetString(Zones[i], string);
+		TextDrawShowForPlayer(i, Zones[i]);
+	}
 	return 1;
 }
 
@@ -20744,7 +22181,7 @@ public ZoneStats()
 		    if(tCP[SNAKE]==TEAM_NONE)
 		    { c_str="Nobody. YET!"; }
 
-			CountVar[playerid][SNAKE]--;
+			//CountVar[playerid][SNAKE]--;
 			new ZoneString[124];
 			for(new x=0; x < 4; x++)
   			{ TextDrawShowForPlayer(playerid, ZoneTextdraw_[x][playerid]); }
@@ -20769,7 +22206,7 @@ public ZoneStats()
 		    if(tCP[BAY]==TEAM_NONE)
 		    { c_str="Nobody. YET!"; }
 
-			CountVar[playerid][BAY]--;
+			//CountVar[playerid][BAY]--;
 			new ZoneString[124];
 			for(new x=0; x < 4; x++)
   			{ TextDrawShowForPlayer(playerid, ZoneTextdraw_[x][playerid]); }
@@ -20794,7 +22231,7 @@ public ZoneStats()
 		    if(tCP[BIG]==TEAM_NONE)
 		    { c_str="Nobody. YET!"; }
 
-			CountVar[playerid][BIG]--;
+			//CountVar[playerid][BIG]--;
 			new ZoneString[124];
 			for(new x=0; x < 4; x++)
   			{ TextDrawShowForPlayer(playerid, ZoneTextdraw_[x][playerid]); }
@@ -20819,7 +22256,7 @@ public ZoneStats()
 		    if(tCP[ARMY]==TEAM_NONE)
 		    { c_str="Nobody. YET!"; }
 
-			CountVar[playerid][ARMY]--;
+			//CountVar[playerid][ARMY]--;
 			new ZoneString[124];
 			for(new x=0; x < 4; x++)
   			{ TextDrawShowForPlayer(playerid, ZoneTextdraw_[x][playerid]); }
@@ -20844,7 +22281,7 @@ public ZoneStats()
 		    if(tCP[PETROL]==TEAM_NONE)
 		    { c_str="Nobody. YET!"; }
 
-			CountVar[playerid][PETROL]--;
+			//CountVar[playerid][PETROL]--;
 			new ZoneString[124];
 			for(new x=0; x < 4; x++)
   			{ TextDrawShowForPlayer(playerid, ZoneTextdraw_[x][playerid]); }
@@ -20869,7 +22306,7 @@ public ZoneStats()
 		    if(tCP[OIL]==TEAM_NONE)
 		    { c_str="Nobody. YET!"; }
 
-			CountVar[playerid][OIL]--;
+			//CountVar[playerid][OIL]--;
 			new ZoneString[124];
 			for(new x=0; x < 4; x++)
   			{ TextDrawShowForPlayer(playerid, ZoneTextdraw_[x][playerid]); }
@@ -20894,7 +22331,7 @@ public ZoneStats()
 		    if(tCP[DESERT]==TEAM_NONE)
 		    { c_str="Nobody. YET!"; }
 
-			CountVar[playerid][DESERT]--;
+			//CountVar[playerid][DESERT]--;
 			new ZoneString[124];
 			for(new x=0; x < 4; x++)
   			{ TextDrawShowForPlayer(playerid, ZoneTextdraw_[x][playerid]); }
@@ -20919,7 +22356,7 @@ public ZoneStats()
 		    if(tCP[QUARRY]==TEAM_NONE)
 		    { c_str="Nobody. YET!"; }
 
-			CountVar[playerid][QUARRY]--;
+			//CountVar[playerid][QUARRY]--;
 			new ZoneString[124];
 			for(new x=0; x < 4; x++)
   			{ TextDrawShowForPlayer(playerid, ZoneTextdraw_[x][playerid]); }
@@ -20944,7 +22381,7 @@ public ZoneStats()
 		    if(tCP[GUEST]==TEAM_NONE)
 		    { c_str="Nobody. YET!"; }
 
-			CountVar[playerid][GUEST]--;
+			//CountVar[playerid][GUEST]--;
 			new ZoneString[124];
 			for(new x=0; x < 4; x++)
   			{ TextDrawShowForPlayer(playerid, ZoneTextdraw_[x][playerid]); }
@@ -20969,7 +22406,7 @@ public ZoneStats()
 		    if(tCP[EAR]==TEAM_NONE)
 		    { c_str="Nobody. YET!"; }
 
-			CountVar[playerid][EAR]--;
+			//CountVar[playerid][EAR]--;
 			new ZoneString[124];
 			for(new x=0; x < 4; x++)
   			{ TextDrawShowForPlayer(playerid, ZoneTextdraw_[x][playerid]); }
@@ -20978,33 +22415,6 @@ public ZoneStats()
 			format(ZoneString, sizeof(ZoneString),"~p~Zone: ~w~Bigear~n~~y~Controlled by: ~w~%s", c_str);
 			TextDrawSetString(ZoneTextdraw_[2][playerid], ZoneString);
 		}
-		if(IsPlayerInDynamicCP(playerid, CP[AIRP]) && UnderAttack[AIRP] == 1 && IsPlayerCapturing[playerid][AIRP] == 1)
-		{
-		    new c_str[100];
-		    if(tCP[AIRP]==TEAM_EURASIA)
-		    { c_str="Eurasia"; }
-		    if(tCP[AIRP]==TEAM_ARAB)
-		    { c_str="Arabia"; }
-		    if(tCP[AIRP]==TEAM_SOVIET)
-		    { c_str="Soviet"; }
-		    if(tCP[AIRP]==TEAM_USA)
-		    { c_str="U.S.A"; }
-		    if(tCP[AIRP]==TEAM_AUS)
-		    { c_str="Australia"; }
-		    if(tCP[AIRP]==TEAM_NONE)
-		    { c_str="Nobody. YET!"; }
-
-			CountVar[playerid][EAR]--;
-			new ZoneString[124];
-			for(new x=0; x < 4; x++)
-  			{ TextDrawShowForPlayer(playerid, ZoneTextdraw_[x][playerid]); }
-			format(ZoneString, sizeof(ZoneString),"%d%", CountVar[playerid][EAR]);
-			TextDrawSetString(ZoneTextdraw_[3][playerid], ZoneString);
-			format(ZoneString, sizeof(ZoneString),"~p~Zone: ~w~Mini Aiprot~n~~y~Controlled by: ~w~%s", c_str);
-			TextDrawSetString(ZoneTextdraw_[2][playerid], ZoneString);
-		}
-		
-		
 	}
 	return 1;
 }
