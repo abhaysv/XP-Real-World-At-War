@@ -1,0 +1,458 @@
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[21:05:45] 
+[21:05:45] Server Plugins
+[21:05:45] --------------
+[21:05:45]  Loading plugin: profiler
+[21:05:45]   Profiler v2.13 is OK.
+[21:05:45]   Loaded.
+[21:05:45]  Loading plugin: crashdetect
+[21:05:45]   Warning: Runtime error detection will not work during this run because 
+[21:05:45]            profiler.DLL has been loaded before crashdetect.
+[21:05:45]   crashdetect v4.8.3 is OK.
+[21:05:45]   Loaded.
+[21:05:45]  Loading plugin: sscanf
+[21:05:45] 
+
+[21:05:45]  ===============================
+
+[21:05:45]       sscanf plugin loaded.     
+
+[21:05:45]          Version:  2.8.1        
+
+[21:05:45]    (c) 2012 Alex "Y_Less" Cole  
+
+[21:05:45]  ===============================
+
+[21:05:45]   Loaded.
+[21:05:45]  Loading plugin: Whirlpool
+[21:05:45]  
+[21:05:45]  ==================
+[21:05:45]  
+[21:05:45]   Whirlpool loaded
+[21:05:45]  
+[21:05:45]  ==================
+[21:05:45]  
+[21:05:45]   Loaded.
+[21:05:45]  Loading plugin: fixes2
+[21:05:45] 
+
+[21:05:45]  ===============================
+
+[21:05:45]        fixes plugin loaded.     
+
+[21:05:45]    (c) 2012 Alex "Y_Less" Cole
+
+[21:05:45]  ===============================
+
+[21:05:45]   Loaded.
+[21:05:45]  Loading plugin: mysql
+[21:05:45] 
+
+  > MySQL plugin R5 successfully loaded.
+
+[21:05:45]   Loaded.
+[21:05:45]  Loading plugin: streamer
+[21:05:45] 
+
+*** Streamer Plugin v2.7.8 by Incognito loaded ***
+
+[21:05:45]   Loaded.
+[21:05:45]  Loading plugin: hash
+[21:05:45] [HASH] Plugin successfully loaded 0.0.1 (Compiled on Feb 24 2014, 16:44:49).
+[21:05:45]   Loaded.
+[21:05:45]  Loading plugin: irc
+[21:05:45]   Failed.
+[21:05:45]  Loaded 8 plugins.
+
+[21:05:45] 
+[21:05:45] Filterscripts
+[21:05:45] ---------------
+[21:05:45]   Loading filterscript 'usfReactionTest.amx'...
+[21:05:45]   Unable to load filterscript 'usfReactionTest.amx'.
+[21:05:45]   Loading filterscript 'usfMaps.amx'...
+[21:05:45]   Unable to load filterscript 'usfMaps.amx'.
+[21:05:45]   Loaded 0 filterscripts.
+
+[21:05:46] [profiler] Attached profiler to gamemodes/rxx.amx
+[21:05:46] 
+[21:05:46] -------------------------------------
+[21:05:46] Loading database...
+[21:05:46] -------------------------------------
+[21:05:49] MySQL connection sucefully executed!
+[21:05:49] -------------------------------------
+[21:05:49] Loading custom maps....
+[21:05:49] -------------------------------------
+[21:05:49] -------------------------------------
+[21:05:49] Loading Vehicles....
+[21:05:49] -------------------------------------
+[21:05:49] SendBoxMessage - By Arakuta
+[21:05:49] 
+ -Configuration Settings Loaded
+[21:05:49]  -66 Forbidden Names Loaded
+[21:05:49]  -20 Forbidden Tags Loaded
+[21:05:49]  -34 Forbidden Words Loaded
+[21:05:49] 
+---------2015_RWW2 V10.9.1--=LOADING=--------
+[21:05:49]  LATEST VERSION BY Perfect_Boy
+[21:05:49]  VERSION v10.9.1
+[21:05:49]  LOADED SUCESSFULLY!
+[21:05:49] ----------------------------------
+
+[21:05:49] [RconPro] Using hardcoded passwords: WARNING: at least one password (3) is not safe!
+[21:05:49] --------------------------------------
+
+[21:05:49]   BFBO Group Script  
+[21:05:49] Number of vehicle models: 20
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[21:17:19] 
+[21:17:19] Server Plugins
+[21:17:19] --------------
+[21:17:19]  Loading plugin: profiler
+[21:17:19]   Profiler v2.13 is OK.
+[21:17:19]   Loaded.
+[21:17:19]  Loading plugin: crashdetect
+[21:17:19]   Warning: Runtime error detection will not work during this run because 
+[21:17:19]            profiler.DLL has been loaded before crashdetect.
+[21:17:19]   crashdetect v4.8.3 is OK.
+[21:17:19]   Loaded.
+[21:17:19]  Loading plugin: sscanf
+[21:17:19] 
+
+[21:17:19]  ===============================
+
+[21:17:19]       sscanf plugin loaded.     
+
+[21:17:19]          Version:  2.8.1        
+
+[21:17:19]    (c) 2012 Alex "Y_Less" Cole  
+
+[21:17:19]  ===============================
+
+[21:17:19]   Loaded.
+[21:17:19]  Loading plugin: Whirlpool
+[21:17:19]  
+[21:17:19]  ==================
+[21:17:19]  
+[21:17:19]   Whirlpool loaded
+[21:17:19]  
+[21:17:19]  ==================
+[21:17:19]  
+[21:17:19]   Loaded.
+[21:17:19]  Loading plugin: fixes2
+[21:17:19] 
+
+[21:17:19]  ===============================
+
+[21:17:19]        fixes plugin loaded.     
+
+[21:17:19]    (c) 2012 Alex "Y_Less" Cole
+
+[21:17:19]  ===============================
+
+[21:17:19]   Loaded.
+[21:17:19]  Loading plugin: mysql
+[21:17:19] 
+
+  > MySQL plugin R5 successfully loaded.
+
+[21:17:19]   Loaded.
+[21:17:19]  Loading plugin: streamer
+[21:17:19] 
+
+*** Streamer Plugin v2.7.8 by Incognito loaded ***
+
+[21:17:19]   Loaded.
+[21:17:19]  Loading plugin: hash
+[21:17:19] [HASH] Plugin successfully loaded 0.0.1 (Compiled on Feb 24 2014, 16:44:49).
+[21:17:19]   Loaded.
+[21:17:19]  Loading plugin: irc
+[21:17:19]   Failed.
+[21:17:19]  Loaded 8 plugins.
+
+[21:17:19] 
+[21:17:19] Filterscripts
+[21:17:19] ---------------
+[21:17:19]   Loading filterscript 'usfReactionTest.amx'...
+[21:17:19]   Unable to load filterscript 'usfReactionTest.amx'.
+[21:17:19]   Loading filterscript 'usfMaps.amx'...
+[21:17:19]   Unable to load filterscript 'usfMaps.amx'.
+[21:17:19]   Loaded 0 filterscripts.
+
+[21:17:19] [profiler] Attached profiler to gamemodes/rxx.amx
+[21:17:20] 
+[21:17:20] -------------------------------------
+[21:17:20] Loading database...
+[21:17:20] -------------------------------------
+[21:17:21] MySQL connection sucefully executed!
+[21:17:21] -------------------------------------
+[21:17:21] Loading custom maps....
+[21:17:21] -------------------------------------
+[21:17:21] -------------------------------------
+[21:17:21] Loading Vehicles....
+[21:17:21] -------------------------------------
+[21:17:21] SendBoxMessage - By Arakuta
+[21:17:21] 
+ -Configuration Settings Loaded
+[21:17:21]  -66 Forbidden Names Loaded
+[21:17:21]  -20 Forbidden Tags Loaded
+[21:17:21]  -34 Forbidden Words Loaded
+[21:17:21] 
+---------2015_RWW2 V10.9.1--=LOADING=--------
+[21:17:21]  LATEST VERSION BY Perfect_Boy
+[21:17:21]  VERSION v10.9.1
+[21:17:21]  LOADED SUCESSFULLY!
+[21:17:21] ----------------------------------
+
+[21:17:21] [RconPro] Using hardcoded passwords: WARNING: at least one password (3) is not safe!
+[21:17:21] --------------------------------------
+
+[21:17:21]   BFBO Group Script  
+[21:17:21] Number of vehicle models: 20
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[01:37:24] 
+[01:37:24] Server Plugins
+[01:37:24] --------------
+[01:37:24]  Loading plugin: profiler
+[01:37:24]   Profiler v2.13 is OK.
+[01:37:24]   Loaded.
+[01:37:24]  Loading plugin: crashdetect
+[01:37:24]   Warning: Runtime error detection will not work during this run because 
+[01:37:24]            profiler.DLL has been loaded before crashdetect.
+[01:37:24]   crashdetect v4.8.3 is OK.
+[01:37:24]   Loaded.
+[01:37:24]  Loading plugin: sscanf
+[01:37:24] 
+
+[01:37:24]  ===============================
+
+[01:37:24]       sscanf plugin loaded.     
+
+[01:37:24]          Version:  2.8.1        
+
+[01:37:24]    (c) 2012 Alex "Y_Less" Cole  
+
+[01:37:24]  ===============================
+
+[01:37:24]   Loaded.
+[01:37:24]  Loading plugin: Whirlpool
+[01:37:24]  
+[01:37:24]  ==================
+[01:37:24]  
+[01:37:24]   Whirlpool loaded
+[01:37:24]  
+[01:37:24]  ==================
+[01:37:24]  
+[01:37:24]   Loaded.
+[01:37:24]  Loading plugin: fixes2
+[01:37:24] 
+
+[01:37:24]  ===============================
+
+[01:37:24]        fixes plugin loaded.     
+
+[01:37:24]    (c) 2012 Alex "Y_Less" Cole
+
+[01:37:24]  ===============================
+
+[01:37:24]   Loaded.
+[01:37:24]  Loading plugin: mysql
+[01:37:24] 
+
+  > MySQL plugin R5 successfully loaded.
+
+[01:37:24]   Loaded.
+[01:37:24]  Loading plugin: streamer
+[01:37:24] 
+
+*** Streamer Plugin v2.7.8 by Incognito loaded ***
+
+[01:37:24]   Loaded.
+[01:37:24]  Loading plugin: hash
+[01:37:24] [HASH] Plugin successfully loaded 0.0.1 (Compiled on Feb 24 2014, 16:44:49).
+[01:37:24]   Loaded.
+[01:37:24]  Loading plugin: irc
+[01:37:24]   Failed.
+[01:37:24]  Loaded 8 plugins.
+
+[01:37:24] 
+[01:37:24] Filterscripts
+[01:37:24] ---------------
+[01:37:24]   Loading filterscript 'usfReactionTest.amx'...
+[01:37:24]   Unable to load filterscript 'usfReactionTest.amx'.
+[01:37:24]   Loading filterscript 'usfMaps.amx'...
+[01:37:24]   Unable to load filterscript 'usfMaps.amx'.
+[01:37:24]   Loaded 0 filterscripts.
+
+[01:37:24] 
+[01:37:24] -------------------------------------
+[01:37:24] Loading database...
+[01:37:24] -------------------------------------
+[01:37:25] MySQL connection sucefully executed!
+[01:37:26] -------------------------------------
+[01:37:26] Loading custom maps....
+[01:37:26] -------------------------------------
+[01:37:26] -------------------------------------
+[01:37:26] Loading Vehicles....
+[01:37:26] -------------------------------------
+[01:37:26] SendBoxMessage - By Arakuta
+[01:37:26] 
+ -Configuration Settings Loaded
+[01:37:26]  -66 Forbidden Names Loaded
+[01:37:26]  -20 Forbidden Tags Loaded
+[01:37:26]  -34 Forbidden Words Loaded
+[01:37:26] 
+---------2015_RWW2 V10.9.1--=LOADING=--------
+[01:37:26]  LATEST VERSION BY Perfect_Boy
+[01:37:26]  VERSION v10.9.1
+[01:37:26]  LOADED SUCESSFULLY!
+[01:37:26] ----------------------------------
+
+[01:37:26] [RconPro] Using hardcoded passwords: WARNING: at least one password (3) is not safe!
+[01:37:26] --------------------------------------
+
+[01:37:26]   BFBO Group Script  
+[01:37:26] Number of vehicle models: 20
+[01:38:07] [connection] 127.0.0.1:56496 requests connection cookie.
+[01:38:08] [connection] incoming connection: 127.0.0.1:56496 id: 0
+[01:38:08] [join] Dusk_Fawn has joined the server (0:127.0.0.1)
+[01:48:33] [part] Dusk_Fawn has left the server (0:1)
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[02:27:22] 
+[02:27:22] Server Plugins
+[02:27:22] --------------
+[02:27:22]  Loading plugin: profiler
+[02:27:22]   Profiler v2.13 is OK.
+[02:27:22]   Loaded.
+[02:27:22]  Loading plugin: crashdetect
+[02:27:22]   Warning: Runtime error detection will not work during this run because 
+[02:27:22]            profiler.DLL has been loaded before crashdetect.
+[02:27:22]   crashdetect v4.8.3 is OK.
+[02:27:22]   Loaded.
+[02:27:22]  Loading plugin: sscanf
+[02:27:22] 
+
+[02:27:22]  ===============================
+
+[02:27:22]       sscanf plugin loaded.     
+
+[02:27:22]          Version:  2.8.1        
+
+[02:27:22]    (c) 2012 Alex "Y_Less" Cole  
+
+[02:27:22]  ===============================
+
+[02:27:22]   Loaded.
+[02:27:22]  Loading plugin: Whirlpool
+[02:27:22]  
+[02:27:22]  ==================
+[02:27:22]  
+[02:27:22]   Whirlpool loaded
+[02:27:22]  
+[02:27:22]  ==================
+[02:27:22]  
+[02:27:22]   Loaded.
+[02:27:22]  Loading plugin: fixes2
+[02:27:22] 
+
+[02:27:22]  ===============================
+
+[02:27:22]        fixes plugin loaded.     
+
+[02:27:22]    (c) 2012 Alex "Y_Less" Cole
+
+[02:27:22]  ===============================
+
+[02:27:22]   Loaded.
+[02:27:22]  Loading plugin: mysql
+[02:27:22] 
+
+  > MySQL plugin R5 successfully loaded.
+
+[02:27:22]   Loaded.
+[02:27:22]  Loading plugin: streamer
+[02:27:22] 
+
+*** Streamer Plugin v2.9.4 by Incognito loaded ***
+
+[02:27:22]   Loaded.
+[02:27:22]  Loading plugin: hash
+[02:27:22] [HASH] Plugin successfully loaded 0.0.1 (Compiled on Feb 24 2014, 16:44:49).
+[02:27:22]   Loaded.
+[02:27:22]  Loading plugin: irc
+[02:27:22]   Failed.
+[02:27:22]  Loaded 8 plugins.
+
+[02:27:22] 
+[02:27:22] Filterscripts
+[02:27:22] ---------------
+[02:27:22]   Loading filterscript 'usfReactionTest.amx'...
+[02:27:22]   Unable to load filterscript 'usfReactionTest.amx'.
+[02:27:22]   Loading filterscript 'usfMaps.amx'...
+[02:27:22]   Unable to load filterscript 'usfMaps.amx'.
+[02:27:22]   Loaded 0 filterscripts.
+
+[02:27:22] 
+[02:27:22] -------------------------------------
+[02:27:22] Loading database...
+[02:27:22] -------------------------------------
+[02:27:23] MySQL connection sucefully executed!
+[02:27:23] -------------------------------------
+[02:27:23] Loading custom maps....
+[02:27:23] -------------------------------------
+[02:27:23] -------------------------------------
+[02:27:23] Loading Vehicles....
+[02:27:24] -------------------------------------
+[02:27:24] SendBoxMessage - By Arakuta
+[02:27:24] 
+ -Configuration Settings Loaded
+[02:27:24]  -66 Forbidden Names Loaded
+[02:27:24]  -20 Forbidden Tags Loaded
+[02:27:24]  -34 Forbidden Words Loaded
+[02:27:24] 
+---------2015_RWW2 V10.9.1--=LOADING=--------
+[02:27:24]  LATEST VERSION BY Perfect_Boy
+[02:27:24]  VERSION v10.9.1
+[02:27:24]  LOADED SUCESSFULLY!
+[02:27:24] ----------------------------------
+
+[02:27:24] [RconPro] Using hardcoded passwords: WARNING: at least one password (3) is not safe!
+[02:27:24] --------------------------------------
+
+[02:27:24]   BFBO Group Script  
+[02:27:24] Number of vehicle models: 20
+[02:27:57] [connection] 127.0.0.1:57940 requests connection cookie.
+[02:27:58] [connection] incoming connection: 127.0.0.1:57940 id: 0
+[02:27:58] [join] Dusk_Fawn has joined the server (0:127.0.0.1)
+[02:32:34] [part] Dusk_Fawn has left the server (0:1)

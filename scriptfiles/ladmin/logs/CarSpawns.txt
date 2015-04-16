@@ -1,0 +1,13 @@
+[16.2.2015 21:51:12] Oc[BEA]sT spawned a "Phoenix" (Model:603) colour (41, 25), at 163.23, 2741.02, 55.76
+ [16.2.2015 22:0:25] Oc[BEA]sT spawned a "Sandking" (Model:495) colour (115, 8), at 355.22, 2528.26, 16.70
+ [24.2.2015 20:43:45] Oc[BEA]sT spawned a "Hydra" (Model:520) colour (68, 95), at -503.25, 2860.70, 78.89
+ [24.2.2015 20:57:50] Oc[BEA]sT spawned a "Hydra" (Model:520) colour (75, 116), at 83.56, 2519.32, 16.48
+ [25.2.2015 1:45:25] Oc[BEA]sT spawned a "Stretch" (Model:409) colour (48, 12), at 297.69, 2516.34, 16.64
+ [25.2.2015 1:57:44] Oc[BEA]sT spawned a "Stretch" (Model:409) colour (43, 119), at -578.46, 2624.40, 53.51
+ [26.2.2015 7:56:18] Oc[BEA]sT spawned a "Freeway" (Model:463) colour (48, 91), at -354.24, 2564.00, 38.78
+ [1.3.2015 6:11:9] Oc[BEA]sT spawned a "Freeway" (Model:463) colour (17, 109), at 374.83, 2526.03, 16.57
+ [1.3.2015 6:35:4] Oc[BEA]sT spawned a "Freeway" (Model:463) colour (24, 54), at 379.60, 2491.52, 16.48
+ [3.3.2015 2:19:29] Oc[BEA]sT spawned a "Freeway" (Model:463) colour (70, 83), at 292.56, 2508.39, 16.50
+ [7.3.2015 4:8:37] Oc[BEA]sT spawned a "Stretch" (Model:409) colour (105, 42), at -539.87, 2584.30, 53.41
+ [7.3.2015 4:22:44] Oc[BEA]sT spawned a "Stretch" (Model:409) colour (45, 54), at -573.44, 2570.38, 53.51
+ 

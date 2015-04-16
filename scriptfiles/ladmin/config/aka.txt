@@ -1,0 +1,5 @@
+192.168.1.78=bond1999
+192.168.1.33=Oc[BEA]sT,Oc_Beast
+192.168.1.35=Oc[BEA]sT
+127.0.0.1=Oc[NPC]Bot,Oc[BEA]sT,Oc[NPC]Traveller,Perfect,[XP]Perfect_Boy,[XP]Perfect_Boyjj,jhgf,[XP]Perfect_Boyfff,iuddhhd,Luminance,dfgss
+192.168.1.34=Oc[BEA]sT
