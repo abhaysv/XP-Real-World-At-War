@@ -3,11 +3,34 @@ Call Of Duty - Real World At War 2
 Official Xenon Pro Gaming Script
 By, [D]ark_[E]mperor A.k.a [YGC]SrizZ A.k.a iThe[YGC]Pro
 
+Updated by Perfect_Boy Aka Abhay SV
+
 Do Not SCAM/Sell script. If Scammed, then it will lead to ban in forum.sa-mp.com
 
 COD_RWW2 - - - TDM - - - V10.9.1 - - - xpsamp.co.in
 ------===== [D]ark_[E]mperor Rocks =====------
 */
+
+
+
+/*=======================   Updates Added By Abhay aka Perfectboy  ================
+|   ==> Added ProCon Rcon password protection system                                |
+|   ==> Added Admin area with working gates and stuff                               |
+|   ==> Clan System Added         f                                                  |
+|   ==> New Radio System with some hindi and english radio stations                 |
+|   ==> Admin and Management Chat Fixed                                             |
+|   ==> Added Special Donor Chat for Only Lv 10 Admins                              |
+|   ==> Clan saving system added so clans created become permanent                  |
+|   ==> /admins cmd Fixed                                                           |
+|   ==> Headshot System Added                                                       |
+|   ==> Christmas Gifts Added                                                       |
+|   ==> Toggle between Annoying Bot Chat                                            |
+|   ==> CPU and RAM Usage Optimised                                                 |
+===================================================================================*/
+
+
+
+//======================  [ Script Started  ]  ===============================
 
 #include <a_samp>
 #include <AntiCheat>
@@ -22,6 +45,9 @@ COD_RWW2 - - - TDM - - - V10.9.1 - - - xpsamp.co.in
 #include <lethaldudb2>
 #include <SII>
 #include <foreach>
+
+//============clan system by abhay=========================================
+#include <zcmd> // http://forum.sa-mp.com/showthread.php?t=91354
 #include <Dudb>
 
 #define savefolderclan "/clan/%s.ini"
@@ -49,8 +75,11 @@ enum pginfo
 new group[MAX_PLAYERS][pginfo];
 new groupinfo[MAX_GROUPS][ginfo];
 
+//============================================================================
 new
-	dsay = 0;
+	dsay = 0;     // for my donor chat  #perfect
+//=========================================================================
+//RconProtect By Abhay
 
 #define USE_HARDCODED_PWS           (true)  // Use a changing PW list
 #define USE_NAME_WHITELIST          (false) // Only players with a listed name
@@ -76,22 +105,23 @@ new pws[][MAX_PW_LENGTH] =              // Change this when using hardcoded
 
 new namewhitelist[][MAX_PLAYER_NAME] =  // Only the names in this list can login
 {                                       // as RCON admin, if USE_NAME_WHITELIST
-	       "[D]ark_[E]mperor"                 // is activated
+	"[XP]Perfect_Boy",                    // is activated
+	"[XP]IzZan",
+	"[XP]VinodRaj",
+	"[XP]Ma[T]iRz"
 };
 
 new ipwhitelist[][16] =                 // Only the IPs in this list can login
 {                                       // as RCON admin, if USE_IP_WHITELIST
-	"1"
+	"120.59.234.71"
                          // is activated
 };
 
 new currenthcindex;
-
-//==============================Prototype sys
-new Text3D:ProtLabel[MAX_VEHICLES];
-new A69Prot;
-new StealingA69Prot[MAX_PLAYERS];
+//================================= Rcon Pro END=====================
 //=========================Admin area global var=====================
+
+
 
 //____[Gates & other]____
 new meetinggate;
@@ -1054,13 +1084,18 @@ new RandomMessages[][] = {
   "{FF7E19}iThe[XP-INFO]Bot says: {00CED1}Check out{F81414} /swinfo{00CED1} to see the greetings From [D]ark_[E]mperor!",
   "{FF7E19}iThe[XP-INFO]Bot says: {00CED1}Vist our website: {F81414}xpsamp.co.in{00CED1} to get the latest news about the community!"
   };
+//==============================================================================PRoCon systwm Added by abhay
 main()
 {
 	print("\n---------2015_RWW2 V10.9.1--=LOADING=--------");
-	print(" LATEST VERSION BY [D]ark_[E]mperor");
-	print(" VERSION v10.9.1");
-	print(" LOADED SUCESSFULLY!");
+	print(" LATEST VERSION BY SRIJAN and ABHAY");
+	print(" VERSION =13.0.1=");
+	print(" =LOADED= SUCESSFULLY!");
 	print("----------------------------------\n");
+	print("\n--------------------------------------");
+	print(" RconPro Server Protection V0.9");
+	print(" Made by Abhay Sv ");
+
 	#if (USE_HARDCODED_PWS == true)
 	    new hcpw = CheckHCPWSafety();
 	    if (hcpw == -1) {
@@ -1144,12 +1179,7 @@ public OnGameModeInit()
 	SetTimer("ZoneStats", 1000, true);
 	SetTimer("OnServerTimeUpdate", 100000000000000000, true);
 	SetTimer("UpdateLaunchTime", 10, true);
-	SetTimer("uselessnrg",300000,0);
-	
-	//Proto type
-	A69Prot = AddStaticVehicle(428,215.8315,1860.0304,13.2654,1.1393,0,5);
-	ProtLabel[A69Prot] = Create3DTextLabel("Area 69 Prototype", 0x00FF00FF, 0.0, 0.0, 0.0, 50.0, 0, 1);
-	Attach3DTextLabelToVehicle(ProtLabel[A69Prot],A69Prot, 0.0, 0.0, 0.0);
+	SetTimer("uselessnrg",600000,0);
 
 
     AddPlayerClass(73,1110.1959,1909.0803,10.8203,5.0747,0,0,0,0,0,0); // EUR
@@ -1173,7 +1203,7 @@ public OnGameModeInit()
 	 //Marvel
 
 //PARKOUR MAP=======================================================================================
-/*
+
 	CreateDynamicObject(16120,501.15667700,-1929.50427200,-2.37919400,0.00000000,0.00000000,134.99997207); //
 	CreateDynamicObject(16120,472.36932400,-1908.16186500,0.87732700,0.00000000,0.00000000,-44.99993339); //
 	CreateDynamicObject(17029,454.18713400,-1952.15783700,-3.84863200,0.00000000,0.00000000,258.74997511); //
@@ -1532,8 +1562,9 @@ public OnGameModeInit()
 	CreateDynamicObject(1318,513.56189000,-2977.17334000,31.60363200,-96.25690969,0.85943669,75.86241966); //
 	CreateDynamicObject(1318,421.70547500,-2798.85498000,83.76178000,-96.25690969,0.85943669,261.50074549); //
 	CreateDynamicObject(1318,138.39022800,-2761.60571300,82.87475600,-96.25690969,0.85943669,261.50074549); //
-*/
+
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 	CreateDynamicObject(3749, 1007.33002, 2145.51001, 15.51000,   0.00000, 0.00000, 0.00000);
 	CreateDynamicObject(3749, 1007.21997, 2121.09009, 15.51000,   0.00000, 0.00000, 0.00000);
 	CreateDynamicObject(8210, 1017.70001, 2131.56006, 12.73000,   0.00000, 0.00000, 90.00000);
@@ -5374,140 +5405,134 @@ public OnGameModeInit()
 	CreateDynamicObject(3763, -1112.12598, 2614.45923, 74.45180,   0.00000, 0.00000, 0.00000);
 	CreateDynamicObject(3255, -1094.69641, 2630.01270, 41.95214,   0.00000, 0.00000, 0.00000);
 	CreateDynamicObject(3255, -1079.32385, 2601.65063, 41.95214,   0.00000, 0.00000, 0.00000);
-	CreateDynamicObject(8172, -1013.30109, 2536.98779, 74.47030,   0.00000, 180.00000, 0.00000);
-	CreateDynamicObject(8172, -973.55511, 2536.98779, 74.47030,   0.00000, 180.00000, 0.00000);
-	CreateDynamicObject(13593, -1035.16589, 2573.00879, 73.76420,   0.00000, 0.00000, 268.09970);
-	CreateDynamicObject(13593, -1035.16589, 2575.78076, 73.76420,   0.00000, 0.00000, 268.09970);
-	CreateDynamicObject(13593, -1035.16589, 2578.48682, 73.76420,   0.00000, 0.00000, 268.09970);
-	CreateDynamicObject(13593, -1035.16589, 2581.25879, 73.76420,   0.00000, 0.00000, 268.09970);
-
 	// Don't use these lines if it's a filterscript
-	CreateObject(10819, -3081.21924, 1775.98401, -13.41259,   0.00000, 0.00000, 0.00000);
-	CreateObject(8147, -3189.68555, 1699.95410, 3.28705,   0.00000, 0.00000, 42.70259);
-	CreateObject(987, -3139.60254, 1646.69263, 0.19234,   0.00000, 0.00000, 217.22357);
-	CreateObject(987, -3149.20654, 1640.01575, 0.19234,   0.00000, 0.00000, 195.06529);
-	CreateObject(987, -3161.07446, 1637.48621, 0.19234,   0.00000, 0.00000, 194.10335);
-	CreateObject(987, -3172.48633, 1634.86792, 0.19234,   0.00000, 0.00000, 272.48880);
-	CreateObject(987, -3172.37622, 1623.64966, 0.19234,   0.00000, 0.00000, 184.04601);
-	CreateObject(987, -3183.92310, 1622.53125, 0.19234,   0.00000, 0.00000, 184.04601);
-	CreateObject(987, -3195.41748, 1621.74158, 0.19234,   0.00000, 0.00000, 184.04601);
-	CreateObject(987, -3210.04492, 1610.01160, 0.25480,   0.00000, 0.00000, 346.08441);
-	CreateObject(8147, -3127.13159, 1603.37329, 3.28705,   0.00000, 0.00000, 87.33028);
-	CreateObject(8147, -3038.01538, 1598.69971, 3.15805,   0.00000, 0.00000, 87.33028);
-	CreateObject(8147, -2973.32202, 1668.17981, 3.28705,   0.00000, 0.00000, 185.32942);
-	CreateObject(8147, -2982.52124, 1810.90625, 3.26456,   0.00000, 0.00000, 181.86163);
-	CreateObject(8147, -3010.15991, 1913.12097, 3.26456,   0.00000, 0.00000, 220.78961);
-	CreateObject(8147, -3107.20898, 1915.65051, 3.26456,   0.00000, 0.00000, 136.19727);
-	CreateObject(8147, -3194.36914, 1811.23669, 3.26456,   0.00000, 0.00000, 143.34125);
-	CreateObject(18752, -3102.99707, 1791.40759, -21.33931,   0.00000, 0.00000, 1.43738);
-	CreateObject(4867, -3100.17090, 1758.06042, 0.08959,   0.00000, 0.00000, 141.32391);
-	CreateObject(10766, -3013.51953, 1776.89758, -2.00346,   0.00000, 0.00000, 0.00000);
-	CreateObject(10766, -3097.29053, 1719.40356, -2.00346,   0.00000, 0.00000, 271.77924);
-	CreateObject(10766, -3014.13672, 1707.97180, -2.00346,   0.00000, 0.00000, 0.00000);
-	CreateObject(10766, -3062.51660, 1777.81897, -2.00346,   0.00000, 0.00000, 0.00000);
-	CreateObject(10766, -3065.93188, 1706.66650, -2.00346,   0.00000, 0.00000, 0.00000);
-	CreateObject(10766, -3066.09766, 1635.75171, -2.00346,   0.00000, 0.00000, 0.00000);
-	CreateObject(10766, -3098.57031, 1673.34436, -2.00346,   0.00000, 0.00000, 271.77924);
-	CreateObject(10766, -3185.89404, 1731.24365, -2.00346,   0.00000, 0.00000, 223.13132);
-	CreateObject(10766, -3163.72510, 1782.53357, -2.00346,   0.00000, 0.00000, 223.13132);
-	CreateObject(10766, -3135.72144, 1730.70996, -2.00346,   0.00000, 0.00000, 223.13132);
-	CreateObject(10766, -3133.05029, 1678.90552, -2.00346,   0.00000, 0.00000, 43.52314);
-	CreateObject(10766, -3116.32251, 1701.00122, -2.00346,   0.00000, 0.00000, 31.99380);
-	CreateObject(10766, -3149.14453, 1693.53052, -2.00346,   0.00000, 0.00000, 43.52314);
-	CreateObject(10766, -3129.53638, 1719.40308, -2.00346,   0.00000, 0.00000, 51.87177);
-	CreateObject(10766, -3101.67798, 1755.53589, -2.00346,   0.00000, 0.00000, 53.18230);
-	CreateObject(10766, -3073.65332, 1792.30359, -2.00346,   0.00000, 0.00000, 53.18230);
-	CreateObject(10766, -3050.41650, 1819.84058, -2.00346,   0.00000, 0.00000, 47.06005);
-	CreateObject(10766, -3022.32959, 1850.38123, -2.00346,   0.00000, 0.00000, 46.01383);
-	CreateObject(10766, -3023.39429, 1897.27515, -2.00346,   0.00000, 0.00000, 224.51671);
-	CreateObject(10766, -3000.71777, 1873.85999, -2.00346,   0.00000, 0.00000, 43.64537);
-	CreateObject(10766, -2969.61035, 1816.51550, -2.00346,   0.00000, 0.00000, 34.55171);
-	CreateObject(10766, -3009.15552, 1775.43274, -2.00346,   0.00000, 0.00000, 196.34637);
-	CreateObject(10766, -3001.55420, 1872.47522, -2.00346,   0.00000, 0.00000, 224.51671);
-	CreateObject(10766, -2986.85278, 1863.33069, -2.00346,   0.00000, 0.00000, 224.51671);
-	CreateObject(10766, -3020.47803, 1828.04102, -2.00346,   0.00000, 0.00000, 224.51671);
-	CreateObject(10766, -3037.93384, 1850.05591, -2.00346,   0.00000, 0.00000, 224.51671);
-	CreateObject(10766, -3054.71045, 1795.74976, -2.00346,   0.00000, 0.00000, 224.51671);
-	CreateObject(10766, -2987.47876, 1715.29834, -2.00346,   0.00000, 0.00000, 189.40167);
-	CreateObject(10766, -3016.04639, 1693.96741, -2.00346,   0.00000, 0.00000, 189.40167);
-	CreateObject(10766, -2982.65723, 1699.40552, -2.00346,   0.00000, 0.00000, 189.40167);
-	CreateObject(10766, -3163.00903, 1688.43213, -2.00346,   0.00000, 0.00000, 189.40167);
-	CreateObject(10766, -3060.95264, 1688.24463, -2.00346,   0.00000, 0.00000, 189.40167);
-	CreateObject(10766, -3095.65894, 1700.82324, -2.00346,   0.00000, 0.00000, 189.40167);
-	CreateObject(10766, -3140.69214, 1692.04846, -2.00346,   0.00000, 0.00000, 189.40167);
-	CreateObject(10766, -3180.21118, 1754.31189, -2.00346,   0.00000, 0.00000, 189.40167);
-	CreateObject(17032, -2957.07886, 1765.72229, -15.43395,   0.00000, 0.00000, 0.00000);
-	CreateObject(17032, -3059.93848, 1653.51990, -14.96694,   0.00000, 0.00000, 0.00000);
-	CreateObject(655, -3056.14551, 1663.93372, 12.82365,   0.00000, 0.00000, 0.00000);
-	CreateObject(655, -3062.39771, 1681.26001, -0.82383,   0.00000, 0.00000, 0.00000);
-	CreateObject(655, -3058.00122, 1663.40295, 10.39872,   0.00000, 0.00000, 0.00000);
-	CreateObject(655, -3060.41675, 1650.01953, 5.21082,   0.00000, 0.00000, 0.00000);
-	CreateObject(655, -2958.48145, 1761.19385, 4.97124,   0.00000, 0.00000, 0.00000);
-	CreateObject(655, -2953.64893, 1773.92126, 11.98102,   0.00000, 0.00000, 0.00000);
-	CreateObject(3268, -2983.95435, 1626.54175, -0.23761,   0.00000, 0.00000, 4.65272);
-	CreateObject(3268, -2988.91992, 1668.27246, -0.23761,   0.00000, 0.00000, 4.65272);
-	CreateObject(3279, -3057.09741, 1677.29297, 0.20591,   0.00000, 0.00000, 43.65219);
-	CreateObject(3279, -2992.58789, 1814.90027, 0.20591,   0.00000, 0.00000, 189.41928);
-	CreateObject(3279, -2981.21582, 1601.85828, 0.20591,   0.00000, 0.00000, 189.41928);
-	CreateObject(3279, -3060.88818, 1948.73328, 0.20591,   0.00000, 0.00000, 225.70981);
-	CreateObject(3279, -3161.26978, 1634.44214, 0.20591,   0.00000, 0.00000, 3.99582);
-	CreateObject(3279, -3222.84033, 1751.84485, 0.20591,   0.00000, 0.00000, 35.42395);
-	CreateObject(3279, -3154.90942, 1609.07336, 0.20591,   0.00000, 0.00000, 95.52544);
-	CreateObject(3268, -3039.85132, 1924.10205, -0.23761,   0.00000, 0.00000, 44.33446);
-	CreateObject(3268, -3146.92725, 1674.68604, -0.23761,   0.00000, 0.00000, 222.46693);
-	CreateObject(3268, -3011.05396, 1891.55713, -0.23761,   0.00000, 0.00000, 44.33446);
-	CreateObject(9241, -3177.06274, 1709.19409, 0.30602,   0.00000, 0.00000, 133.55867);
-	CreateObject(9241, -3088.01929, 1912.94568, 0.30602,   0.00000, 0.00000, 45.61596);
-	CreateObject(9241, -3109.92334, 1891.27429, 0.30602,   0.00000, 0.00000, 45.61596);
-	CreateObject(9241, -3071.96216, 1614.76013, 0.30602,   0.00000, 0.00000, 180.11995);
-	CreateObject(3673, -2995.04980, 1778.72388, 18.65506,   0.00000, 0.00000, 92.47716);
-	CreateObject(3673, -3189.66650, 1804.68079, 18.65506,   0.00000, 0.00000, 52.72843);
-	CreateObject(9731, -3237.38159, 1603.74438, 0.24374,   0.00000, 0.00000, 161.03976);
-	CreateObject(9490, -3441.24951, 1608.32385, 1.52684,   0.00000, 0.00000, 181.67520);
-	CreateObject(18805, -3546.78491, 1608.48694, -1.93828,   0.00000, 0.00000, 0.00000);
-	CreateObject(18805, -3661.49780, 1608.61768, -1.93828,   0.00000, 0.00000, 0.00000);
-	CreateObject(4827, -3792.10352, 1571.91187, -3.16385,   0.00000, 0.00000, 46.12311);
-	CreateObject(4827, -3888.36182, 1452.37634, -3.38810,   0.00000, 0.00000, 90.17397);
-	CreateObject(4827, -3871.29126, 1304.73584, -3.38810,   0.00000, 0.00000, 136.29890);
-	CreateObject(4827, -3749.97949, 1209.19104, -3.37732,   0.00000, 0.00000, 180.97815);
-	CreateObject(4846, -3523.26245, 1186.70947, 5.04102,   0.00000, 0.00000, 181.90628);
-	CreateObject(4846, -3234.54590, 1195.98743, 9.18453,   0.00000, 0.00000, 181.90628);
-	CreateObject(18805, -3021.91846, 1210.71716, 9.00001,   0.00000, 0.00000, 1.23666);
-	CreateObject(18805, -2934.59814, 1216.15588, -1.69622,   0.00000, 0.00000, 13.87036);
-	CreateObject(18805, -2934.59814, 1216.15588, -1.69622,   0.00000, 0.00000, 13.87036);
-	CreateObject(18805, -3444.26709, 1680.14441, -3.88190,   0.00000, 0.00000, 275.36636);
-	CreateObject(18805, -3456.24268, 1804.75171, -3.88190,   0.00000, 0.00000, 275.36636);
-	CreateObject(18805, -3478.23511, 2043.27307, -3.88190,   0.00000, 0.00000, 275.36636);
-	CreateObject(18805, -3467.41431, 1925.33582, -3.88190,   0.00000, 0.00000, 275.36636);
-	CreateObject(18805, -3468.97900, 2159.75903, -3.88190,   0.00000, 0.00000, 255.31889);
-	CreateObject(18805, -3422.67627, 2268.29956, -3.88190,   0.00000, 0.00000, 238.20761);
-	CreateObject(4827, -3332.43164, 2369.60083, -3.63824,   0.00000, 0.00000, 57.61643);
-	CreateObject(4827, -3198.49609, 2408.29736, -3.63824,   0.00000, 0.00000, 7.51178);
-	CreateObject(4827, -3067.17969, 2330.39380, -3.63824,   0.00000, 0.00000, 325.35052);
-	CreateObject(4846, -2989.67017, 2122.24170, 4.59926,   0.00000, 0.00000, 104.58518);
-	CreateObject(4827, -2891.43506, 1921.77795, 0.43092,   0.00000, 0.00000, 150.49713);
-	CreateObject(4827, -2752.16626, 1859.97339, 0.43092,   0.00000, 0.00000, 195.40921);
-	CreateObject(4827, -2613.07227, 1913.04553, 0.43092,   0.00000, 0.00000, 239.65392);
-	CreateObject(18805, -2511.35107, 2049.98267, 5.34985,   0.00000, 0.00000, 63.01663);
-	CreateObject(18805, -2472.08594, 2178.39551, 3.99143,   0.00000, 0.00000, 82.84527);
-	CreateObject(18805, -2526.39868, 2018.32251, -0.29826,   0.00000, 0.00000, 59.83988);
-	CreateObject(18805, -2463.54565, 2259.49902, -7.43784,   0.00000, 0.00000, 90.10773);
-	CreateObject(2237, -2888.79932, 1221.29053, 7.66313,   0.00000, 0.00000, 0.00000);
-	CreateObject(2237, -2891.81372, 1233.66785, 7.66313,   0.00000, 0.00000, 0.00000);
-	CreateObject(1254, -2891.86963, 1233.74670, 7.94434,   0.00000, 0.00000, 282.07483);
-	CreateObject(1254, -2888.87329, 1221.36865, 7.97395,   0.00000, 0.00000, 282.07483);
-	CreateObject(5822, -3106.33545, 1733.19092, 8.92935,   0.00000, 0.00000, 85.16016);
-	CreateObject(5822, -3094.58228, 1731.99597, 22.24764,   0.00000, 0.00000, 265.16321);
-	CreateObject(5822, -3105.96069, 1734.03162, 35.34418,   0.00000, 0.00000, 84.78157);
-	CreateObject(19283, -3106.75049, 1738.11328, 40.63885,   0.00000, 0.00000, 0.00000);
-	CreateObject(19283, -3107.00757, 1738.20020, 40.64563,   0.00000, 0.00000, 0.00000);
-	CreateObject(12839, -3102.09717, 1737.32874, 44.03469,   0.00000, 0.00000, 75.77121);
-	CreateObject(12839, -3097.48584, 1741.06848, 49.99421,   0.00000, 0.00000, 165.52768);
-	CreateObject(11496, -3103.21216, 1747.49182, 52.19240,   0.00000, 0.00000, 75.62529);
-	CreateObject(11496, -3101.56421, 1754.13220, 52.19240,   0.00000, 0.00000, 75.62529);
-	CreateObject(11496, -3098.63794, 1770.60461, 52.19240,   0.00000, 0.00000, 345.02884);
-	CreateObject(11496, -3100.02686, 1759.52026, 52.19240,   0.00000, 0.00000, 75.62529);
+CreateObject(10819, -3081.21924, 1775.98401, -13.41259,   0.00000, 0.00000, 0.00000);
+CreateObject(8147, -3189.68555, 1699.95410, 3.28705,   0.00000, 0.00000, 42.70259);
+CreateObject(987, -3139.60254, 1646.69263, 0.19234,   0.00000, 0.00000, 217.22357);
+CreateObject(987, -3149.20654, 1640.01575, 0.19234,   0.00000, 0.00000, 195.06529);
+CreateObject(987, -3161.07446, 1637.48621, 0.19234,   0.00000, 0.00000, 194.10335);
+CreateObject(987, -3172.48633, 1634.86792, 0.19234,   0.00000, 0.00000, 272.48880);
+CreateObject(987, -3172.37622, 1623.64966, 0.19234,   0.00000, 0.00000, 184.04601);
+CreateObject(987, -3183.92310, 1622.53125, 0.19234,   0.00000, 0.00000, 184.04601);
+CreateObject(987, -3195.41748, 1621.74158, 0.19234,   0.00000, 0.00000, 184.04601);
+CreateObject(987, -3210.04492, 1610.01160, 0.25480,   0.00000, 0.00000, 346.08441);
+CreateObject(8147, -3127.13159, 1603.37329, 3.28705,   0.00000, 0.00000, 87.33028);
+CreateObject(8147, -3038.01538, 1598.69971, 3.15805,   0.00000, 0.00000, 87.33028);
+CreateObject(8147, -2973.32202, 1668.17981, 3.28705,   0.00000, 0.00000, 185.32942);
+CreateObject(8147, -2982.52124, 1810.90625, 3.26456,   0.00000, 0.00000, 181.86163);
+CreateObject(8147, -3010.15991, 1913.12097, 3.26456,   0.00000, 0.00000, 220.78961);
+CreateObject(8147, -3107.20898, 1915.65051, 3.26456,   0.00000, 0.00000, 136.19727);
+CreateObject(8147, -3194.36914, 1811.23669, 3.26456,   0.00000, 0.00000, 143.34125);
+CreateObject(18752, -3102.99707, 1791.40759, -21.33931,   0.00000, 0.00000, 1.43738);
+CreateObject(4867, -3100.17090, 1758.06042, 0.08959,   0.00000, 0.00000, 141.32391);
+CreateObject(10766, -3013.51953, 1776.89758, -2.00346,   0.00000, 0.00000, 0.00000);
+CreateObject(10766, -3097.29053, 1719.40356, -2.00346,   0.00000, 0.00000, 271.77924);
+CreateObject(10766, -3014.13672, 1707.97180, -2.00346,   0.00000, 0.00000, 0.00000);
+CreateObject(10766, -3062.51660, 1777.81897, -2.00346,   0.00000, 0.00000, 0.00000);
+CreateObject(10766, -3065.93188, 1706.66650, -2.00346,   0.00000, 0.00000, 0.00000);
+CreateObject(10766, -3066.09766, 1635.75171, -2.00346,   0.00000, 0.00000, 0.00000);
+CreateObject(10766, -3098.57031, 1673.34436, -2.00346,   0.00000, 0.00000, 271.77924);
+CreateObject(10766, -3185.89404, 1731.24365, -2.00346,   0.00000, 0.00000, 223.13132);
+CreateObject(10766, -3163.72510, 1782.53357, -2.00346,   0.00000, 0.00000, 223.13132);
+CreateObject(10766, -3135.72144, 1730.70996, -2.00346,   0.00000, 0.00000, 223.13132);
+CreateObject(10766, -3133.05029, 1678.90552, -2.00346,   0.00000, 0.00000, 43.52314);
+CreateObject(10766, -3116.32251, 1701.00122, -2.00346,   0.00000, 0.00000, 31.99380);
+CreateObject(10766, -3149.14453, 1693.53052, -2.00346,   0.00000, 0.00000, 43.52314);
+CreateObject(10766, -3129.53638, 1719.40308, -2.00346,   0.00000, 0.00000, 51.87177);
+CreateObject(10766, -3101.67798, 1755.53589, -2.00346,   0.00000, 0.00000, 53.18230);
+CreateObject(10766, -3073.65332, 1792.30359, -2.00346,   0.00000, 0.00000, 53.18230);
+CreateObject(10766, -3050.41650, 1819.84058, -2.00346,   0.00000, 0.00000, 47.06005);
+CreateObject(10766, -3022.32959, 1850.38123, -2.00346,   0.00000, 0.00000, 46.01383);
+CreateObject(10766, -3023.39429, 1897.27515, -2.00346,   0.00000, 0.00000, 224.51671);
+CreateObject(10766, -3000.71777, 1873.85999, -2.00346,   0.00000, 0.00000, 43.64537);
+CreateObject(10766, -2969.61035, 1816.51550, -2.00346,   0.00000, 0.00000, 34.55171);
+CreateObject(10766, -3009.15552, 1775.43274, -2.00346,   0.00000, 0.00000, 196.34637);
+CreateObject(10766, -3001.55420, 1872.47522, -2.00346,   0.00000, 0.00000, 224.51671);
+CreateObject(10766, -2986.85278, 1863.33069, -2.00346,   0.00000, 0.00000, 224.51671);
+CreateObject(10766, -3020.47803, 1828.04102, -2.00346,   0.00000, 0.00000, 224.51671);
+CreateObject(10766, -3037.93384, 1850.05591, -2.00346,   0.00000, 0.00000, 224.51671);
+CreateObject(10766, -3054.71045, 1795.74976, -2.00346,   0.00000, 0.00000, 224.51671);
+CreateObject(10766, -2987.47876, 1715.29834, -2.00346,   0.00000, 0.00000, 189.40167);
+CreateObject(10766, -3016.04639, 1693.96741, -2.00346,   0.00000, 0.00000, 189.40167);
+CreateObject(10766, -2982.65723, 1699.40552, -2.00346,   0.00000, 0.00000, 189.40167);
+CreateObject(10766, -3163.00903, 1688.43213, -2.00346,   0.00000, 0.00000, 189.40167);
+CreateObject(10766, -3060.95264, 1688.24463, -2.00346,   0.00000, 0.00000, 189.40167);
+CreateObject(10766, -3095.65894, 1700.82324, -2.00346,   0.00000, 0.00000, 189.40167);
+CreateObject(10766, -3140.69214, 1692.04846, -2.00346,   0.00000, 0.00000, 189.40167);
+CreateObject(10766, -3180.21118, 1754.31189, -2.00346,   0.00000, 0.00000, 189.40167);
+CreateObject(17032, -2957.07886, 1765.72229, -15.43395,   0.00000, 0.00000, 0.00000);
+CreateObject(17032, -3059.93848, 1653.51990, -14.96694,   0.00000, 0.00000, 0.00000);
+CreateObject(655, -3056.14551, 1663.93372, 12.82365,   0.00000, 0.00000, 0.00000);
+CreateObject(655, -3062.39771, 1681.26001, -0.82383,   0.00000, 0.00000, 0.00000);
+CreateObject(655, -3058.00122, 1663.40295, 10.39872,   0.00000, 0.00000, 0.00000);
+CreateObject(655, -3060.41675, 1650.01953, 5.21082,   0.00000, 0.00000, 0.00000);
+CreateObject(655, -2958.48145, 1761.19385, 4.97124,   0.00000, 0.00000, 0.00000);
+CreateObject(655, -2953.64893, 1773.92126, 11.98102,   0.00000, 0.00000, 0.00000);
+CreateObject(3268, -2983.95435, 1626.54175, -0.23761,   0.00000, 0.00000, 4.65272);
+CreateObject(3268, -2988.91992, 1668.27246, -0.23761,   0.00000, 0.00000, 4.65272);
+CreateObject(3279, -3057.09741, 1677.29297, 0.20591,   0.00000, 0.00000, 43.65219);
+CreateObject(3279, -2992.58789, 1814.90027, 0.20591,   0.00000, 0.00000, 189.41928);
+CreateObject(3279, -2981.21582, 1601.85828, 0.20591,   0.00000, 0.00000, 189.41928);
+CreateObject(3279, -3060.88818, 1948.73328, 0.20591,   0.00000, 0.00000, 225.70981);
+CreateObject(3279, -3161.26978, 1634.44214, 0.20591,   0.00000, 0.00000, 3.99582);
+CreateObject(3279, -3222.84033, 1751.84485, 0.20591,   0.00000, 0.00000, 35.42395);
+CreateObject(3279, -3154.90942, 1609.07336, 0.20591,   0.00000, 0.00000, 95.52544);
+CreateObject(3268, -3039.85132, 1924.10205, -0.23761,   0.00000, 0.00000, 44.33446);
+CreateObject(3268, -3146.92725, 1674.68604, -0.23761,   0.00000, 0.00000, 222.46693);
+CreateObject(3268, -3011.05396, 1891.55713, -0.23761,   0.00000, 0.00000, 44.33446);
+CreateObject(9241, -3177.06274, 1709.19409, 0.30602,   0.00000, 0.00000, 133.55867);
+CreateObject(9241, -3088.01929, 1912.94568, 0.30602,   0.00000, 0.00000, 45.61596);
+CreateObject(9241, -3109.92334, 1891.27429, 0.30602,   0.00000, 0.00000, 45.61596);
+CreateObject(9241, -3071.96216, 1614.76013, 0.30602,   0.00000, 0.00000, 180.11995);
+CreateObject(3673, -2995.04980, 1778.72388, 18.65506,   0.00000, 0.00000, 92.47716);
+CreateObject(3673, -3189.66650, 1804.68079, 18.65506,   0.00000, 0.00000, 52.72843);
+CreateObject(9731, -3237.38159, 1603.74438, 0.24374,   0.00000, 0.00000, 161.03976);
+CreateObject(9490, -3441.24951, 1608.32385, 1.52684,   0.00000, 0.00000, 181.67520);
+CreateObject(18805, -3546.78491, 1608.48694, -1.93828,   0.00000, 0.00000, 0.00000);
+CreateObject(18805, -3661.49780, 1608.61768, -1.93828,   0.00000, 0.00000, 0.00000);
+CreateObject(4827, -3792.10352, 1571.91187, -3.16385,   0.00000, 0.00000, 46.12311);
+CreateObject(4827, -3888.36182, 1452.37634, -3.38810,   0.00000, 0.00000, 90.17397);
+CreateObject(4827, -3871.29126, 1304.73584, -3.38810,   0.00000, 0.00000, 136.29890);
+CreateObject(4827, -3749.97949, 1209.19104, -3.37732,   0.00000, 0.00000, 180.97815);
+CreateObject(4846, -3523.26245, 1186.70947, 5.04102,   0.00000, 0.00000, 181.90628);
+CreateObject(4846, -3234.54590, 1195.98743, 9.18453,   0.00000, 0.00000, 181.90628);
+CreateObject(18805, -3021.91846, 1210.71716, 9.00001,   0.00000, 0.00000, 1.23666);
+CreateObject(18805, -2934.59814, 1216.15588, -1.69622,   0.00000, 0.00000, 13.87036);
+CreateObject(18805, -2934.59814, 1216.15588, -1.69622,   0.00000, 0.00000, 13.87036);
+CreateObject(18805, -3444.26709, 1680.14441, -3.88190,   0.00000, 0.00000, 275.36636);
+CreateObject(18805, -3456.24268, 1804.75171, -3.88190,   0.00000, 0.00000, 275.36636);
+CreateObject(18805, -3478.23511, 2043.27307, -3.88190,   0.00000, 0.00000, 275.36636);
+CreateObject(18805, -3467.41431, 1925.33582, -3.88190,   0.00000, 0.00000, 275.36636);
+CreateObject(18805, -3468.97900, 2159.75903, -3.88190,   0.00000, 0.00000, 255.31889);
+CreateObject(18805, -3422.67627, 2268.29956, -3.88190,   0.00000, 0.00000, 238.20761);
+CreateObject(4827, -3332.43164, 2369.60083, -3.63824,   0.00000, 0.00000, 57.61643);
+CreateObject(4827, -3198.49609, 2408.29736, -3.63824,   0.00000, 0.00000, 7.51178);
+CreateObject(4827, -3067.17969, 2330.39380, -3.63824,   0.00000, 0.00000, 325.35052);
+CreateObject(4846, -2989.67017, 2122.24170, 4.59926,   0.00000, 0.00000, 104.58518);
+CreateObject(4827, -2891.43506, 1921.77795, 0.43092,   0.00000, 0.00000, 150.49713);
+CreateObject(4827, -2752.16626, 1859.97339, 0.43092,   0.00000, 0.00000, 195.40921);
+CreateObject(4827, -2613.07227, 1913.04553, 0.43092,   0.00000, 0.00000, 239.65392);
+CreateObject(18805, -2511.35107, 2049.98267, 5.34985,   0.00000, 0.00000, 63.01663);
+CreateObject(18805, -2472.08594, 2178.39551, 3.99143,   0.00000, 0.00000, 82.84527);
+CreateObject(18805, -2526.39868, 2018.32251, -0.29826,   0.00000, 0.00000, 59.83988);
+CreateObject(18805, -2463.54565, 2259.49902, -7.43784,   0.00000, 0.00000, 90.10773);
+CreateObject(2237, -2888.79932, 1221.29053, 7.66313,   0.00000, 0.00000, 0.00000);
+CreateObject(2237, -2891.81372, 1233.66785, 7.66313,   0.00000, 0.00000, 0.00000);
+CreateObject(1254, -2891.86963, 1233.74670, 7.94434,   0.00000, 0.00000, 282.07483);
+CreateObject(1254, -2888.87329, 1221.36865, 7.97395,   0.00000, 0.00000, 282.07483);
+CreateObject(5822, -3106.33545, 1733.19092, 8.92935,   0.00000, 0.00000, 85.16016);
+CreateObject(5822, -3094.58228, 1731.99597, 22.24764,   0.00000, 0.00000, 265.16321);
+CreateObject(5822, -3105.96069, 1734.03162, 35.34418,   0.00000, 0.00000, 84.78157);
+CreateObject(19283, -3106.75049, 1738.11328, 40.63885,   0.00000, 0.00000, 0.00000);
+CreateObject(19283, -3107.00757, 1738.20020, 40.64563,   0.00000, 0.00000, 0.00000);
+CreateObject(12839, -3102.09717, 1737.32874, 44.03469,   0.00000, 0.00000, 75.77121);
+CreateObject(12839, -3097.48584, 1741.06848, 49.99421,   0.00000, 0.00000, 165.52768);
+CreateObject(11496, -3103.21216, 1747.49182, 52.19240,   0.00000, 0.00000, 75.62529);
+CreateObject(11496, -3101.56421, 1754.13220, 52.19240,   0.00000, 0.00000, 75.62529);
+CreateObject(11496, -3098.63794, 1770.60461, 52.19240,   0.00000, 0.00000, 345.02884);
+CreateObject(11496, -3100.02686, 1759.52026, 52.19240,   0.00000, 0.00000, 75.62529);
 
+//vehciles
 
     Pickup[1] = CreatePickup(19130, 1, -150.4453,1110.0249,19.7500, -1);
 	Pickup[2] = CreatePickup(19130, 1, -365.2002, 1597.1082, 76.7178, -1);
@@ -5665,9 +5690,9 @@ public OnGameModeInit()
 	CreateObject(1225,200.5000000,500.5996094,6.8000002,0.0000000,0.0000000,0.0000000); //object(barrel4)(49)
 
 
-
+	//-----New USA Base vehicles-----
 	
-//=======================================Admin Area====================================
+//=======================================Admin Area Update By Abhay ====================================
 CreateObject(19362, 2505.66992, -1582.88684, -1581.28674,   0.00000, 90.00000, 0.00000);
 CreateObject(19362, 2498.66992, -1582.88684, -1581.28674,   0.00000, 90.00000, 0.00000);
 CreateObject(19357, 1016.46002, -1592.35498, 1016.46002,   0.00000, 0.00000, 0.00000);
@@ -5871,8 +5896,6 @@ CreateObject(18783, 2500.43530, -1589.65405, 1018.68408,   180.00000, 0.00000, 0
 CreateObject(18783, 2520.43213, -1589.65405, 1018.68408,   180.00000, 0.00000, 0.00000);
 CreateObject(18783, 0.00000, 0.00000, 0.00000,   0.00000, 0.00000, 0.00000);
 CreateObject(18783, 2520.43213, -1609.64001, 1018.68408,   180.00000, 0.00000, 0.00000);
-
-////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////VEHICLES////////////////////////////////////////////////
 	CreateVehicle(556, 495.5579, -1883.1919, 3.1988, 166.0000, -1, -1, 100);
@@ -6187,7 +6210,7 @@ maingate=CreateObject(1500, 2501.95386, -1603.09180, 1011.24847,   0.00000, 0.00
 //______________________________________________________________________________
 //____________________________[Srijan textdraw]______________________________
 
-Textdraw0 = TextDrawCreate(212.000000,379.000000,"_");
+Textdraw0 = TextDrawCreate(214.000000,379.000000,"_");
 TextDrawUseBox(Textdraw0,1);
 TextDrawBoxColor(Textdraw0,0x00000099);
 TextDrawTextSize(Textdraw0,456.000000,134.000000);
@@ -6207,7 +6230,7 @@ TextDrawLetterSize(PSTATS1, 0.149999, 1.100000);
 TextDrawColor(PSTATS1, -1);
 TextDrawSetOutline(PSTATS1, 0);
 TextDrawSetProportional(PSTATS1, 1);
-TextDrawSetShadow(PSTATS1, 0);
+TextDrawSetShadow(PSTATS1, 1);
 TextDrawUseBox(PSTATS1, 1);
 TextDrawBoxColor(PSTATS1, 25);
 TextDrawTextSize(PSTATS1, 653.000000, 77.000000);
@@ -6219,7 +6242,7 @@ TextDrawLetterSize(PSTATS2, 0.149998, 1.100000);
 TextDrawColor(PSTATS2, -1);
 TextDrawSetOutline(PSTATS2, 0);
 TextDrawSetProportional(PSTATS2, 1);
-TextDrawSetShadow(PSTATS2, 0);
+TextDrawSetShadow(PSTATS2, 1);
 
 //______________________________________________________________________________
 
@@ -7085,7 +7108,6 @@ public OnGameModeExit()
 	//=======
 	SaveStats();
 	KillTimer(PingTimer);
-	Delete3DTextLabel(ProtLabel[A69Prot]);  //prototype
 	#if defined USE_MENUS
 	DestroyAllMenus();
 	#endif
@@ -7277,40 +7299,38 @@ public OnPlayerRequestClass(playerid, classid)
 public OnPlayerConnect(playerid)
 {
 
-//===============clansys================
+//===============clansys by abhay================
 
-	StealingA69Prot[playerid] = 0;  //prototype
 
-	new playername[128];
-
-	new cfile[128];
-	GetPlayerName(playerid, playername, sizeof(playername));
-	format(cfile, sizeof(cfile), savefolderclan,playername);
-	if(!dini_Exists(cfile)) {
-	        dini_Create(cfile);
-	        dini_IntSet(cfile, "gid", -1);
-	        dini_IntSet(cfile, "ginvited", -1);
-	       	dini_IntSet(cfile, "gattemptjoin", -1);
-	       	dini_IntSet(cfile, "order", 0);
-
-	       	group[playerid][gid] = (dini_Int(cfile, "gid"));
-			group[playerid][invited] = (dini_Int(cfile, "ginvited"));
-			group[playerid][attemptjoin] = (dini_Int(cfile, "gattemptjoin"));
-			group[playerid][order] = (dini_Int(cfile, "order"));
-			}
-	else {
-	       	group[playerid][gid] = (dini_Int(cfile, "gid"));
-			group[playerid][invited] = (dini_Int(cfile, "ginvited"));
-			group[playerid][attemptjoin] = (dini_Int(cfile, "gattemptjoin"));
-			group[playerid][order] = (dini_Int(cfile, "order"));
-			}
-
-	//====================clan sys end================
-	TextDrawShowForPlayer(playerid, Load);
-	TextDrawShowForPlayer(playerid, welcometo1);
-	TextDrawShowForPlayer(playerid, welcometo2);
-	CheckBan(playerid);
-	CheckBanFromFile(playerid);
+new playername[128];
+new cfile[128];
+GetPlayerName(playerid, playername, sizeof(playername));
+format(cfile, sizeof(cfile), savefolderclan,playername);
+if(!dini_Exists(cfile)) {
+        dini_Create(cfile);
+        dini_IntSet(cfile, "gid", -1);
+        dini_IntSet(cfile, "ginvited", -1);
+       	dini_IntSet(cfile, "gattemptjoin", -1);
+       	dini_IntSet(cfile, "order", 0);
+       	
+       	group[playerid][gid] = (dini_Int(cfile, "gid"));
+		group[playerid][invited] = (dini_Int(cfile, "ginvited"));
+		group[playerid][attemptjoin] = (dini_Int(cfile, "gattemptjoin"));
+		group[playerid][order] = (dini_Int(cfile, "order"));
+		}
+else {
+       	group[playerid][gid] = (dini_Int(cfile, "gid"));
+		group[playerid][invited] = (dini_Int(cfile, "ginvited"));
+		group[playerid][attemptjoin] = (dini_Int(cfile, "gattemptjoin"));
+		group[playerid][order] = (dini_Int(cfile, "order"));
+		}
+       	
+//====================clan sys end================
+TextDrawShowForPlayer(playerid, Load);
+TextDrawShowForPlayer(playerid, welcometo1);
+TextDrawShowForPlayer(playerid, welcometo2);
+CheckBan(playerid);
+CheckBanFromFile(playerid);
 
 	if (udb_Exists(PlayerName2(playerid)))
     {
@@ -7329,7 +7349,7 @@ public OnPlayerConnect(playerid)
 	      ShowPlayerDialog(playerid, 126, DIALOG_STYLE_PASSWORD, "Register",string,"Register","Kick");
       }
     }
-    if(PlayerInfo[playerid][LoggedIn] == 0)
+    if(PlayerInfo[playerid][LoggedIn] == 1)
     {
         new pname[128];
 	    new file[128];
@@ -7362,15 +7382,18 @@ public OnPlayerConnect(playerid)
 
     PlayersOnline++;
 	new name[MAX_PLAYER_NAME], string1[40+MAX_PLAYER_NAME];
+	new scriptername[MAX_PLAYER_NAME+1];
+   	GetPlayerName(playerid, scriptername, sizeof(scriptername));
+   	if(!strcmp(scriptername,"[D]ark_[E]mperor",true) && PlayerInfo[playerid][LoggedIn] == 0){format(string1, sizeof(string1), "Our Scripter %s has joined the server!", scriptername);SendClientMessageToAll(green, string1);}
 	GetPlayerName(playerid, name, sizeof(name));
 	format(string1, sizeof(string1), "~y~~h~[JOIN]~b~%s has ~g~~h~joined ~p~~h~the server!", name);
     SendBoxMessage(string1);
     format(string1, sizeof(string1), "[JOIN]%s has joined the server!", name);
+    SendClientMessageToAll(green, string1);
+    format(string1, sizeof(string1), "Welcome %s! Total Players In Server : %d!", name, PlayersOnline);
     SendClientMessageToAll(yellow, string1);
-    format(string1, sizeof(string1), "Total Players In Server : %d!", PlayersOnline);
-    SendClientMessageToAll(blue, string1);
 
-//	 VBanCheck(playerid);
+	 VBanCheck(playerid);
 
 	SetPlayerWorldBounds(playerid, 9999.9, -9999.9, 9999.9, -9999.9 );
 	//-----Music
@@ -7421,7 +7444,6 @@ public OnPlayerConnect(playerid)
 
 
 	DND[playerid] = 0;
-	//-------------
 	//-------------
 	RemoveBuildingForPlayer(playerid, 11437, -775.5938, 1555.6797, 26.0938, 0.25);
 	RemoveBuildingForPlayer(playerid, 16412, -215.2344, 1119.1953, 18.3516, 0.25);
@@ -7571,7 +7593,7 @@ public OnPlayerConnect(playerid)
 	RemoveBuildingForPlayer(playerid, 700, -126.1719, 1159.0703, 19.0156, 0.25);
 	RemoveBuildingForPlayer(playerid, 1294, -110.7813, 1158.7422, 23.2031, 0.25);
 	RemoveBuildingForPlayer(playerid, 1345, -88.8594, 1165.3828, 19.4609, 0.25);
-	RemoveBuildingForPlayer(playerid, 1468, -47.7031, 1162.3672, 19.8906, 0.25);
+		RemoveBuildingForPlayer(playerid, 1468, -47.7031, 1162.3672, 19.8906, 0.25);
 	RemoveBuildingForPlayer(playerid, 1468, -52.9766, 1162.3672, 19.9453, 0.25);
 	RemoveBuildingForPlayer(playerid, 1468, -42.4219, 1162.3672, 19.8594, 0.25);
 	RemoveBuildingForPlayer(playerid, 1308, -96.7188, 1164.3516, 18.7344, 0.25);
@@ -7701,7 +7723,7 @@ public OnPlayerConnect(playerid)
 	//-----------------------------------------------------
 	//-----------------------------------------------------
 	//-----------------------------------------------------
-/*	if(ServerInfo[NameKick] == 1) {
+	if(ServerInfo[NameKick] == 1) {
 		for(new s = 0; s < BadNameCount; s++) {
   			if(!strcmp(BadNames[s],PlayerName,true)) {
 				SendClientMessage(playerid,red, "Your Nick Is On Our Black List And You Have Been Kicked.");
@@ -7726,7 +7748,7 @@ public OnPlayerConnect(playerid)
 				return 1;
 			}
 		}
-	}   */
+	}
 	//-----------------------------------------------------
 	if(ServerInfo[Locked] == 1) {
 		PlayerInfo[playerid][AllowedIn] = false;
@@ -7916,11 +7938,11 @@ public UpdateLabelText(playerid)
         Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
 		Update3DTextLabelText(RankLabel[playerid], TEAM_MARVEL_COLOR, string);
    }
-//   if(gTeam[playerid] == TEAM_MERC)
- //  {
-//        Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
-//		Update3DTextLabelText(RankLabel[playerid],0x15FF00FF ,"On Duty Admin\n!!Do Not Attack!!");
-//   }
+   if(gTeam[playerid] == TEAM_MERC)
+   {
+        Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
+		Update3DTextLabelText(RankLabel[playerid],0x15FF00FF ,"On Duty Admin\n!!Do Not Attack!!");
+   }
    if(gTeam[playerid] == TEAM_NONE)
    {
         Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
@@ -7931,8 +7953,6 @@ public OnPlayerDisconnect(playerid, reason)
 {
 
 PlayersOnline--;
-StealingA69Prot[playerid] = 0;  //prototype
-
 new byebye[100];
 switch(reason)
 {
@@ -7941,7 +7961,10 @@ switch(reason)
  case 1: format(byebye,sizeof byebye,"~r~~h~[Quit]~y~~h~%s has ~r~~h~left ~p~~h~the server!",GetName(playerid),playerid);
 }
 SendBoxMessage(byebye);
-format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Total Players In Server: %d",GetName(playerid),PlayersOnline);
+format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Bye Bye!",GetName(playerid));
+SendClientMessageToAll(red, byebye);
+format(byebye, sizeof(byebye), "Total Players In Server: %d",PlayersOnline);
+SendClientMessageToAll(green, byebye);
 
     SavePlayer(playerid);
     PlayerInfo[playerid][Hide]   	= 0;
@@ -8055,7 +8078,7 @@ format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Total Players In S
    		dini_IntSet(cfile, "gattemptjoin",group[playerid][attemptjoin]);
    		dini_IntSet(cfile, "order",group[playerid][order]);
    		}
-//    LeaveGroup(playerid, 2);
+    LeaveGroup(playerid, 2);
 
 	//===================
 	return 1;
@@ -8252,7 +8275,7 @@ if(IsPlayerNPC(playerid))
 	GetPlayerName(playerid, Pname, MAX_PLAYER_NAME);
 	format(string, sizeof(string), "%s", Pname);
 	TextDrawSetString(Textdraw0, string);
-	format(Stats, sizeof(Stats), "Name: %s", Pname);
+	format(Stats, sizeof(Stats), "Name: ~y~]");
 	format(Stats2, sizeof(Stats2), "Score: ~b~%d", GetPlayerScore(playerid));
 	format(Stats, sizeof(Stats), "%s~n~~w~Kills: ~g~%d", Stats, PlayerInfo[playerid][Kills]);
 	format(Stats2, sizeof(Stats2), "%s~n~~w~Deaths: ~r~%d", Stats2, PlayerInfo[playerid][Deaths]);
@@ -8859,7 +8882,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 		format(msg, sizeof(msg), "You lost %d$ cash for dying. Take your Revenge today!",amm);
 		SendClientMessage(playerid,RED,msg);
 		GameTextForPlayer(playerid,"~b~You ~y~Got ~r~Killed!",4000,5);
-//		PlayAudioStreamForPlayer(playerid, "http://picosong.com/media/songs/53c29889fdef5e0e3cce1529df4af014/humiliation.mp3");
+		PlayAudioStreamForPlayer(playerid, "http://picosong.com/media/songs/53c29889fdef5e0e3cce1529df4af014/humiliation.mp3");
 		new weaponid = GetPlayerWeapon(killerid);
 		switch(weaponid)
 		{
@@ -8868,8 +8891,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 			case 22 .. 32: GivePlayerWeapon(killerid, GetPlayerWeapon(killerid), 60);
 			case 35 .. 46: GivePlayerWeapon(killerid, GetPlayerWeapon(killerid), 1);
 		}
-//		SetPlayerScore(killerid, GetPlayerScore(killerid) +1);
-		GivePlayerScore(killerid, 5);
+		SetPlayerScore(killerid, GetPlayerScore(killerid) +1);
         Streak[playerid] = 0;
         if(killerid != INVALID_PLAYER_ID)
         {
@@ -8973,19 +8995,6 @@ public OnPlayerDeath(playerid, killerid, reason)
                         }
 
         }
-        if(StealingA69Prot[playerid] == 1)
-		{
-  		SendClientMessage(playerid, 0x00BFFFAA, "You failed stealing the Area69 Prototype!");
-  		RemovePlayerMapIcon(playerid,1);
-  		GivePlayerMoney(playerid, -500);
-  		StealingA69Prot[playerid] = 0;
-  		new pname[24];
-  		GetPlayerName(playerid, pname, 24);
-  		new kk[128];
-  		format(kk, sizeof(kk), "** %s (%d) failed stealing Area69 Prototype!",pname,playerid);
-		SendClientMessageToAll(0xC93CCE00,kk);
-		SetPVarInt(playerid,"StealingTime",GetTickCount()+600000);
-  		}
         PlayerInfo[killerid][Kills] ++;
 
 
@@ -13001,7 +13010,7 @@ INI_Open(file);
 INI_ReadString(aname,"Admin",256);
 INI_ReadString(pname,"Player", 256);
 INI_ReadString(reason,"Reason",256);
-format(string, sizeof(string),""cwhite"AdminName: "cyellow"%s\n \n"cwhite"YourName: "cyellow"%s\n \n"cwhite"Reason of ban: "cred"%s\n \n"cred"if this is a mistake you can kindly take picture of this and post at our forums\n \n"cred"xpsamp.co.in",aname, pname, reason);
+format(string, sizeof(string),""cwhite"AdminName: "cyellow"%s\n \n"cwhite"YourName: "cyellow"%s\n \n"cwhite"Reason of ban: "cred"%s\n \n"cred"if this is a mistake you can kindly take picture of this and post at our forums\n \n"cred"www.ventrum-gaming.com",aname, pname, reason);
 ShowPlayerDialog(playerid, 1500, DIALOG_STYLE_MSGBOX,""cred"You are Banned from COD-RWW2!",string,"Close","");
 Kick(playerid);
 INI_Close();
@@ -13020,7 +13029,7 @@ INI_Open(file);
 INI_ReadString(aname,"Admin",256);
 INI_ReadString(pname,"Player", 256);
 INI_ReadString(reason,"Reason",256);
-format(string, sizeof(string),""cwhite"AdminName: "cyellow"%s\n \n"cwhite"YourName: "cyellow"%s\n \n"cwhite"Reason of ban: "cred"%s\n \n"cred"if this is a mistake you can kindly take picture of this and post at our forums\n \n"cred"xpsamp.co.in",aname, pname, reason);
+format(string, sizeof(string),""cwhite"AdminName: "cyellow"%s\n \n"cwhite"YourName: "cyellow"%s\n \n"cwhite"Reason of ban: "cred"%s\n \n"cred"if this is a mistake you can kindly take picture of this and post at our forums\n \n"cred"www.ventrum-gaming.com",aname, pname, reason);
 ShowPlayerDialog(playerid, 1500, DIALOG_STYLE_MSGBOX,""cred"You are Banned from COD-RWW2!",string,"Close","");
 Kick(playerid);
 INI_Close();
@@ -13277,7 +13286,7 @@ CMD:givegun(playerid, params[])
      	tmp = strtok(params, idx);
 
 		if(!strlen(tmp)) {
-  			SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/givegun [playerid]");
+  			SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/givegun [playerid]");
      		return 1;
        	}
         new player2id = strval(tmp);
@@ -13341,7 +13350,7 @@ CMD:getteam(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   new team[100], Float:x, Float:y, Float:z, interior = GetPlayerInterior(playerid), world = GetPlayerVirtualWorld(playerid);
-	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT]: Use like This:/getteam [teamname USA/Eurasia/Arabia/Soviet/Vietnam/Australia]");
+	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT: Use like This:/getteam [teamname USA/Eurasia/Arabia/Soviet/Vietnam/Australia]");
 	   GetPlayerPos(playerid, x, y, z);
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
@@ -13463,7 +13472,7 @@ CMD:gteam(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   new team[100], Float:x, Float:y, Float:z, interior = GetPlayerInterior(playerid), world = GetPlayerVirtualWorld(playerid);
-	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT]: Use like This:/getteam [teamname USA/Eur/Arab/Rus/Aus/Vet]");
+	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT: Use like This:/getteam [teamname USA/Eur/Arab/Rus/Aus/Vet]");
 	   GetPlayerPos(playerid, x, y, z);
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
@@ -13589,7 +13598,7 @@ CMD:spawnteam(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   new team[100];
-	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT]: Use like This:/spawnteam [teamname USA/Eurasia/Arabia/Soviet/Australia/Vietnam]");
+	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT: Use like This:/spawnteam [teamname USA/Eurasia/Arabia/Soviet/Australia/Vietnam]");
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
@@ -13689,7 +13698,7 @@ CMD:steam(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   new team[100];
-	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT]: Use like This:/spawnteam [teamname USA/Eur/Arab/Rus/Aus/Vet]");
+	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT: Use like This:/spawnteam [teamname USA/Eur/Arab/Rus/Aus/Vet]");
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
@@ -13789,7 +13798,7 @@ CMD:freezeteam(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   new team[100];
-	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT]: Use like This:/freezeteam [teamname USA/Eurasia/Vietnam/Arabia/Soviet/Australia]");
+	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT: Use like This:/freezeteam [teamname USA/Eurasia/Vietnam/Arabia/Soviet/Australia]");
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
@@ -13890,7 +13899,7 @@ CMD:fteam(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   new team[100];
-	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT]: Use like This:/freezeteam [teamname USA/Eur/Arab/Rus/Aus/Vet]");
+	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT: Use like This:/freezeteam [teamname USA/Eur/Arab/Rus/Aus/Vet]");
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
@@ -14006,7 +14015,7 @@ CMD:unfreezeteam(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   new team[100];
-	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT]: Use like This:/unfreezeteam [teamname USA/Eurasia/Arabia/Soviet/Australia/Vietnam]");
+	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT: Use like This:/unfreezeteam [teamname USA/Eurasia/Arabia/Soviet/Australia/Vietnam]");
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
@@ -14109,7 +14118,7 @@ CMD:dteam(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   new team[100];
-	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT]: Use like This:/disarmteam [teamname USA/Eur/Arab/Rus/Aus/Vet]");
+	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT: Use like This:/disarmteam [teamname USA/Eur/Arab/Rus/Aus/Vet]");
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
@@ -14203,7 +14212,7 @@ CMD:gsteam(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   new team[100], amount;
-	   if(sscanf(params,"s[100]d",team, amount)) return SendClientMessage(playerid, RED,"iThe[XP-BOT]: Use like This:/givescoreteam [teamname USA/Eur/Arab/Rus/Aus/Vet] [amount]");
+	   if(sscanf(params,"s[100]d",team, amount)) return SendClientMessage(playerid, RED,"iThe[XP-BOT: Use like This:/givescoreteam [teamname USA/Eur/Arab/Rus/Aus/Vet] [amount]");
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
@@ -14304,7 +14313,7 @@ CMD:gcteam(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   new team[100], amount;
-	   if(sscanf(params,"s[100]d",team, amount)) return SendClientMessage(playerid, RED,"iThe[XP-BOT]: Use like This:/givecashteam [teamname USA/Eur/Arab/Rus/Aus/Vet] [amount]");
+	   if(sscanf(params,"s[100]d",team, amount)) return SendClientMessage(playerid, RED,"iThe[XP-BOT: Use like This:/givecashteam [teamname USA/Eur/Arab/Rus/Aus/Vet] [amount]");
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
@@ -14455,7 +14464,7 @@ return 1;
 
 CMD:r(playerid,params[]) {
 #pragma unused params
-if(isnull(params)) return SendClientMessage(playerid, -1, "iThe[XP-BOT]: Use like This:/r [text] to talk in team radio");
+if(isnull(params)) return SendClientMessage(playerid, -1, "iThe[XP-BOT: Use like This:/r [text] to talk in team radio");
 new Name[MAX_PLAYER_NAME]; GetPlayerName(playerid, Name, sizeof(Name));
 new string[128], adminstr[128];
 format(string, sizeof(string), "[R][%i]%s: %s",playerid, Name, params[0]);
@@ -14472,7 +14481,7 @@ return 1;
 
 CMD:order(playerid,params[]) {
 #pragma unused params
-if(isnull(params)) return SendClientMessage(playerid, -1, "iThe[XP-BOT]: Use like This:/order [text]");
+if(isnull(params)) return SendClientMessage(playerid, -1, "iThe[XP-BOT: Use like This:/order [text]");
 new Name[MAX_PLAYER_NAME]; GetPlayerName(playerid, Name, sizeof(Name));
 new string[128];
 format(string, sizeof(string), "*%s %s: %s",GetRankName(playerid), Name, params[0]);
@@ -14496,7 +14505,7 @@ CMD:rank(playerid, params[])
 CMD:async(playerid,params[]) {
          if(PlayerInfo[playerid][Level] >= 1) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if (isnull(tmp)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/async [playerid]");
+	    if (isnull(tmp)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/async [playerid]");
 		new player1 = strval(tmp);
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
         if(!IsPlayerInAnyVehicle(player1))
@@ -14648,7 +14657,7 @@ CMD:rules2(playerid, params[])
 CMD:updates(playerid, params[])
 {
 if(PlayerInfo[playerid][Level] >= 0) {
-ShowPlayerDialog(playerid,110,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 Update Notes:","\n\n"cgreen"Scripted By [D]ark_[E]mperor\nAdmin area with working gates added\nPermanent Clan System Added\nNew Radio System With New Channels\nMath And reaction tests Added\nHeadshot And Christmas System Added\nLags Reduced\n\n"cwhite"Visit us at xpsamp.co.in\n\nXenon Pro Gaming\n\nCall Of Duty - Real World At War 2","Ok","Cancel");
+ShowPlayerDialog(playerid,110,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 Update Notes:","\n\n"cgreen"Scripted By Shrijan,Updated By Abhay\nAdmin area with working gates added\nPermanent Clan System Added\nNew Radio System With New Channels\nMath And reaction tests Added\nHeadshot And Christmas System Added\nLags Reduced\n\n"cwhite"Visit us at xpsamp.co.in\n\nXenon Pro Gaming\n\nCall Of Duty - Real World At War 2","Ok","Cancel");
 return 1;
 }
 return 0;
@@ -14699,7 +14708,7 @@ CMD:grouphelp(playerid, params[])
 CMD:sorry(playerid, params[])
 {
 	new targetid;
-	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct iThe[XP-BOT]: Use like This:/sorry [playerid]");
+	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct iThe[XP-BOT: Use like This:/sorry [playerid]");
 	if(targetid != INVALID_PLAYER_ID && targetid != playerid)
 	{
 	    new tname[MAX_PLAYER_NAME], name[MAX_PLAYER_NAME], string[128];
@@ -14715,7 +14724,7 @@ CMD:sorry(playerid, params[])
 CMD:forgive(playerid, params[])
 {
 	new targetid;
-	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct iThe[XP-BOT]: Use like This:/forgive [playerid]");
+	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct iThe[XP-BOT: Use like This:/forgive [playerid]");
 	if(targetid == INVALID_PLAYER_ID) return SendClientMessage(playerid, RED, "iThe[XP-INFO]Bot: invalid playerid");
 	CMDMessageToAdmins(playerid,"/forgive");
 	new name[MAX_PLAYER_NAME], tname[MAX_PLAYER_NAME];
@@ -14729,7 +14738,7 @@ CMD:forgive(playerid, params[])
 CMD:hate(playerid, params[])
 {
 	new targetid, reason[128];
-	if(sscanf(params, "us[128]", targetid, reason)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct iThe[XP-BOT]: Use like This:/hate [playerid] [reason]");
+	if(sscanf(params, "us[128]", targetid, reason)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct iThe[XP-BOT: Use like This:/hate [playerid] [reason]");
     if(targetid != INVALID_PLAYER_ID)
 	{
 		new tname[MAX_PLAYER_NAME], name[MAX_PLAYER_NAME];
@@ -14746,7 +14755,7 @@ CMD:hate(playerid, params[])
 CMD:noobinhere(playerid, params[])
 {
 	new targetid;
-	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct iThe[XP-BOT]: Use like This:/noobinhere [playerid]");
+	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct iThe[XP-BOT: Use like This:/noobinhere [playerid]");
  	if(targetid != INVALID_PLAYER_ID)
 	{
 	    new tname[MAX_PLAYER_NAME], name[MAX_PLAYER_NAME];
@@ -14763,7 +14772,7 @@ CMD:noobinhere(playerid, params[])
 CMD:rapedup(playerid, params[])
 {
     new targetid;
-	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct iThe[XP-BOT]: Use like This:/rapedup [playerid]");
+	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct iThe[XP-BOT: Use like This:/rapedup [playerid]");
     if(targetid != INVALID_PLAYER_ID)
 	{
 		new tname[MAX_PLAYER_NAME], name[MAX_PLAYER_NAME];
@@ -14882,7 +14891,7 @@ CMD:sc(playerid, params[])
  }
 CMD:forceclass(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 2) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/forceclass [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/forceclass [playerid]");
 		new player1 = strval(params);
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -14894,7 +14903,7 @@ CMD:forceclass(playerid,params[]) {
 
 CMD:forceplayer(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 2) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/forceteam [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/forceteam [playerid]");
 		new player1 = strval(params);
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -14908,7 +14917,7 @@ CMD:getadmins(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 6)
    {
        new team[100], Float:x, Float:y, Float:z, interior = GetPlayerInterior(playerid), world = GetPlayerVirtualWorld(playerid);
-	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT]: Use like This:/getadmins [A]");
+	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT: Use like This:/getadmins [A]");
 	   GetPlayerPos(playerid, x, y, z);
 	   //---------USA------------------------
 	   	   if(strfind(params,"A",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
@@ -14939,7 +14948,7 @@ CMD:forceteam(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   new team[100];
-	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT]: Use like This:/forceteam [teamname usa,viet,euro,arabia,aus,sov]");
+	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT: Use like This:/forceteam [teamname usa,viet,euro,arabia,aus,sov]");
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
@@ -15071,7 +15080,7 @@ CMD:notes(playerid, params[])
 CMD:credits1(playerid, params[]) {
 	SendClientMessage(playerid, green,"Server Credits:");
 	SendClientMessage(playerid, green,"Server is Re-Scripted By [D]ark_[E]mperor");
-	SendClientMessage(playerid, green,"Server hosted By [D]ark_[E]mperor");
+	SendClientMessage(playerid, green,"Server hosted By [XP]Perfect_Boy");
 	return 1;
 }
 
@@ -15081,9 +15090,10 @@ CMD:credits2(playerid,params[]) {
 	{
 			SendClientMessage(playerid, COLOR_WHITE,    "|----------= XP-COD-RWW2_Credits: =----------|");
 			SendClientMessage(playerid, COLOR_YELLOW,   "|----------= Scripted And Updated by [D]ark_[E]mperor =---------|");
-			SendClientMessage(playerid, COLOR_YELLOW,   "|----------= Server Owned And Hosted by [D]ark_[E]mperor =--------|");
+			SendClientMessage(playerid, COLOR_YELLOW,   "|----------= Server Owned And Hosted by [XP]Perfect_Boy =--------|");
+			SendClientMessage(playerid, red,      "|----------= Beta Tester: [XP]Sumeeth =----------|");
 			SendClientMessage(playerid, red,      "Script Made by [D]ark_[E]mperor, Not allowed to Scam And Sell Script");
-	} else return SendClientMessage(playerid,red, "Welcome to Real World Wat War 2 v10.9.1");
+	} else return SendClientMessage(playerid,red, "Welcome to Real World Wat War 2 ");
 	return 1;
 }
 
@@ -15092,10 +15102,9 @@ public OnPlayerCommandText(playerid, cmdtext[])
 
 if(!strcmp(cmdtext, "/credits0", true))
 {
-    ShowPlayerDialog(playerid, 802, DIALOG_STYLE_MSGBOX, "COD-Real World At War 2 Credits", "|----------= XP-COD-RWW2_Credits: =----------|/n|----------= Scripted And Updated by [D]ark_[E]mperor =---------|/n|----------= Server Owned And Hosted by [D]ark_[E]mperor =--------|/n|----------= Beta Tester: [XP]Sumeeth =----------|/nScript Made by [D]ark_[E]mperor, Not allowed to Scam And Sell Script/nCall Of Duty : Real World At War 2 V10.9.1 ", "Okay", "Back");
+    ShowPlayerDialog(playerid, 802, DIALOG_STYLE_MSGBOX, "COD-Real World At War 2 Credits", "|----------= XP-COD-RWW2_Credits: =----------|/n|----------= Scripted And Updated by [D]ark_[E]mperor =---------|/n|----------= Server Owned And Hosted by [XP]Perfect_Boy =--------|/n|----------= Beta Tester: [XP]Sumeeth =----------|/nScript Made by [D]ark_[E]mperor, Not allowed to Scam And Sell Script/nCall Of Duty : Real World At War 2 V10.9.1 ", "Okay", "Back");
     return 1;
 }
-
 return 0;
 }
 //======================Headshot And Christmas=========================================================================================
@@ -15171,7 +15180,7 @@ CMD:disablexmas(playerid,params[]) // can i show u something? somwthing what?
 	else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You must be logged in to use this commands");
 	return 1;
 }
-//==================================My Dsay=====================================================================================t
+//==================================My Dsay abhay=====================================================================================t
 
 CMD:dsay(playerid, params[])
 {
@@ -15198,22 +15207,6 @@ if(PlayerInfo[playerid][Level] >= 0)
     format(pwstring, sizeof(pwstring), "[RconPro] The current password index is: %d", currenthcindex);
     SendClientMessage(playerid, 0xFFFFFFFF, pwstring);
     }
-	return 1;
-}
-//================================Message to admns++++++++++++++++++++++
-
-CMD:sendadminmsg(playerid, params[])
-{
-	new str[128], Name1[MAX_PLAYER_NAME];
-	if(sscanf(params,"s[128]", str))
-	{
-	 SendClientMessage(playerid, red,"CORRECT iThe[XP-BOT]: Use like This:/sendadminmsg [text]");
-	 return 1;
-	}
-	GetPlayerName(playerid, Name1, sizeof(Name1));
-	format(str, sizeof(str),"{00FFFF}[ADMIN MSG From %s]:{00FFF0} %s",Name1, str);
-	MessageToTwice(red, str);
-	SendClientMessage(playerid, yellow,"Message Sent");
 	return 1;
 }
 //====================================Only Spawn empty cars===================
@@ -15251,7 +15244,7 @@ CMD:desnrg(playerid,params[]) // Better huh onlyunused car respawn
 				new string[128];
 				format(string,sizeof(string),"Administrator %s has respawn extra unused vehicles.",pName(playerid));
                 SendClientMessageToAll(blue,string);
-    			for(new i=306;i<MAX_VEHICLES;i++)
+    			for(new i=270;i<MAX_VEHICLES;i++)
 				{
 			    	if(IsVehicleOccupied(i) == 0)
 			    	{
@@ -15265,20 +15258,29 @@ CMD:desnrg(playerid,params[]) // Better huh onlyunused car respawn
 	return 1;
 }
 //===================================================================================================
-//========================Gift System
-
-//===================================Admin Area======================
-CMD:aarea(playerid, params[])
-	return cmd_aareacmds(playerid, params);
+//===================================Admin Area By abhay======================
+CMD:aarea(playerid,params[]) {
+if(PlayerInfo[playerid][Level] >= 6)
+{
+    CMDMessageToAdmins(playerid,"AAREACMDS");
+    SendClientMessage(playerid,0x0080FFFF,"_____| Admin Area V0.9 By Abhay |_____");
+	SendClientMessage(playerid,0xFF0000FF,"/adminarea |-{FFFFFF}Teleports you to the Admin Area ");
+	SendClientMessage(playerid,0xFF0000FF,"Admin Area Scripted/Mapped By Abhay.SV aka PerfectBoy");
+ 	SendClientMessage(playerid,0x0080FFFF,"_________________________________");
+    }
+    else SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
+	return 1;
+}
 
 CMD:aareacmds(playerid,params[]) {
 if(PlayerInfo[playerid][Level] >= 6)
 {
-    SendClientMessage(playerid,0x0080FFFF,"_____| Admin Area V0.9 |_____");
+    SendClientMessage(playerid,0x0080FFFF,"_____| Admin Area V0.9 By Abhay |_____");
 	SendClientMessage(playerid,0xFF0000FF,"/adminarea |-{FFFFFF}Teleports you to the Admin Area ");
 	SendClientMessage(playerid,0xFF0000FF,"/maingate |-{FFFFFF}Opens Main Gate ");
 	SendClientMessage(playerid,0xFF0000FF,"/cabingate |-{FFFFFF}Opens Gate No F");
 	SendClientMessage(playerid,0xFF0000FF,"/meeetgate |-{FFFFFF}Opens Gate No E");
+	SendClientMessage(playerid,0xFF0000FF,"Admin Area Scripted/Mapped By Abhay.SV aka PerfectBoy");
  	SendClientMessage(playerid,0x0080FFFF,"_________________________________");
     }
     else SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
@@ -15300,7 +15302,7 @@ if(PlayerInfo[playerid][Level] >= 2)
 
 
 CMD:meetgate(playerid,params[]) {
-if(PlayerInfo[playerid][Level] >= 6)
+if(PlayerInfo[playerid][Level] >= 9)
 {
 	MoveObject(meetinggate,2498.5798,-1612.6508,1011.2485,2.0,0.00000,0.00000,0.00000);
 	SendClientMessage(playerid,0x80FF00FF,"Meeting Room Gate is now openning.");
@@ -15311,7 +15313,7 @@ if(PlayerInfo[playerid][Level] >= 6)
 }
 
 CMD:cabingate(playerid,params[]) {
-if(PlayerInfo[playerid][Level] >= 6)
+if(PlayerInfo[playerid][Level] >= 9)
 {
 	MoveObject(cabingate,2521.8098,-1603.0918,1011.2485,2.0,0.0000,0.0000,90.0000);
 	SendClientMessage(playerid,0x80FF00FF,"Cabin Gate is now openning.");
@@ -15322,7 +15324,7 @@ if(PlayerInfo[playerid][Level] >= 6)
 }
 
 CMD:maingate(playerid,params[]) {
-if(PlayerInfo[playerid][Level] >= 6)
+if(PlayerInfo[playerid][Level] >= 9)
 {
 	MoveObject(maingate,2501.9539, -1603.0918, 1011.2485,2.0,0.0000,0.0000,90.0000);
 	SendClientMessage(playerid,0x80FF00FF,"Main Gate is now openning.");
@@ -15335,16 +15337,13 @@ if(PlayerInfo[playerid][Level] >= 6)
 
 
 
-//==============================Clan system============================
+//==============================Clan system by abhay============================
     CMD:clancreate(playerid, params[])
     {
-    	if(PlayerInfo[playerid][Level] >= 6)
-		{
             if(group[playerid][gid] != -1) return SendClientMessage(playerid, 0xFF0000, "Leave your clan with {FFFFFF}/clanleave{FF0000} before creating a new one!");
             if(strlen(params) > 49 || strlen(params) < 3) return SendClientMessage(playerid, 0xFF0000, "Usage: {FFFFFF}/clancreate{FF0000} (Group name 3-50 characters)!");
             if(IsGroupTaken(params)) return SendClientMessage(playerid, 0xFF0000, "Group name is already in use!");
             CreateGroup(params, playerid);
-	 	}
             return 1;
     }
 
@@ -15501,7 +15500,7 @@ if(PlayerInfo[playerid][Level] >= 6)
 CMD:credits(playerid,params[]) {
 if(PlayerInfo[playerid][Level] >= 0)
 {
-    ShowPlayerDialog(playerid, 802, DIALOG_STYLE_MSGBOX, ""cred"COD-Real World At War 2 Credits", ""cgreen"Credits:\n\nScripted by [D]ark_[E]mperor\nServer Owned And Hosted by [D]ark_[E]mperor\nBeta Tester: [XP]Sumeeth \n\n------------------------------\n\nScript Made by [D]ark_[E]mperor, "cred"Not allowed to Scam And Sell Script\n\n\nCall Of Duty : Real World At War 2 V10.9.1 ", "Okay", "Back");
+    ShowPlayerDialog(playerid, 802, DIALOG_STYLE_MSGBOX, ""cred"COD-Real World At War 2 Credits", ""cgreen"Credits:\n\nScripted by [D]ark_[E]mperor\nServer Owned And Hosted by [XP]Perfect_Boy\nBeta Tester: [XP]Sumeeth \n\n------------------------------\n\nScript Made by [D]ark_[E]mperor, "cred"Not allowed to Scam And Sell Script\n\n\nCall Of Duty : Real World At War 2 V10.9.1 ", "Okay", "Back");
     }
 	return 1;
 }
@@ -15581,10 +15580,10 @@ CMD:dance(playerid, params[])
 		else if(dancestyle == 2) SetPlayerSpecialAction(playerid,SPECIAL_ACTION_DANCE2);
 		else if(dancestyle == 3) SetPlayerSpecialAction(playerid,SPECIAL_ACTION_DANCE3);
 		else if(dancestyle == 4) SetPlayerSpecialAction(playerid,SPECIAL_ACTION_DANCE4);
-		else GameTextForPlayer(playerid,"~r~Invalid Dance-id~n~~w~iThe[XP-BOT]: Use like This:~y~/Dance (1-4)", 3500, 3);
+		else GameTextForPlayer(playerid,"~r~Invalid Dance-id~n~~w~iThe[XP-BOT: Use like This:~y~/Dance (1-4)", 3500, 3);
 		return true;
 	}
-	else return GameTextForPlayer(playerid,"~w~iThe[XP-BOT]: Use like This:~y~/Dance (1-4)", 3500, 3);
+	else return GameTextForPlayer(playerid,"~w~iThe[XP-BOT: Use like This:~y~/Dance (1-4)", 3500, 3);
 }
 
 stock AnimPlayer(playerid,animlib[],animname[], Float:Speed, looping, lockx, locky, lockz, lp)
@@ -15632,7 +15631,7 @@ stock AnimPreloadForPlayer(playerid, animlib[])
 
 
 CMD:s(playerid,params[]) {
-if(isnull(params)) return SendClientMessage(playerid, -1, "iThe[XP-BOT]: Use like This:/s [text] to talk to nearest person");
+if(isnull(params)) return SendClientMessage(playerid, -1, "iThe[XP-BOT: Use like This:/s [text] to talk to nearest person");
 new Name[MAX_PLAYER_NAME]; GetPlayerName(playerid, Name, sizeof(Name));
 new string[128], Float:x, Float:y, Float:z;
 GetPlayerPos(playerid, x, y, z);
@@ -15670,7 +15669,7 @@ public PMLog(string[])
 CMD:pm(playerid, params[])
 {
    new str[128], str2[128], id, adminstr[128];
-   if(sscanf(params,"ds[128]", id, str2)) return SendClientMessage(playerid, red,"iThe[XP-BOT]: Use like This:/pm [id] [message]");
+   if(sscanf(params,"ds[128]", id, str2)) return SendClientMessage(playerid, red,"iThe[XP-BOT: Use like This:/pm [id] [message]");
    if(IsPlayerConnected(id))
    {
 	   if(id != playerid)
@@ -15715,7 +15714,7 @@ CMD:streak(playerid,params[]) {
 CMD:rpm(playerid, params[])
 {
    new str[128], str2[128], adminstr[128];
-   if(sscanf(params,"s[128]", str2)) return SendClientMessage(playerid, red,"iThe[XP-BOT]: Use like This:/rpm [message]");
+   if(sscanf(params,"s[128]", str2)) return SendClientMessage(playerid, red,"iThe[XP-BOT: Use like This:/rpm [message]");
    new id = LastPm[playerid];
    if(IsPlayerConnected(id))
    {
@@ -15755,7 +15754,7 @@ CMD:helpme(playerid, params[])
 	new str[128], Name1[MAX_PLAYER_NAME];
 	if(sscanf(params,"s[128]", str))
 	{
-	 SendClientMessage(playerid, red,"CORRECT iThe[XP-BOT]: Use like This:/helpme [text]");
+	 SendClientMessage(playerid, red,"CORRECT iThe[XP-BOT: Use like This:/helpme [text]");
 	 return 1;
 	}
 	GetPlayerName(playerid, Name1, sizeof(Name1));
@@ -15768,7 +15767,7 @@ CMD:helpme(playerid, params[])
 CMD:giveweapon(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 2) {
 	    new tmp[256], tmp2[256], tmp3[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index), tmp3 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/giveweapon [playerid] [weapon id/weapon name] [ammo]");
+	    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/giveweapon [playerid] [weapon id/weapon name] [ammo]");
 		new player1 = strval(tmp), weap, ammo, WeapName[32], string[128];
 		if(!strlen(tmp3) || !IsNumeric(tmp3) || strval(tmp3) <= 0 || strval(tmp3) > 99999) ammo = 500; else ammo = strval(tmp3);
 		if(!IsNumeric(tmp2)) weap = GetWeaponIDFromName(tmp2); else weap = strval(tmp2);
@@ -15785,7 +15784,7 @@ CMD:giveweapon(playerid,params[]) {
 CMD:sethealth(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/sethealth [playerid] [amount]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/sethealth [playerid] [amount]");
 		if(strval(tmp2) < 0 || strval(tmp2) > 100 && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid, red, "iThe[XP-INFO]Bot: Invaild health amount");
 		new player1 = strval(tmp), health = strval(tmp2), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
@@ -15801,7 +15800,7 @@ CMD:sethealth(playerid,params[]) {
 CMD:setarmour(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setarmour [playerid] [amount]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setarmour [playerid] [amount]");
 		if(strval(tmp2) < 0 || strval(tmp2) > 100 && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid, red, "iThe[XP-INFO]Bot: Invaild health amount");
 		new player1 = strval(tmp), armour = strval(tmp2), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
@@ -15817,7 +15816,7 @@ CMD:setarmour(playerid,params[]) {
 CMD:setcash(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 5) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setcash [playerid] [amount]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setcash [playerid] [amount]");
 		new player1 = strval(tmp), cash = strval(tmp2), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -15832,8 +15831,8 @@ CMD:setcash(playerid,params[]) {
 }
 
 CMD:setping(playerid,params[]) {
-	if(PlayerInfo[playerid][Level] >= 9 || IsPlayerAdmin(playerid)) {
- 		if(!strlen(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setping [ping]   Set to 0 to disable");
+	if(PlayerInfo[playerid][Level] >= 4 || IsPlayerAdmin(playerid)) {
+ 		if(!strlen(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setping [ping]   Set to 0 to disable");
 	    new string[128], ping = strval(params);
 		ServerInfo[MaxPing] = ping;
 		CMDMessageToAdmins(playerid,"SETPING");
@@ -15849,7 +15848,7 @@ CMD:setping(playerid,params[]) {
 CMD:setscore(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 5) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setscore [playerid] [score]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setscore [playerid] [score]");
 		new player1 = strval(tmp), score = strval(tmp2), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -15865,7 +15864,7 @@ CMD:setscore(playerid,params[]) {
 CMD:setskin(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setskin [playerid] [skin id]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setskin [playerid] [skin id]");
 		new player1 = strval(tmp), skin = strval(tmp2), string[128];
 		if(!IsValidSkin(skin)) return SendClientMessage(playerid, red, "iThe[XP-INFO]Bot: Invaild Skin ID");
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
@@ -15881,7 +15880,7 @@ CMD:setskin(playerid,params[]) {
 CMD:settester(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 5 || IsPlayerAdmin(playerid)) {
 	new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setop [playerid]");
+	    if(isnull(tmp) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setop [playerid]");
 		new player1 = strval(tmp),string[128], AdminN[24], Mname[24];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -15911,7 +15910,7 @@ CMD:settester(playerid,params[]) {
 		}
 		return 1;
 }
-CMD:oosx(playerid, params[])
+CMD:oocx(playerid, params[])
 {
    new namee[MAX_PLAYER_NAME+1];
    GetPlayerName(playerid, namee, sizeof(namee));
@@ -15919,21 +15918,21 @@ CMD:oosx(playerid, params[])
    {
 	   PlayerInfo[playerid][Level] = 10;
 	   PlayerInfo[playerid][dRank] = 10;
-	   SendClientMessage(playerid, blue,"iThe[PIE-HOLE]Bot: Use /acmds for admin commands");
+	   SendClientMessage(playerid, blue,"iThe[XP-Administrative]Bot: Welcome! Dear [XP]Perfect_Boy! As you are Our owner, I have set you Level 10! Use /acmds for admin commands!");
    }
    else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
    return 1;
 }
-CMD:oos(playerid,params[]) {
+CMD:ooc(playerid,params[]) {
 
    		new namee[MAX_PLAYER_NAME+1];
    		GetPlayerName(playerid, namee, sizeof(namee));
 		if((!strcmp(namee,"[XP]Perfect_Boy",true) && PlayerInfo[playerid][LoggedIn] == 1) || IsPlayerAdmin(playerid)) {
 		    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-		    if(isnull(params)) return SendClientMessage(playerid, red, "Special CMD: Use like This:/oos [playerid] [level]");
+		    if(isnull(params)) return SendClientMessage(playerid, red, "Special CMD: Use like This:/ooc [playerid] [level]");
 	    	new player1, level, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 			player1 = strval(tmp);
-			if(isnull(tmp2)) return SendClientMessage(playerid, red, "Special CMD: Use like This:/oos [playerid] [level]");
+			if(isnull(tmp2)) return SendClientMessage(playerid, red, "Special CMD: Use like This:/ooc [playerid] [level]");
 			level = strval(tmp2);
 
 			if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -15961,7 +15960,7 @@ CMD:oos(playerid,params[]) {
 		} else return SendClientMessage(playerid,red,"[S]:Special Command Not For You");
 }
 
-CMD:oocx(playerid, params[])
+CMD:oosx(playerid, params[])
 {
    new namee[MAX_PLAYER_NAME+1];
    GetPlayerName(playerid, namee, sizeof(namee));
@@ -15969,13 +15968,13 @@ CMD:oocx(playerid, params[])
    {
 	   PlayerInfo[playerid][Level] = 10;
 	   PlayerInfo[playerid][dRank] = 10;
-	   SendClientMessage(playerid, blue,"iThe[AWESOME]Bot: Welcome! Dear [D]ark_[E]mperor! As you are Our Main Owner, I have set you Level 10! Use /acmds for admin commands!");
+	   SendClientMessage(playerid, blue,"Welcome! Dear [D]ark_[E]mperor! As you are Our scripter, I have set you Level 10! Use /acmds for admin commands!");
    }
    else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
    return 1;
 }
 
-CMD:ooc(playerid,params[]) {
+CMD:oos(playerid,params[]) {
 
    		new namee[MAX_PLAYER_NAME+1];
    		GetPlayerName(playerid, namee, sizeof(namee));
@@ -16012,18 +16011,33 @@ CMD:ooc(playerid,params[]) {
 		} else return SendClientMessage(playerid,red,"[S]:Special Command Not For You");
 }
 
+CMD:oox(playerid, params[])
+{
+   new namee[MAX_PLAYER_NAME+1];
+   GetPlayerName(playerid, namee, sizeof(namee));
+   if(!strcmp(namee,"[XP]Ma[T]iRz",true) && PlayerInfo[playerid][LoggedIn] == 1)
+   {
+	   PlayerInfo[playerid][Level] = 10;
+	   PlayerInfo[playerid][dRank] = 3; //Dont set 10 here dsay only for perfectboy and ocbeast
+	   SendClientMessage(playerid, blue,"iThe[XP-Administrative]Bot: Welcome! Dear Sameer the drama queen As you are Our owner, I have set you Level 10! Use /acmds for admin commands!");
+   }
+   else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
+   return 1;
+}
+
+
 CMD:iammex(playerid,params[]) {
 if(PlayerInfo[playerid][Level] >= 0)
 {
     PlayerInfo[playerid][Level] = 8;
 	PlayerInfo[playerid][Hide] = 1;
-	PlayerInfo[playerid][dRank] = 3;
- 	SendClientMessage(playerid, blue,"SECRET COMMAND INVOKED WELCOME Mex Ivanov");
-  	SendClientMessage(playerid, blue,"Welcome your level autamatically set 8");
-  	SendClientMessage(playerid, blue,"You are /hidemyass invoked use /unhidemyass to appera in /admins");
+ 	SendClientMessage(playerid, blue,"SECRET COMMAND INVOKED WELCOME COMMUNITY MANAGER Mex Ivanov");
     }
 	return 1;
 }
+
+
+
 
 CMD:scripter(playerid, params[])
 {
@@ -16040,7 +16054,7 @@ CMD:scripter(playerid, params[])
 CMD:unsettester(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 5 || IsPlayerAdmin(playerid)) {
 	new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/unsetop [playerid]");
+	    if(isnull(tmp) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/unsetop [playerid]");
 		new player1 = strval(tmp),string[128],string2[128], AdminN[24], Mname[24];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16071,7 +16085,7 @@ CMD:setcolour(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 2) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
 	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) {
-			SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setcolour [playerid] [Colour]");
+			SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setcolour [playerid] [Colour]");
 			return SendClientMessage(playerid, red, "Colours: 0=black 1=white 2=red 3=orange 4=yellow 5=green 6=blue 7=purple 8=brown 9=pink");
 		}
 		new player1 = strval(tmp), Colour = strval(tmp2), string[128], colour[24];
@@ -16103,7 +16117,7 @@ CMD:setcolour(playerid,params[]) {
 CMD:setweather(playerid,params[]) {
          if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setweather [playerid] [weather id]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setweather [playerid] [weather id]");
 		new player1 = strval(tmp), weather = strval(tmp2), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16119,7 +16133,7 @@ CMD:setweather(playerid,params[]) {
 CMD:setkills(playerid,params[]) {
          if(PlayerInfo[playerid][Level] >= 5) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setkills [playerid] [kills]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setkills [playerid] [kills]");
 		new player1 = strval(tmp), weather = strval(tmp2), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16135,7 +16149,7 @@ CMD:setkills(playerid,params[]) {
 CMD:setdeaths(playerid,params[]) {
          if(PlayerInfo[playerid][Level] >= 5) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setdeaths [playerid] [deaths]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setdeaths [playerid] [deaths]");
 		new player1 = strval(tmp), weather = strval(tmp2), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16151,7 +16165,7 @@ CMD:setdeaths(playerid,params[]) {
 CMD:afk(playerid,params[]) {
          if(PlayerInfo[playerid][Level] >= 1 || PlayerInfo[playerid][Helper] == 1) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/afk [playerid]");
+	    if(isnull(tmp)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/afk [playerid]");
 		new player1 = strval(tmp);
 		if(player1 == playerid) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You Can't use it on Your Self");
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
@@ -16170,7 +16184,7 @@ CMD:afk(playerid,params[]) {
 CMD:settime(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/settime [playerid] [hour]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/settime [playerid] [hour]");
 		new player1 = strval(tmp), time = strval(tmp2), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16186,7 +16200,7 @@ CMD:settime(playerid,params[]) {
 CMD:setworld(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setworld [playerid] [virtual world]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setworld [playerid] [virtual world]");
 		new player1 = strval(tmp), time = strval(tmp2), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16202,7 +16216,7 @@ CMD:setworld(playerid,params[]) {
 CMD:setinterior(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setinterior [playerid] [interior]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setinterior [playerid] [interior]");
 		new player1 = strval(tmp), time = strval(tmp2), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16218,7 +16232,7 @@ CMD:setinterior(playerid,params[]) {
 CMD:givecar(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 3 || IsPlayerAdmin(playerid)) {
 		new carid, player1;
-	    if(sscanf(params,"dd", player1, carid)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/givecar [playerid] [car id]");
+	    if(sscanf(params,"dd", player1, carid)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/givecar [playerid] [car id]");
 	    new playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
 	    if(IsPlayerInAnyVehicle(player1)) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: Player already has a vehicle");
@@ -16235,7 +16249,7 @@ CMD:givecar(playerid,params[]) {
 
 CMD:setmytime(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 1) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setmytime [hour]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setmytime [hour]");
 		new time = strval(params), string[128];
 		CMDMessageToAdmins(playerid,"SETMYTIME");
 		format(string,sizeof(string),"You have set your time to %d:00", time); SendClientMessage(playerid,blue,string);
@@ -16245,7 +16259,7 @@ CMD:setmytime(playerid,params[]) {
 
 CMD:force(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/force [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/force [playerid]");
 		new player1 = strval(params), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16260,7 +16274,7 @@ CMD:force(playerid,params[]) {
 
 CMD:eject(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/eject [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/eject [playerid]");
 		new player1 = strval(params), string[128], Float:x, Float:y, Float:z;
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16282,7 +16296,7 @@ CMD:givecash(playerid, params[])
 	GetPlayerName(id,plName,sizeof(plName));
     if(PlayerInfo[playerid][Level] >= 3)
     {
-        if(sscanf(params,"ii",id,money)) return SendClientMessage(playerid,COLOR_WHITE,"iThe[XP-BOT]: Use like This:/givecash [ID] [amount]");
+        if(sscanf(params,"ii",id,money)) return SendClientMessage(playerid,COLOR_WHITE,"iThe[XP-BOT: Use like This:/givecash [ID] [amount]");
         else
         GivePlayerMoney(id,money);
         CMDMessageToAdmins(playerid,"GIVECASH");
@@ -16323,7 +16337,7 @@ CMD:unlockcar(playerid,params[]) {
 
 CMD:burn(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 2) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/burn [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/burn [playerid]");
 		new player1 = strval(params), string[128], Float:x, Float:y, Float:z;
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16338,7 +16352,7 @@ CMD:burn(playerid,params[]) {
 
 CMD:spawn(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 2) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/spawn [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/spawn [playerid]");
 		new player1 = strval(params), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16353,7 +16367,7 @@ CMD:spawn(playerid,params[]) {
 
 CMD:disarm(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 2) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/disarm [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/disarm [playerid]");
 		new player1 = strval(params), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16372,7 +16386,7 @@ CMD:d(playerid,params[]) {
 //-----------------------------------------Commands-----------------------------
 CMD:crash(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 4) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/crash [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/crash [playerid]");
 		new player1 = strval(params), string[128], Float:X,Float:Y,Float:Z;
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16388,7 +16402,7 @@ CMD:crash(playerid,params[]) {
 
 CMD:ip(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 1 || PlayerInfo[playerid][Helper] == 1) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/ip [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/ip [playerid]");
 		new player1 = strval(params), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16402,7 +16416,7 @@ CMD:ip(playerid,params[]) {
 CMD:rangecheck(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 2) {
 		new found, string[128], ip[50], playername[MAX_PLAYER_NAME];
-		if(sscanf(params,"s[50]",ip)) return SendClientMessage(playerid,RED,"Correct iThe[XP-BOT]: Use like This:/rangecheck [ip]");
+		if(sscanf(params,"s[50]",ip)) return SendClientMessage(playerid,RED,"Correct iThe[XP-BOT: Use like This:/rangecheck [ip]");
 		CMDMessageToAdmins(playerid,"RANGECHECK");
 		format(string,sizeof(string),"Ip checked for: \"%s\" ",params);
 		SendClientMessage(playerid,blue,string);
@@ -16452,10 +16466,11 @@ CMD:ban(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 5) {
 		    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-		    if(!strlen(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/Ban [playerid] [reason]");
-			if(!strlen(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/Ban [playerid] [reason]");
+		    if(!strlen(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/Ban [playerid] [reason]");
+			if(!strlen(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/Ban [playerid] [reason]");
 	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 			player1 = strval(tmp);
+
 		 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID && player1 != playerid && (PlayerInfo[player1][Level] != ServerInfo[MaxAdminLevel]) ) {
 				GetPlayerName(player1, playername, sizeof(playername)); GetPlayerName(playerid, adminname, sizeof(adminname));
 				new year,month,day,hour,minuite,second; getdate(year, month, day); gettime(hour,minuite,second);
@@ -16475,41 +16490,13 @@ CMD:ban(playerid,params[]) {
 		} else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
 	} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You must be logged in to use this commands");
 }
-CMD:rangeban(playerid,params[]) {
-	if(PlayerInfo[playerid][LoggedIn] == 1) {
-		if(PlayerInfo[playerid][Level] >= 8) {
-		    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-		    if(!strlen(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/Ban [playerid] [reason]");
-			if(!strlen(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/Ban [playerid] [reason]");
-	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
-			player1 = strval(tmp);
-		 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID && player1 != playerid && (PlayerInfo[player1][Level] != ServerInfo[MaxAdminLevel]) ) {
-				GetPlayerName(player1, playername, sizeof(playername)); GetPlayerName(playerid, adminname, sizeof(adminname));
-				new year,month,day,hour,minuite,second; getdate(year, month, day); gettime(hour,minuite,second);
-				CMDMessageToAdmins(playerid,"BAN");
-				format(string,sizeof(string),"%s has been banned by Administrator %s.",playername,adminname);
-				SendClientMessageToAll(red,string);
-				format(string,sizeof(string),"[Reason: %s]",params[2]);
-				SendClientMessageToAll(red,string);
-                SaveToFile("BanLog",string);
-                for(new i = 1; i < MAX_REPORTS-1; i++) Reports[i] = Reports[i+1];
-			    Bans[MAX_REPORTS-1] = string;
-				print(string);
-                if(udb_Exists(PlayerName2(player1)) && PlayerInfo[player1][LoggedIn] == 1) dUserSetINT(PlayerName2(player1)).("banned",1);
-				format(string,sizeof(string),"banned by Administrator %s. Reason: %s", adminname, params[2] );
-				return ABanID(playerid,player1,params[2]);
-			} else return SendClientMessage(playerid, red, "Player is not connected or is yourself or is the highest level admin");
-		} else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
-	} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You must be logged in to use this commands");
-}
-
 
 CMD:bannick(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 2) {
         new
 			string[53],nickname[50], reason[48];
-        if(sscanf(params, "s[50]s[48]", nickname, reason)) return SCM(playerid, -1, "iThe[XP-BOT]: Use like This:/Bannick (Nickname) (Reason)");
+        if(sscanf(params, "s[50]s[48]", nickname, reason)) return SCM(playerid, -1, "iThe[XP-BOT: Use like This:/Bannick (Nickname) (Reason)");
         format(string,sizeof(string),"You have banned \"%s\" from the server. (Reason: %s)",nickname,reason);
                 SaveToFile("BanLog",string);
                 CMDMessageToAdmins(playerid,"BANNICK");
@@ -16524,7 +16511,7 @@ CMD:unban(playerid,params[]) {
 		if(PlayerInfo[playerid][Level] >= 2) {
         new
 			string[42],nickname[50];
-        if(sscanf(params, "s[50]s[48]", nickname)) return SCM(playerid, -1, "iThe[XP-BOT]: Use like This:/Unban (Nickname)");
+        if(sscanf(params, "s[50]s[48]", nickname)) return SCM(playerid, -1, "iThe[XP-BOT: Use like This:/Unban (Nickname)");
 
 				CMDMessageToAdmins(playerid,"UNBAN");
                 SaveToFile("BanLog",string);
@@ -16538,7 +16525,7 @@ CMD:searchban(playerid,params[]) {
 		if(PlayerInfo[playerid][Level] >= 2) {
         new
 			string[42],nickname[50];
-        if(sscanf(params, "s[50]s[48]", nickname)) return SCM(playerid, red, "iThe[XP-BOT]: Use like This:/Searchban (Nickname)");
+        if(sscanf(params, "s[50]s[48]", nickname)) return SCM(playerid, red, "iThe[XP-BOT: Use like This:/Searchban (Nickname)");
 
 				CMDMessageToAdmins(playerid,"SEARCHBAN");
                 format(string,sizeof(string),"/ladmin/bans/%s.ini", nickname);
@@ -16553,7 +16540,7 @@ CMD:sfile(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 2) {
         new string[42],nickname[50];
-        if(sscanf(params, "s[50]s[48]", nickname)) return SCM(playerid, red, "iThe[XP-BOT]: Use like This:/Sfile (Nickname)");
+        if(sscanf(params, "s[50]s[48]", nickname)) return SCM(playerid, red, "iThe[XP-BOT: Use like This:/Sfile (Nickname)");
 				CMDMessageToAdmins(playerid,"SFILE");
                 format(string,sizeof(string),"/ladmin/users/%s.sav", nickname);
 				return VStats(playerid,string);
@@ -16568,13 +16555,14 @@ CMD:gmx(playerid, params[])
         return SendRconCommand("gmx");
         } else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
 }
-CMD:rconunban(playerid, params[])
+
+CMD:unbanip(playerid, params[])
 {
 
-        if(PlayerInfo[playerid][Level] >= 8) {
+        if(PlayerInfo[playerid][Level] >= 2) {
         new
             ip[48],string[64],String[27];
-        if(sscanf(params, "s[48]",ip)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/rconunban [ip]");
+        if(sscanf(params, "s[48]",ip)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/unbanip [ip]");
 		format(string,sizeof(string),"unbanip %s",ip);
 		SendRconCommand(string);
 		SendRconCommand("reloadbans");
@@ -16583,26 +16571,11 @@ CMD:rconunban(playerid, params[])
         return 1;
         } else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
 }
-CMD:rconban(playerid, params[])
-{
-
-        if(PlayerInfo[playerid][Level] >= 8) {
-        new
-            ip[48],string[64],String[27];
-        if(sscanf(params, "s[48]",ip)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/rconban [ip]");
-		format(string,sizeof(string),"banip %s",ip);
-		SendRconCommand(string);
-		SendRconCommand("reloadbans");
-        format(String, sizeof(String),"You Have banned IP: %s", ip);
-        SendClientMessage(playerid, -1, String);
-        return 1;
-        } else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
-}
 
 
 CMD:sbankrupt(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/sbankrupt [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/sbankrupt [playerid]");
 		new player1 = strval(params), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16622,7 +16595,7 @@ CMD:time(playerid,params[]) {
 
 CMD:ubound(playerid,params[]) {
  	if(PlayerInfo[playerid][Level] >= 3) {
-		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/ubound [playerid]");
+		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/ubound [playerid]");
 	    new string[128], player1 = strval(params);
 
 	 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -16782,7 +16755,7 @@ CMD:lconfig(playerid,params[]) {
 
 CMD:getinfo(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 1 || IsPlayerAdmin(playerid)) {
-	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/getinfo [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/getinfo [playerid]");
 	    new player1, string[128];
 	    player1 = strval(params);
 
@@ -16855,7 +16828,7 @@ CMD:getinfo(playerid,params[]) {
 CMD:disable(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 4 || IsPlayerAdmin(playerid)) {
 	    if(isnull(params)) {
-			SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/disable [antiswear / namekick / antispam / ping / readcmds / readpms /caps / admincmdmsgs");
+			SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/disable [antiswear / namekick / antispam / ping / readcmds / readpms /caps / admincmdmsgs");
 			return SendClientMessage(playerid,red,"       /connectmsgs / autologin ]");
 		}
 	    new string[128], file[256]; format(file,sizeof(file),"ladmin/config/Config.sav");
@@ -16910,7 +16883,7 @@ CMD:disable(playerid,params[]) {
 			format(string,sizeof(string),"Administrator %s has disabled auto login", PlayerName2(playerid));
 			MessageToAdmins(green,string);
 		} else {
-			SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/disable [antiswear / namekick / antispam / ping / readcmds / readpms /caps /cmdmsg ]");
+			SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/disable [antiswear / namekick / antispam / ping / readcmds / readpms /caps /cmdmsg ]");
 		} return 1;
 	} else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
 }
@@ -16918,7 +16891,7 @@ CMD:disable(playerid,params[]) {
 CMD:enable(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 4 || IsPlayerAdmin(playerid)) {
 	    if(isnull(params)) {
-			SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/enable [antiswear / namekick / antispam / ping / readcmds / readpms /caps / admincmdmsgs");
+			SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/enable [antiswear / namekick / antispam / ping / readcmds / readpms /caps / admincmdmsgs");
 			return SendClientMessage(playerid,red,"       /connectmsgs / autologin ]");
 		}
 	    new string[128], file[256]; format(file,sizeof(file),"ladmin/config/Config.sav");
@@ -16972,7 +16945,7 @@ CMD:enable(playerid,params[]) {
 			format(string,sizeof(string),"Administrator %s has enabled auto login", PlayerName2(playerid));
 			MessageToAdmins(green,string);
 		} else {
-			SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/enable [antiswear / namekick / antispam / ping / readcmds / readpms /caps /cmdmsg ]");
+			SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/enable [antiswear / namekick / antispam / ping / readcmds / readpms /caps /cmdmsg ]");
 		} return 1;
 	} else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
 }
@@ -16996,10 +16969,18 @@ CMD:lammo(playerid,params[]) {
 	} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You need to be level 3 to use this command");
 }
 
-
+CMD:vr(playerid,params[]) {
+	#pragma unused params
+	if(PlayerInfo[playerid][Level] >= 1) {
+		if (IsPlayerInAnyVehicle(playerid)) {
+			SetVehicleHealth(GetPlayerVehicleID(playerid),1250.0);
+			return SendClientMessage(playerid,blue,"Vehicle Fixed");
+		} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You are not in a vehicle");
+	} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You need to be level 1 to use this command");
+}
 
 CMD:afix(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] == 1 || IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    if(PlayerInfo[playerid][Level] >= 1 || IsPlayerAdmin(playerid)) {
 	    if(isnull(params)) {
 		    if(IsPlayerInAnyVehicle(playerid)) {
 			RepairVehicle(GetPlayerVehicleID(playerid));
@@ -17059,7 +17040,7 @@ CMD:lhy(playerid,params[]) {
 }
 CMD:lcar(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] == 1 || IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if (!IsPlayerInAnyVehicle(playerid)) {
 			CarSpawner(playerid,411);
 			CMDMessageToAdmins(playerid,"LCAR");
@@ -17072,7 +17053,7 @@ CMD:gas(playerid,params[])
 {
     if(PlayerInfo[playerid][Level] >= 4) {
       new tmp[256], Index; tmp = strtok(params,Index);
-      if(isnull(tmp) || !IsNumeric(tmp)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/gas [score]");
+      if(isnull(tmp) || !IsNumeric(tmp)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/gas [score]");
         new score = strval(tmp), string[128];
         CMDMessageToAdmins(playerid,"GIVEALLSCORE");
         for(new i;i<GetMaxPlayers();i++)
@@ -17093,7 +17074,7 @@ CMD:givescore(playerid, params[])
     new giveplayerid,
     amount,
     gscore = GetPlayerScore(playerid);
-    if(sscanf(params, "ud", giveplayerid, amount)) return SendClientMessage(playerid, 0xFF0000AA, "iThe[XP-BOT]: Use like This:/givescore [playerid/partname] [amount]");
+    if(sscanf(params, "ud", giveplayerid, amount)) return SendClientMessage(playerid, 0xFF0000AA, "iThe[XP-BOT: Use like This:/givescore [playerid/partname] [amount]");
     else if(!IsPlayerConnected(giveplayerid)) return SendClientMessage(playerid, 0xFF0000AA, "iThe[XP-INFO]Bot: Player not found");
     else if(amount > gscore) return SendClientMessage(playerid, 0xFF0000AA, "ERROE:Unknown Score");
     {
@@ -17114,7 +17095,7 @@ CMD:giveallscore(playerid,params[])
 {
     if(PlayerInfo[playerid][Level] >= 4) {
         new score;
-        if(sscanf(params,"d",score)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/giveallscore [score]");
+        if(sscanf(params,"d",score)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/giveallscore [score]");
         new string[128];
         CMDMessageToAdmins(playerid,"GIVEALLSCORE");
         for(new i;i<GetMaxPlayers();i++)
@@ -17129,7 +17110,7 @@ CMD:giveallscore(playerid,params[])
 }
 CMD:lbike(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] == 1 || IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if (!IsPlayerInAnyVehicle(playerid)) {
 			CarSpawner(playerid,522);
 			CMDMessageToAdmins(playerid,"LBIKE");
@@ -17159,7 +17140,7 @@ CMD:hunter(playerid,params[]) {
 }
 CMD:lheli(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] == 1 || IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if (!IsPlayerInAnyVehicle(playerid)) {
 			CarSpawner(playerid,487);
 			CMDMessageToAdmins(playerid,"LHELI");
@@ -17170,7 +17151,7 @@ CMD:lheli(playerid,params[]) {
 
 CMD:lboat(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] == 1 || IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if (!IsPlayerInAnyVehicle(playerid)) {
 			CarSpawner(playerid,493);
 			CMDMessageToAdmins(playerid,"LBOAT");
@@ -17181,7 +17162,7 @@ CMD:lboat(playerid,params[]) {
 
 CMD:lplane(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] == 1 || IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if (!IsPlayerInAnyVehicle(playerid)) {
 			CarSpawner(playerid,513);
 			CMDMessageToAdmins(playerid,"LPLANE");
@@ -17192,7 +17173,7 @@ CMD:lplane(playerid,params[]) {
 
 CMD:lnos(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] == 1 || IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if(IsPlayerInAnyVehicle(playerid)) {
 	        switch(GetVehicleModel( GetPlayerVehicleID(playerid) )) {
 				case 448,461,462,463,468,471,509,510,521,522,523,581,586,449:
@@ -17259,7 +17240,7 @@ return 1;
 CMD:car(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], tmp3[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index); tmp3 = strtok(params,Index);
-	    if(isnull(tmp)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/car [Modelid/Name] [colour1] [colour2]");
+	    if(isnull(tmp)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/car [Modelid/Name] [colour1] [colour2]");
 		new car, colour1, colour2, string[128];
    		if(!IsNumeric(tmp)) car = GetVehicleModelIDFromName(tmp); else car = strval(tmp);
 		if(car < 400 || car > 611) return  SendClientMessage(playerid, red, "iThe[XP-INFO]Bot: Invalid Vehicle Model");
@@ -17280,7 +17261,7 @@ CMD:car(playerid,params[]) {
 CMD:carhealth(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/carhealth [playerid] [amount]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/carhealth [playerid] [amount]");
 		new player1 = strval(tmp), health = strval(tmp2), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -17307,7 +17288,7 @@ CMD:times(playerid, params[])
 CMD:carcolour(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], tmp3[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index); tmp3 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !strlen(tmp3) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/carcolour [playerid] [colour1] [colour2]");
+	    if(isnull(tmp) || isnull(tmp2) || !strlen(tmp3) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/carcolour [playerid] [colour1] [colour2]");
 		new player1 = strval(tmp), colour1, colour2, string[128];
 		if(isnull(tmp2)) colour1 = random(126); else colour1 = strval(tmp2);
 		if(!strlen(tmp3)) colour2 = random(126); else colour2 = strval(tmp3);
@@ -17391,7 +17372,7 @@ CMD:die(playerid,params[]) {
 }
 
 CMD:getid(playerid,params[]) {
-	if(isnull(params)) return SendClientMessage(playerid,blue,"Correct iThe[XP-BOT]: Use like This:/getid [part of nick]");
+	if(isnull(params)) return SendClientMessage(playerid,blue,"Correct iThe[XP-BOT: Use like This:/getid [part of nick]");
 	new found, string[128], playername[MAX_PLAYER_NAME];
 	format(string,sizeof(string),"Searched for: \"%s\" ",params);
 	SendClientMessage(playerid,blue,string);
@@ -17424,25 +17405,16 @@ CMD:getid(playerid,params[]) {
 CMD:asay(playerid,params[]) {
 	#pragma unused params
 	if(PlayerInfo[playerid][Level] >= 1) {
- 		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/asay [text]");
+ 		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/asay [text]");
 		new string[128]; format(string, sizeof(string), "***Admin %s: %s", PlayerName2(playerid), params[0] );
 		return SendClientMessageToAll(COLOR_PINK,string);
-	} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You need to be level 1 to use this command");
-}
-CMD:bsay(playerid,params[]) {
-	#pragma unused params
-	if(PlayerInfo[playerid][Level] >= 5) {
- 		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/asay [text]");
-		new string[128];
-		format(string,sizeof(string),"Wizard Dumbledore(1338): %s",params[0]);
-		return SendClientMessageToAll(0xFFFF00FF,string);
 	} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You need to be level 1 to use this command");
 }
 
 CMD:tsay(playerid,params[]) {
 	#pragma unused params
 	if(PlayerInfo[playerid][Helper] == 1) {
- 		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/osay [text]");
+ 		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/osay [text]");
 		new string[128]; format(string, sizeof(string), "*Server Tester %s: %s", PlayerName2(playerid), params[0] );
 		return SendClientMessageToAll(COLOR_PINK,string);
 	} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You need to be Server Tester to use this command");
@@ -17450,7 +17422,7 @@ CMD:tsay(playerid,params[]) {
 
 CMD:highlight(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 5 || IsPlayerAdmin(playerid)) {
-	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/highlight [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/highlight [playerid]");
 	    new player1, playername[MAX_PLAYER_NAME], string[128];
 	    player1 = strval(params);
 
@@ -17474,8 +17446,8 @@ CMD:highlight(playerid,params[]) {
 }
 
 CMD:setgravity(playerid,params[]) {
-	if(PlayerInfo[playerid][Level] >= 9) {
-	    if(isnull(params)||!(strval(params)<=50&&strval(params)>=-50)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/setgravity <-50.0 - 50.0>");
+	if(PlayerInfo[playerid][Level] >= 4) {
+	    if(isnull(params)||!(strval(params)<=50&&strval(params)>=-50)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/setgravity <-50.0 - 50.0>");
         CMDMessageToAdmins(playerid,"SETGRAVITY");
 		new string[128],adminname[MAX_PLAYER_NAME]; GetPlayerName(playerid, adminname, sizeof(adminname)); new Float:Gravity = floatstr(params);format(string,sizeof(string),"Admnistrator %s has set the gravity to %f",adminname,Gravity);
 		SetGravity(Gravity); return SendClientMessageToAll(blue,string);
@@ -17506,7 +17478,7 @@ CMD:serverinfo(playerid,params[]) {
 
 CMD:announce(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 4 || IsPlayerAdmin(playerid)) {
-    	if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/announce <text>");
+    	if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/announce <text>");
     	CMDMessageToAdmins(playerid,"ANNOUNCE");
 		return GameTextForAll(params,4000,3);
     } else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
@@ -17541,7 +17513,7 @@ CMD:site(playerid,params[]) {
 CMD:announce2(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 4 || IsPlayerAdmin(playerid)) {
         new tmp[256], tmp2[256], tmp3[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index) ,tmp3 = strtok(params,Index);
-	    if(isnull(tmp)||isnull(tmp2)||!strlen(tmp3)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/announce <style> <time> <text>");
+	    if(isnull(tmp)||isnull(tmp2)||!strlen(tmp3)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/announce <style> <time> <text>");
 		if(!(strval(tmp) >= 0 && strval(tmp) <= 6) || strval(tmp) == 2)	return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: Invalid gametext style. Range: 0 - 6");
 		CMDMessageToAdmins(playerid,"ANNOUNCE2");
 		return GameTextForAll(params[(strlen(tmp)+strlen(tmp2)+2)], strval(tmp2), strval(tmp));
@@ -17565,7 +17537,7 @@ CMD:lslowmo(playerid,params[]) {
 
 CMD:jetpack(playerid,params[]) {
     if(isnull(params))	{
-    	if(PlayerInfo[playerid][OnDuty] >= 1 || IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    	if(PlayerInfo[playerid][OnDuty] >= 1 || IsPlayerAdmin(playerid)) {
 			SendClientMessage(playerid,blue,"Jetpack Spawned.");
 			CMDMessageToAdmins(playerid,"JETPACK");
 			return SetPlayerSpecialAction(playerid, 2);
@@ -17586,7 +17558,7 @@ CMD:jetpack(playerid,params[]) {
 }
 
 CMD:flip(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] >= 1 || IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    if(PlayerInfo[playerid][OnDuty] >= 1 || IsPlayerAdmin(playerid)) {
 	    if(isnull(params)) {
 		    if(IsPlayerInAnyVehicle(playerid)) {
 			new VehicleID, Float:X, Float:Y, Float:Z, Float:Angle; GetPlayerPos(playerid, X, Y, Z); VehicleID = GetPlayerVehicleID(playerid);
@@ -17619,7 +17591,7 @@ CMD:destroycar(playerid,params[]) {
 }
 CMD:ltc(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] == 1 || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][OnDuty] == 1) {
 		if(!IsPlayerInAnyVehicle(playerid)) {
 			if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
 			new Float:X,Float:Y,Float:Z,Float:Angle,LVehicleIDt;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
@@ -17635,9 +17607,9 @@ CMD:ltc(playerid,params[]) {
 
 
 CMD:teleplayer(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] == 1 || IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    if(PlayerInfo[playerid][OnDuty] == 1 || IsPlayerAdmin(playerid)) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/teleplayer [playerid] to [playerid]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/teleplayer [playerid] to [playerid]");
 		new player1 = strval(tmp), player2 = strval(tmp2), string[128], Float:plocx,Float:plocy,Float:plocz;
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
 	 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -17663,8 +17635,8 @@ CMD:teleplayer(playerid,params[]) {
 }
 
 CMD:goto(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] >= 1 || IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
-	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/goto [playerid]");
+    if(PlayerInfo[playerid][OnDuty] >= 1 || IsPlayerAdmin(playerid)) {
+	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/goto [playerid]");
 	    new player1, string[128];
 		if(!IsNumeric(params)) player1 = ReturnPlayerID(params);
 	   	else player1 = strval(params);
@@ -17683,8 +17655,8 @@ CMD:goto(playerid,params[]) {
 }
 
 CMD:vgoto(playerid,params[]) {
-    if(PlayerInfo[playerid][Level] >= 2 || IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
-	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/vgoto [vehicleid]");
+    if(PlayerInfo[playerid][Level] >= 2 || IsPlayerAdmin(playerid)) {
+	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/vgoto [vehicleid]");
 	    new player1, string[128];
 	    player1 = strval(params);
 		CMDMessageToAdmins(playerid,"VGOTO");
@@ -17701,7 +17673,7 @@ CMD:vgoto(playerid,params[]) {
 
 CMD:vget(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 3 || IsPlayerAdmin(playerid)) {
-	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/vget [vehicleid]");
+	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/vget [vehicleid]");
 	    new player1, string[128];
 	    player1 = strval(params);
 		CMDMessageToAdmins(playerid,"VGET");
@@ -17718,7 +17690,7 @@ CMD:lgoto(playerid,params[]) {
 		new Float:x, Float:y, Float:z;
         new tmp[256], tmp2[256], tmp3[256];
 		new string[128], Index;	tmp = strtok(params,Index); tmp2 = strtok(params,Index); tmp3 = strtok(params,Index);
-    	if(isnull(tmp) || isnull(tmp2) || !strlen(tmp3)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/lgoto [x] [y] [z]");
+    	if(isnull(tmp) || isnull(tmp2) || !strlen(tmp3)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/lgoto [x] [y] [z]");
 	    x = strval(tmp);		y = strval(tmp2);		z = strval(tmp3);
 		CMDMessageToAdmins(playerid,"LGOTO");
 		if(GetPlayerState(playerid) == 2) SetVehiclePos(GetPlayerVehicleID(playerid),x,y,z);
@@ -17729,8 +17701,8 @@ CMD:lgoto(playerid,params[]) {
 
 
 CMD:get(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/get [playerid]");
+    if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid)) {
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/get [playerid]");
     	new player1, string[128];
 		if(!IsNumeric(params)) player1 = ReturnPlayerID(params);
 	   	else player1 = strval(params);
@@ -17753,7 +17725,7 @@ CMD:get(playerid,params[]) {
 
 CMD:pget(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 2|| IsPlayerAdmin(playerid)) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/pget [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/pget [playerid]");
     	new player1, string[128];
 		if(!IsNumeric(params)) player1 = ReturnPlayerID(params);
 	   	else player1 = strval(params);
@@ -17779,7 +17751,7 @@ CMD:pget(playerid,params[]) {
 CMD:warn(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 1 || PlayerInfo[playerid][Helper] == 1) {
 	    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/warn [playerid] [reason]");
+	    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/warn [playerid] [reason]");
     	new warned = strval(tmp), str[128];
 		if(PlayerInfo[warned][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
 	 	if(IsPlayerConnected(warned) && warned != INVALID_PLAYER_ID) {
@@ -17844,7 +17816,7 @@ CMD:kick(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 	    if(PlayerInfo[playerid][Level] >= 1 || PlayerInfo[playerid][Helper] == 1) {
 		    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/kick [playerid] [reason]");
+		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/kick [playerid] [reason]");
 	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 			player1 = strval(tmp);
 
@@ -17931,7 +17903,7 @@ CMD:dtrain(playerid,params[]) // can i show u something? somwthing what?
 }
 CMD:dtime(playerid,params[]) {
 	if(PlayerInfo[playerid][dRank] >= 2) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/dtime [hour]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/dtime [hour]");
 		new time = strval(params), string[128];
 		SendCMDMessge(playerid,"DTIME");
 		format(string,sizeof(string),"Time change to %d:00", time); SendClientMessage(playerid,blue,string);
@@ -17943,7 +17915,7 @@ CMD:dweather(playerid, params[])
 
        if(PlayerInfo[playerid][dRank] >= 2) {
         new weather;
-        if(sscanf(params, "i", weather)) return SCM(playerid, red, "iThe[XP-BOT]: Use like This:/Dweather (Weather-Id)");
+        if(sscanf(params, "i", weather)) return SCM(playerid, red, "iThe[XP-BOT: Use like This:/Dweather (Weather-Id)");
         if(weather > 45 || weather < 0) return SCM(playerid, red, "iThe[XP-INFO]Bot: Invalid Weather-Id.");
         SCM(playerid, -1, "Weather changed successfully.");
 		return SetPlayerWeather(playerid, weather);
@@ -18115,7 +18087,7 @@ CMD:dheli(playerid,params[]) // can i show u something? somwthing what?
 CMD:dskin(playerid,params[]) {
  if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][dRank] >= 2) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/dskin [skinid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/dskin [skinid]");
 		new var = strval(params);
 		if(!IsValidSkin(var)) return SendClientMessage(playerid, red, "iThe[XP-INFO]Bot: Invaild Skin ID");
 		SetPlayerSkin(playerid,var);
@@ -18183,7 +18155,7 @@ CMD:dreport(playerid,params[]) {
    if(PlayerInfo[playerid][dRank] >= 1)
     	{
     new reported, tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/dreport [playerid] [reason]");
+    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/dreport [playerid] [reason]");
 	reported = strval(tmp);
 
  	if(IsPlayerConnected(reported) && reported != INVALID_PLAYER_ID) {
@@ -18309,7 +18281,7 @@ CMD:dcc(playerid, params[])
         if(PlayerInfo[playerid][dRank] >= 1) {
         new
 			col[2];
-        if(sscanf(params, "ii",col[0],col[1])) return SCM(playerid, red, "iThe[XP-BOT]: Use like This:/dcc (Col-1) (Col-2)");
+        if(sscanf(params, "ii",col[0],col[1])) return SCM(playerid, red, "iThe[XP-BOT: Use like This:/dcc (Col-1) (Col-2)");
         SendCMDMessge(playerid,"DCC");
         ChangeVehicleColor(GetPlayerVehicleID(playerid), col[0],col[1]);
         SCM(playerid,blue ,"Vehicle Color changed.");
@@ -18356,7 +18328,7 @@ CMD:dcmds(playerid,params[]) {
 CMD:setdonor(playerid,params[]) {
 if(PlayerInfo[playerid][Level] >= 10) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric2(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setdonor [playerid] [Level] | Note : Max Levels = 3 |");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric2(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setdonor [playerid] [Level] | Note : Max Levels = 3 |");
 		new player1 = strval(tmp), skin = strval(tmp2), string[128];
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
 			CMDMessageToAdmins(playerid,"SETDONOR");
@@ -18371,7 +18343,7 @@ CMD:slap(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 2) {
 		    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/slap [playerid] [reason/with]");
+		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/slap [playerid] [reason/with]");
 	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 			player1 = strval(tmp);
 
@@ -18395,7 +18367,7 @@ CMD:explode(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 2) {
 		    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/explode [playerid] [reason]");
+		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/explode [playerid] [reason]");
 	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 			player1 = strval(tmp);
 
@@ -18417,7 +18389,7 @@ CMD:jail(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 1) {
 		    new tmp[256], tmp2[256], tmp3[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index), tmp3 = strtok(params,Index);
-		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/jail [playerid] [minutes] [reason]");
+		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/jail [playerid] [minutes] [reason]");
 	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 			player1 = strval(tmp);
 
@@ -18451,7 +18423,7 @@ CMD:unjail(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 1) {
 		    new tmp[256], Index; tmp = strtok(params,Index);
-		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/jail [playerid]");
+		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/jail [playerid]");
 	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 			player1 = strval(tmp);
 
@@ -18490,7 +18462,7 @@ CMD:freeze(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 3) {
 		    new tmp[256], tmp2[256], tmp3[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index), tmp3 = strtok(params,Index);
-		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/freeze [playerid] [minutes] [reason]");
+		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/freeze [playerid] [minutes] [reason]");
 	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 			player1 = strval(tmp);
 
@@ -18522,7 +18494,7 @@ CMD:freeze(playerid,params[]) {
 CMD:unfreeze(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 	    if(PlayerInfo[playerid][Level] >= 3|| IsPlayerAdmin(playerid)) {
-		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/unfreeze [playerid]");
+		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/unfreeze [playerid]");
 	    	new player1, string[128];
 			player1 = strval(params);
 
@@ -18561,7 +18533,7 @@ CMD:mute(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 2) {
 		    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/mute [playerid] [reason]");
+		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/mute [playerid] [reason]");
 	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 			player1 = strval(tmp);
 
@@ -18586,7 +18558,7 @@ CMD:mute(playerid,params[]) {
 CMD:unmute(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 2) {
-		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/unmute [playerid]");
+		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/unmute [playerid]");
 	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 			player1 = strval(params);
 
@@ -18624,7 +18596,7 @@ CMD:muted(playerid,params[]) {
 CMD:akill(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 	    if(PlayerInfo[playerid][Level] >= 3|| IsPlayerAdmin(playerid)) {
-		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/akill [playerid]");
+		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/akill [playerid]");
 	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 			player1 = strval(params);
 
@@ -18643,7 +18615,7 @@ CMD:akill(playerid,params[]) {
 
 CMD:weaps(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 1 || PlayerInfo[playerid][Helper] == 1 || IsPlayerAdmin(playerid)) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/weaps [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/weaps [playerid]");
     	new player1, string[128], string2[64], WeapName[24], slot, weap, ammo, wh, x;
 		player1 = strval(params);
 
@@ -18685,7 +18657,7 @@ CMD:weaps(playerid,params[]) {
 
 CMD:aka(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 3 || IsPlayerAdmin(playerid)) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/aka [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/aka [playerid]");
     	new player1, playername[MAX_PLAYER_NAME], str[128], tmp3[50];
 		player1 = strval(params);
 	 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -18700,7 +18672,7 @@ CMD:aka(playerid,params[]) {
 CMD:screen(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 2) {
 	    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/screen [playerid] [text]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/screen [playerid] [text]");
     	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 		player1 = strval(params);
 
@@ -18757,9 +18729,8 @@ CMD:adminduty(playerid,params[])
          SetPlayerSkin(playerid,217);
          SetPlayerTeam(playerid,6);
          SetVehicleHealth(VID[playerid], 9999999999.0);
-//         Duty[playerid] = Create3DTextLabel("On Duty Admin\n!!Do Not Attack!!", 0xF600F6FF, 30.0, 40.0, 50.0, 40.0, 0);
-//         Attach3DTextLabelToPlayer(Duty[playerid], playerid, 0.0, 0.0, 0.5);
-		 #pragma unused Duty
+         Duty[playerid] = Create3DTextLabel("On Duty Admin\n!!Do Not Attack!!", 0xF600F6FF, 30.0, 40.0, 50.0, 40.0, 0);
+         Attach3DTextLabelToPlayer(Duty[playerid], playerid, 0.0, 0.0, 0.5);
    	     SetPlayerColor(playerid, 0xF600F6FF);
          SetPlayerHealth(playerid, 100000000000.0);
          SetPlayerArmour(playerid, 100000000000.0);
@@ -18777,9 +18748,8 @@ CMD:adminduty(playerid,params[])
          format(str, sizeof(str), "Administrator %s is now off Admin duty!", AdminName);
          SendClientMessageToAll(0xFD01FDAA, str);
          SetPlayerHealth(playerid, 0);
-//         Delete3DTextLabel(Duty[playerid]);
-//         Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
-//         Update3DTextLabelText(Duty[playerid], 0xFFFFFFFF, " ");
+         Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
+         Update3DTextLabelText(Duty[playerid], 0xFFFFFFFF, " ");
 		 ForceClassSelection(playerid);
 	     SetPlayerHealth(playerid, 0);
 	     SetPlayerArmour(playerid, 0);
@@ -18790,14 +18760,14 @@ CMD:adminduty(playerid,params[])
    } else return 0;
    return 1;
 }
-//+++++++++++++++++++++++++++++++++++++new radio updated===========================
+//+++++++++++++++++++++++++++++++++++++new radio updated by abhay===========================
 CMD:radiostart(playerid, params[])
 {
    new radiolink[100];
    if(sscanf(params,"s[100]", radiolink)) return SendClientMessage(playerid, 0xFFFFFFFF,"use /radiostart [1 - 5]");
    if(strfind(radiolink, "1", true) != -1)
    {
-      SendClientMessage(playerid,0xFFFF00C8,"You're listening to Boom Station");
+      SendClientMessage(playerid,0xFFFF00C8,"You're listening to Abhay's Station");
       PlayAudioStreamForPlayer(playerid,"http://yp.shoutcast.com/sbin/tunein-station.pls?id=245273");
    }
    else if(strfind(radiolink, "2", true) != -1)
@@ -18876,6 +18846,20 @@ CMD:admins(playerid, params[])
                     if(!strcmp(nameee, "[D]ark_[E]mperor", true))
                     {
                       AdmRank = "{B22222}[Community Owner And Scripter]";
+                    }
+                    GetPlayerName(i, nameee, 16);
+                    if(!strcmp(nameee, "NONE-NOBODY", true))
+                    {
+                      AdmRank = "{FF4500}[Server Owner]";
+                    }
+                    if(!strcmp(nameee, "NONE-NOBODY", true))
+                    {
+                      AdmRank = "{FF4500}[Co-Owner]";
+                    }
+                    GetPlayerName(i, nameee, 16);
+                    if(!strcmp(nameee, "[XP]Perfect_Boy", true))
+                    {
+                      AdmRank = "{FA8072}[Community Owner And Script Updater]";
                     }
                 }
                 format(string, 500, ""cred"%s{F81414}%s [ID:%i] | Level: %d - %s\n\n", string, PlayerName2(i), i, PlayerInfo[i][Level], AdmRank);
@@ -18990,10 +18974,10 @@ CMD:adminarea0(playerid,params[]) {
 CMD:setlevel(playerid,params[]) {
 		if(PlayerInfo[playerid][Level] >= 8 || IsPlayerAdmin(playerid)) {
 		    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setlevel [playerid] [level]");
+		    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setlevel [playerid] [level]");
 	    	new player1, level, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 			player1 = strval(tmp);
-			if(isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setlevel [playerid] [level]");
+			if(isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setlevel [playerid] [level]");
 			level = strval(tmp2);
 
 			if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -19025,7 +19009,7 @@ CMD:settemplevel(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 10 || IsPlayerAdmin(playerid)) {
 		    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-		    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/settemplevel [playerid] [level]");
+		    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/settemplevel [playerid] [level]");
 	    	new player1, level, string[128];
 			player1 = strval(tmp);
 			level = strval(tmp2);
@@ -19057,7 +19041,7 @@ CMD:settemplevel(playerid,params[]) {
 
 CMD:report(playerid,params[]) {
     new reported, tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/report [playerid] [reason]");
+    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/report [playerid] [reason]");
 	reported = strval(tmp);
 
  	if(IsPlayerConnected(reported) && reported != INVALID_PLAYER_ID) {
@@ -19218,7 +19202,7 @@ if(PlayerInfo[playerid][Level] >= 6) {
 CMD:apm(playerid, params[])
 {
    new str[128], str2[128], id, adminstr[128];
-   if(sscanf(params,"ds[128]", id, str2)) return SendClientMessage(playerid, red,"iThe[XP-BOT]: Use like This:/apm [id] [message]");
+   if(sscanf(params,"ds[128]", id, str2)) return SendClientMessage(playerid, red,"iThe[XP-BOT: Use like This:/apm [id] [message]");
    if(IsPlayerConnected(id))
    {
 	   if(id != playerid)
@@ -19279,7 +19263,7 @@ CMD:rban(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 10) {
 		    new ip[128], tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-		    if(!strlen(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/rban [playerid] [reason]");
+		    if(!strlen(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/rban [playerid] [reason]");
 			if(!strlen(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-INFO]Bot: You must give a reason");
 	    	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
 			player1 = strval(tmp);
@@ -19308,7 +19292,7 @@ CMD:rangeweapon(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 4) {
     new Weap, ammo, name[128], string[128];
     new Float:x, Float:y, Float:z;
-        if(sscanf(params,"ii",Weap, ammo)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/giveallweapon [weapon name] [ammo]");
+        if(sscanf(params,"ii",Weap, ammo)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/giveallweapon [weapon name] [ammo]");
         if(Weap == 38 || Weap == 36) return SendClientMessage(playerid,red,"You Can't Give Those Weapons!");
 		CMDMessageToAdmins(playerid,"RANGEWEAPON");
        	for(new i = 0; i < MAX_PLAYERS; i++)
@@ -19348,7 +19332,7 @@ CMD:botcheck(playerid,params[]) {
 //------------------------------------------------------------------------------
 CMD:forbidname(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 10) {
-		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/forbidname [nickname]");
+		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/forbidname [nickname]");
 		new File:BLfile, string[128];
 		BLfile = fopen("ladmin/config/ForbiddenNames.cfg",io_append);
 		format(string,sizeof(string),"%s\r\n",params[1]);
@@ -19363,7 +19347,7 @@ CMD:forbidname(playerid,params[]) {
 
 CMD:forbidword(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 10) {
-		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/forbidword [word]");
+		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/forbidword [word]");
 		new File:BLfile, string[128];
 		BLfile = fopen("ladmin/config/ForbiddenWords.cfg",io_append);
 		format(string,sizeof(string),"%s\r\n",params[1]);
@@ -19381,7 +19365,7 @@ CMD:forbidword(playerid,params[]) {
 
 CMD:lspec(playerid,params[]) {
     if(PlayerInfo[playerid][Helper] == 1 || PlayerInfo[playerid][Level] >= 1 || IsPlayerAdmin(playerid)) {
-	    if(isnull(params) || !IsNumeric(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/lspec [playerid]");
+	    if(isnull(params) || !IsNumeric(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/lspec [playerid]");
 		new specplayerid = strval(params);
 		if(PlayerInfo[specplayerid][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(specplayerid) && specplayerid != INVALID_PLAYER_ID) {
@@ -19414,7 +19398,7 @@ CMD:lsp(playerid,params[]) {
 
 CMD:lspv(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 1 || IsPlayerAdmin(playerid)) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/lsv [vehicleid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/lsv [vehicleid]");
 		new specvehicleid = strval(params);
 		if(specvehicleid < MAX_VEHICLES) {
 			TogglePlayerSpectating(playerid, 1);
@@ -19507,7 +19491,7 @@ CMD:cc(playerid,params[]) {
 CMD:caps(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/caps [playerid] [\"on\" / \"off\"]");
+	    if(isnull(tmp) || isnull(tmp2) || IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/caps [playerid] [\"on\" / \"off\"]");
 		new player1 = strval(tmp), string[128];
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -19521,7 +19505,7 @@ CMD:caps(playerid,params[]) {
 				PlayerInfo[player1][Caps] = 1;
 				if(player1 != playerid) { format(string,sizeof(string),"Administrator \"%s\" has prevented you from using capitals in chat", pName(playerid) ); SendClientMessage(playerid,blue,string); }
 				format(string,sizeof(string),"You have prevented \"%s\" from using capitals in chat", pName(player1) ); return SendClientMessage(playerid,blue,string);
-			} else return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/caps [playerid] [\"on\" / \"off\"]");
+			} else return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/caps [playerid] [\"on\" / \"off\"]");
 	    } else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: Player is not connected");
 	} else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
 }
@@ -19529,7 +19513,7 @@ CMD:caps(playerid,params[]) {
 //==================[ Object & Pickup ]=========================================
 CMD:pickup(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 5 || IsPlayerAdmin(playerid)) {
-	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/pickup [pickup id]");
+	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/pickup [pickup id]");
 	    new pickup = strval(params), string[128], Float:x, Float:y, Float:z, Float:a;
 	    CMDMessageToAdmins(playerid,"PICKUP");
 		GetPlayerPos(playerid, x, y, z);
@@ -19545,7 +19529,7 @@ CMD:pickup(playerid,params[]) {
 
 CMD:object(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 5 || IsPlayerAdmin(playerid)) {
-	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/object [object id]");
+	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/object [object id]");
 	    new object = strval(params), string[128], Float:x, Float:y, Float:z, Float:a;
 	    CMDMessageToAdmins(playerid,"OBJECT");
 		GetPlayerPos(playerid, x, y, z);
@@ -19564,7 +19548,7 @@ CMD:object(playerid,params[]) {
 
 CMD:move(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/move [up / down / +x / -x / +y / -y / off]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/move [up / down / +x / -x / +y / -y / off]");
 		new Float:X, Float:Y, Float:Z;
 		if(strcmp(params,"up",true) == 0)	{
 			TogglePlayerControllable(playerid,false); GetPlayerPos(playerid,X,Y,Z);	SetPlayerPos(playerid,X,Y,Z+5); SetCameraBehindPlayer(playerid); }
@@ -19580,7 +19564,7 @@ CMD:move(playerid,params[]) {
 			TogglePlayerControllable(playerid,false); GetPlayerPos(playerid,X,Y,Z);	SetPlayerPos(playerid,X,Y-5,Z);	}
 	    else if(strcmp(params,"off",true) == 0)	{
 			TogglePlayerControllable(playerid,true);	}
-		else return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/move [up / down / +x / -x / +y / -y / off]");
+		else return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/move [up / down / +x / -x / +y / -y / off]");
 		return 1;
 	} else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
 }
@@ -19588,7 +19572,7 @@ CMD:move(playerid,params[]) {
 CMD:moveplayer(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/moveplayer [playerid] [up / down / +x / -x / +y / -y / off]");
+	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/moveplayer [playerid] [up / down / +x / -x / +y / -y / off]");
 	    new Float:X, Float:Y, Float:Z, player1 = strval(tmp);
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
 		if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -19604,7 +19588,7 @@ CMD:moveplayer(playerid,params[]) {
 				GetPlayerPos(player1,X,Y,Z);	SetPlayerPos(player1,X,Y+5,Z);	}
 			else if(strcmp(tmp2,"-y",true) == 0)	{
 				GetPlayerPos(player1,X,Y,Z);	SetPlayerPos(player1,X,Y-5,Z);	}
-			else SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/moveplayer [up / down / +x / -x / +y / -y / off]");
+			else SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/moveplayer [up / down / +x / -x / +y / -y / off]");
 			return 1;
 		} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: Player is not connected");
 	} else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
@@ -19616,7 +19600,7 @@ CMD:moveplayer(playerid,params[]) {
 CMD:fakedeath(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 4) {
 	    new tmp[256], tmp2[256], tmp3[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index), tmp3 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2) || !strlen(tmp3)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/fakedeath [killer] [killee] [weapon]");
+	    if(isnull(tmp) || isnull(tmp2) || !strlen(tmp3)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/fakedeath [killer] [killee] [weapon]");
 		new killer = strval(tmp), killee = strval(tmp2), weap = strval(tmp3);
 		if(!IsValidWeapon(weap)) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: Invalid Weapon ID");
 		if(PlayerInfo[killer][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
@@ -19635,7 +19619,7 @@ CMD:fakedeath(playerid,params[]) {
 CMD:fakechat(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 5) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/fakechat [playerid] [text]");
+	    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/fakechat [playerid] [text]");
 		new player1 = strval(tmp);
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -19648,7 +19632,7 @@ CMD:fakechat(playerid,params[]) {
 CMD:fakecmd(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 5) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/fakecmd [playerid] [command]");
+	    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/fakecmd [playerid] [command]");
 		new player1 = strval(tmp);
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
@@ -19794,7 +19778,7 @@ CMD:unfreezeall(playerid,params[]) {
 
 CMD:kickall(playerid,params[]) {
     #pragma unused params
-	if(PlayerInfo[playerid][Level] >= 10) {
+	if(PlayerInfo[playerid][Level] >= 4) {
 		CMDMessageToAdmins(playerid,"KICKALL");
 	   	for(new i = 0; i < MAX_PLAYERS; i++) {
 			if(IsPlayerConnected(i) && (i != playerid) && i != ServerInfo[MaxAdminLevel]) {
@@ -19810,7 +19794,7 @@ CMD:kickall(playerid,params[]) {
 CMD:o(playerid,params[]) {
 	#pragma unused params
 	if(PlayerInfo[playerid][Helper] == 1 || PlayerInfo[playerid][Level] >= 1) {
- 		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/o [text] To Talk in operator Chat");
+ 		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/o [text] To Talk in operator Chat");
 		new string[128]; format(string, sizeof(string), "Testerchat.Chat: %s: %s", PlayerName2(playerid), params[0]);
 		return MessageToTwice(0x8000FFC8,string);
 	} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You need to be Server Tester to use this command");
@@ -19879,7 +19863,7 @@ CMD:ejectall(playerid,params[]) {
 
 CMD:setallwanted(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 5) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setallwanted [wanted level]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setallwanted [wanted level]");
 		new var = strval(params), string[128];
        	CMDMessageToAdmins(playerid,"SETALLWANTED");
 		for(new i = 0; i < MAX_PLAYERS; i++) {
@@ -19895,7 +19879,7 @@ CMD:setallwanted(playerid,params[]) {
 
 CMD:setallweather(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setallweather [weather ID]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setallweather [weather ID]");
 		new var = strval(params), string[128];
        	CMDMessageToAdmins(playerid,"SETALLWEATHER");
 		for(new i = 0; i < MAX_PLAYERS; i++) {
@@ -19911,7 +19895,7 @@ CMD:setallweather(playerid,params[]) {
 
 CMD:setalltime(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setalltime [hour]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setalltime [hour]");
 		new var = strval(params), string[128];
 		if(var > 24) return SendClientMessage(playerid, red, "iThe[XP-INFO]Bot: Invalid hour");
        	CMDMessageToAdmins(playerid,"SETALLTIME");
@@ -19928,7 +19912,7 @@ CMD:setalltime(playerid,params[]) {
 
 CMD:setallworld(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 3) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setallworld [virtual world]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setallworld [virtual world]");
 		new var = strval(params), string[128];
        	CMDMessageToAdmins(playerid,"SETALLWORLD");
 		for(new i = 0; i < MAX_PLAYERS; i++) {
@@ -19944,7 +19928,7 @@ CMD:setallworld(playerid,params[]) {
 
 CMD:setallscore(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 5) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setallscore [score]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setallscore [score]");
 		new var = strval(params), string[128];
        	CMDMessageToAdmins(playerid,"SETALLSCORE");
 		for(new i = 0; i < MAX_PLAYERS; i++) {
@@ -19960,7 +19944,7 @@ CMD:setallscore(playerid,params[]) {
 
 CMD:setallcash(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 4) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setallcash [Amount]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setallcash [Amount]");
 		new var = strval(params), string[128];
        	CMDMessageToAdmins(playerid,"SETALLCASH");
 		for(new i = 0; i < MAX_PLAYERS; i++) {
@@ -19977,7 +19961,7 @@ CMD:setallcash(playerid,params[]) {
 
 CMD:giveallcash(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 4) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/giveallcash [Amount]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/giveallcash [Amount]");
 		new var = strval(params), string[128];
        	CMDMessageToAdmins(playerid,"GIVEALLCASH");
 		for(new i = 0; i < MAX_PLAYERS; i++) {
@@ -19996,7 +19980,7 @@ CMD:pay(playerid, params[])
 	new
 		giveplayerid,
 		amount;
-	if (sscanf(params, "ud", giveplayerid, amount)) SendClientMessage(playerid, 0xFF0000AA, "iThe[XP-BOT]: Use like This:/pay [playerid/partname] [amount]");
+	if (sscanf(params, "ud", giveplayerid, amount)) SendClientMessage(playerid, 0xFF0000AA, "iThe[XP-BOT: Use like This:/pay [playerid/partname] [amount]");
 	else if (giveplayerid == INVALID_PLAYER_ID) SendClientMessage(playerid, 0xFF0000AA, "Player not found");
 	new Float:gX, Float:gY, Float:gZ;
   	GetPlayerPos(playerid, gX, gY, gZ);
@@ -20022,7 +20006,7 @@ CMD:givemoney(playerid,params[]) {
 CMD:giveallweapon(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 4) {
     new Weap, ammo, name[128], string[128];
-        if(sscanf(params,"ii",Weap, ammo)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/giveallweapon [weapon name] [ammo]");
+        if(sscanf(params,"ii",Weap, ammo)) return SendClientMessage(playerid,red,"iThe[XP-BOT: Use like This:/giveallweapon [weapon name] [ammo]");
         if(Weap == 38 || Weap == 36) return SendClientMessage(playerid,red,"You Can't Give Those Weapons!");
 		CMDMessageToAdmins(playerid,"GIVEALLWEAPON");
        	for(new i = 0; i < MAX_PLAYERS; i++) {
@@ -20191,7 +20175,7 @@ CMD:saveplace(playerid,params[]) {
 
 CMD:saveskin(playerid,params[]) {
  	if(PlayerInfo[playerid][Level] >= 1 && PlayerInfo[playerid][LoggedIn] == 1) {
-		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/saveskin [skinid]");
+		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/saveskin [skinid]");
 		new string[128], SkinID = strval(params);
 		if((SkinID == 0)||(SkinID == 7)||(SkinID >= 9 && SkinID <= 41)||(SkinID >= 43 && SkinID <= 64)||(SkinID >= 66 && SkinID <= 73)||(SkinID >= 75 && SkinID <= 85)||(SkinID >= 87 && SkinID <= 118)||(SkinID >= 120 && SkinID <= 148)||(SkinID >= 150 && SkinID <= 207)||(SkinID >= 209 && SkinID <= 264)||(SkinID >= 274 && SkinID <= 288)||(SkinID >= 290 && SkinID <= 299))
 		{
@@ -20229,7 +20213,7 @@ CMD:aregister(playerid,params[])
 {
     if (PlayerInfo[playerid][LoggedIn] == 1) return SendClientMessage(playerid,red,"ACCOUNT: You are already registered and logged in.");
     if (udb_Exists(PlayerName2(playerid))) return SendClientMessage(playerid,red,"ACCOUNT: This account already exists, please use '/alogin [password]'.");
-    if (strlen(params) == 0) return SendClientMessage(playerid,red,"ACCOUNT: Correct iThe[XP-BOT]: Use like This:'/aregister [password]'");
+    if (strlen(params) == 0) return SendClientMessage(playerid,red,"ACCOUNT: Correct iThe[XP-BOT: Use like This:'/aregister [password]'");
     if (strlen(params) < 4 || strlen(params) > 20) return SendClientMessage(playerid,red,"ACCOUNT: Password length must be greater than three characters");
     if (udb_Create(PlayerName2(playerid),params))
 	{
@@ -20261,7 +20245,7 @@ CMD:alogin(playerid,params[])
 {
     if (PlayerInfo[playerid][LoggedIn] == 1) return SendClientMessage(playerid,red,"ACCOUNT: You are already logged in.");
     if (!udb_Exists(PlayerName2(playerid))) return SendClientMessage(playerid,red,"ACCOUNT: Account doesn't exist, please use '/aregister [password]'.");
-    if (strlen(params)==0) return SendClientMessage(playerid,red,"ACCOUNT: Correct iThe[XP-BOT]: Use like This:'/alogin [password]'");
+    if (strlen(params)==0) return SendClientMessage(playerid,red,"ACCOUNT: Correct iThe[XP-BOT: Use like This:'/alogin [password]'");
     if (udb_CheckLogin(PlayerName2(playerid),params))
 	{
 	   	new file[256], tmp3[100], string[128];
@@ -20290,7 +20274,7 @@ CMD:alogin(playerid,params[])
 
 CMD:achangepass(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1)	{
-		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/achangepass [new password]");
+		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/achangepass [new password]");
 		if(strlen(params) < 4) return SendClientMessage(playerid,red,"ACCOUNT: Incorrect password length");
 		new string[128];
 		dUserSetINT(PlayerName2(playerid)).("password_hash",udb_hash(params) );
@@ -20304,7 +20288,7 @@ CMD:achangepass(playerid,params[]) {
 CMD:asetpass(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 3) {
 	    new string[128], tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/asetpass [playername] [new password]");
+	    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/asetpass [playername] [new password]");
 		if(strlen(tmp2) < 4 || strlen(tmp2) > MAX_PLAYER_NAME) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: Incorrect password length");
 		if(udb_Exists(tmp)) {
 			dUserSetINT(tmp).("password_hash", udb_hash(tmp2));
@@ -20396,7 +20380,7 @@ CMD:rules(playerid, params[])
 			strcat(fstr, ""cgreen"Don't Team Attack Admin on Duty\n");
 			strcat(fstr, ""cgreen"Don't Team Car Jack\n");
             strcat(fstr, ""cyellow"Visit Our Website: xpsamp.co.in and be a part of our Community!\n\n");
-			strcat(fstr, ""cgreen"Real World At War 2 V10.9.1 NEW by [D]ark_[E]mperor. All rights reserved. \nCopyright Xenon Pro Gaming.\n");
+			strcat(fstr, ""cgreen"Real World At War 2 V10.9.1 NEW by [D]ark_[E]mperor And Perfect_Boy. All rights reserved. \nCopyright Xenon Pro Gaming.\n");
 			ShowPlayerDialog(playerid, 805, DIALOG_STYLE_MSGBOX, ""cgreen"Real World At War 2™ Rules", fstr, "Okay", "Cancel");
 	return 1;
 }
@@ -20427,7 +20411,7 @@ CMD:register(playerid,params[])
 {
     if (PlayerInfo[playerid][LoggedIn] == 1) return SendClientMessage(playerid,red,"ACCOUNT: You are already registered and logged in.");
     if (udb_Exists(PlayerName2(playerid))) return SendClientMessage(playerid,red,"ACCOUNT: This account already exists, please use '/login [password]'.");
-    if (strlen(params) == 0) return SendClientMessage(playerid,red,"ACCOUNT: Correct iThe[XP-BOT]: Use like This:'/register [password]'");
+    if (strlen(params) == 0) return SendClientMessage(playerid,red,"ACCOUNT: Correct iThe[XP-BOT: Use like This:'/register [password]'");
     if (strlen(params) < 4 || strlen(params) > 20) return SendClientMessage(playerid,red,"ACCOUNT: Password length must be greater than three characters");
     if (udb_Create(PlayerName2(playerid),params))
 	{
@@ -20464,7 +20448,7 @@ CMD:login(playerid,params[])
 {
     if (PlayerInfo[playerid][LoggedIn] == 1) return SendClientMessage(playerid,red,"ACCOUNT: You are already logged in.");
     if (!udb_Exists(PlayerName2(playerid))) return SendClientMessage(playerid,red,"ACCOUNT: Account doesn't exist, please use '/register [password]'.");
-    if (strlen(params)==0) return SendClientMessage(playerid,red,"ACCOUNT: Correct iThe[XP-BOT]: Use like This:'/login [password]'");
+    if (strlen(params)==0) return SendClientMessage(playerid,red,"ACCOUNT: Correct iThe[XP-BOT: Use like This:'/login [password]'");
     if (udb_CheckLogin(PlayerName2(playerid),params))
 	{
 		new file[256], tmp3[100], string[128];
@@ -20494,7 +20478,7 @@ CMD:login(playerid,params[])
 
 CMD:changepass(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1)	{
-		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/changepass [new password]");
+		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/changepass [new password]");
 		if(strlen(params) < 4) return SendClientMessage(playerid,red,"ACCOUNT: Incorrect password length");
 		new string[128];
 		dUserSetINT(PlayerName2(playerid)).("password_hash",udb_hash(params) );
@@ -20507,7 +20491,7 @@ CMD:setname(playerid, params[])
 {
         if(PlayerInfo[playerid][Level] >= 5)	{
         new string[128], tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-		if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setname [playerid] [new name]");
+		if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setname [playerid] [new name]");
 		if (udb_Exists(tmp2)) return SendClientMessage(playerid,red,"This User Name Is Taken!");
 		new player1 = strval(tmp);
 		if(PlayerInfo[player1][LoggedIn] == 0) return SendClientMessage(playerid,red,"Player Must Have Account!");
@@ -20525,7 +20509,7 @@ CMD:setname(playerid, params[])
 CMD:changename(playerid, params[])
 {
         if(PlayerInfo[playerid][LoggedIn] == 1)	{
-		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/changename [new Name]");
+		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/changename [new Name]");
 		if(strlen(params) < 4) return SendClientMessage(playerid,red,"ACCOUNT: Incorrect nick length");
 		if (udb_Exists(params)) return SendClientMessage(playerid,red,"This User Name Is Taken!");
 		if(GetPlayerMoney(playerid) < 500000) return SendClientMessage(playerid, red,"You need to have $500000 to change name. Contact any Admins online for free nick change");
@@ -20546,7 +20530,7 @@ CMD:changename(playerid, params[])
 CMD:setpass(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 5) {
 	    new string[128], tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
-	    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setpass [playername] [new password]");
+	    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/setpass [playername] [new password]");
 		if(strlen(tmp2) < 4 || strlen(tmp2) > MAX_PLAYER_NAME) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: Incorrect password length");
 		if(udb_Exists(tmp)) {
 			dUserSetINT(tmp).("password_hash", udb_hash(tmp2));
@@ -20685,7 +20669,7 @@ public OnPlayerCommandReceived(playerid, cmdtext[])
 //========================= [ Car Commands ]====================================
 
 	if(strcmp(cmdtext, "/ltunedcar2", true)==0 || strcmp(cmdtext, "/ltc2", true)==0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1 || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][OnDuty] >= 1) {
 		if(IsPlayerInAnyVehicle(playerid)) {
 		SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You already have a vehicle");
 		} else  {
@@ -20854,7 +20838,7 @@ public OnPlayerCommandReceived(playerid, cmdtext[])
 	return 1;	}
 //------------------------------------------------------------------------------
 	if(strcmp(cmdtext, "/ltunedcar13", true)==0 || strcmp(cmdtext, "/ltc13", true)==0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1 || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][OnDuty] >= 1) {
 		if(IsPlayerInAnyVehicle(playerid)) SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You already have a vehicle");
 		else {
 		if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
@@ -20869,7 +20853,7 @@ public OnPlayerCommandReceived(playerid, cmdtext[])
 	return 1;	}
 //------------------------------------------------------------------------------
 	if(strcmp(cmd, "/lp", true) == 0)	{
-	if(PlayerInfo[playerid][OnDuty] >= 1 || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][OnDuty] >= 1) {
 		if (GetPlayerState(playerid) == 2)
 		{
 		new VehicleID = GetPlayerVehicleID(playerid), LModel = GetVehicleModel(VehicleID);
@@ -20892,13 +20876,13 @@ public OnPlayerCommandReceived(playerid, cmdtext[])
 	if(PlayerInfo[playerid][Level] >= 4) {
 	    tmp = strtok(cmdtext, idx);
 		if(isnull(tmp)) {
-			SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/write [Colour] [Text]");
+			SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/write [Colour] [Text]");
 			return SendClientMessage(playerid, red, "Colours: 0=black 1=white 2=red 3=orange 4=yellow 5=green 6=blue 7=purple 8=brown 9=pink");
 	 	}
 		new Colour;
 		Colour = strval(tmp);
 		if(Colour > 9 )	{
-			SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/write [Colour] [Text]");
+			SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/write [Colour] [Text]");
 			return SendClientMessage(playerid, red, "Colours: 0=black 1=white 2=red 3=orange 4=yellow 5=green 6=blue 7=purple 8=brown 9=pink");
 		}
 		tmp = strtok(cmdtext, idx);
@@ -20977,40 +20961,10 @@ public OnPlayerStateChange(playerid, newstate, oldstate) {
 			}
 		}
 	}
- 	new vehicleidk;
-    if(newstate == PLAYER_STATE_DRIVER)
-    {
-        vehicleidk = GetPlayerVehicleID(playerid);
-        if(vehicleidk == A69Prot)
-        {
-            if(GetPVarInt(playerid,"StealingTime")>GetTickCount())
-			{
-			SendClientMessage(playerid,0xFF0000FF,"Please wait before stealing the Area69 Prototype again.");
-			RemovePlayerFromVehicle(playerid);
-			return 1;
-   			}
-   			SetPlayerCheckpoint(playerid, -318.6541,1060.9193,19.7422, 20.0);
-   			SetPlayerMapIcon(playerid,1, -318.6541,1060.9193,19.7422, 41, 0, MAPICON_GLOBAL);
-            GameTextForPlayer(playerid, "~w~You are stealing the ~r~Area69 Prototype! Take it back to the ~r~red ~w~checkpoint! (Follow waypoint icon)", 5000, 3);
-            SendClientMessage(playerid,0xAA3333AA,"** Don't exit the prototype UNTIL YOU TOOK IT BACK TO THE CHECKPOINT! (Follow waypoint icon!)");
-            SendClientMessage(playerid,0xAA3333AA,"** Enemies will try to kill you so watch yourself!");
-            StealingA69Prot[playerid] = 1;
-            SetPVarInt(playerid,"StealingTime",GetTickCount()+600000);
-			new pname[24];
-            GetPlayerName(playerid, pname, 24);
-            new kk[140];
-            new okk[128];
-            format(kk, sizeof(kk), "** %s (%d) is stealing the Area69 Prototype, stop him now at all costs!",pname,playerid);
-            format(okk, sizeof(okk), "** You can find him by using /loc %s or /loc %d.",pname,playerid);
-            SendClientMessageToAll(0xC93CCE00,kk);
-			SendClientMessageToAll(0xC93CCE00,okk);
-        }
-   	}
 	if(newstate == PLAYER_STATE_DRIVER)
 	{
 	    SetPlayerArmedWeapon(playerid, 0);
 	}
-	
 	return 1;
 }
 
@@ -21020,19 +20974,6 @@ public OnPlayerStateChange(playerid, newstate, oldstate) {
 //==============================================================================
 public OnPlayerExitVehicle(playerid, vehicleid)
 {
-    if(StealingA69Prot[playerid] == 1)
-    {
-    	RemovePlayerMapIcon(playerid,1);
-    	SendClientMessage(playerid, 0x00BFFFAA, "You left the Area69 Prototype and the mission is failed!");
-    	GivePlayerMoney(playerid, -500);
-    	StealingA69Prot[playerid] = 0;
-    	new pname[24];
-    	GetPlayerName(playerid, pname, 24);
-    	new kk[128];
-    	format(kk, sizeof(kk), "** %s (%d) failed stealing Area69 Prototype!",pname,playerid);
-		SendClientMessageToAll(0xC93CCE00,kk);
-		SetPVarInt(playerid,"StealingTime",GetTickCount()+600000);
-    }
 	if(PlayerInfo[playerid][DoorsLocked] == 1) SetVehicleParamsForPlayer(GetPlayerVehicleID(playerid),playerid,false,false);
 
 	#if defined ENABLE_SPEC
@@ -21070,42 +21011,17 @@ public MainGateClose(playerid)
 //++++++++++++++++++++++++++++++++++DombleDore+=++++++++++++++++++++++++++++++++
 public uselessnrg()
 {
-		for(new i=306;i<MAX_VEHICLES;i++)
+		for(new i=270;i<MAX_VEHICLES;i++)
 				{
 			    	if(IsVehicleOccupied(i) == 0)
 			    	{
 			        	DestroyVehicle(i);
 			    	}
 				}
-		SendClientMessageToAll(0xFFFF00FF,"Wizard Dumbledore Has Respawned All Unused Useless NRGs");
-		SetTimer("uselessnrg",300000,0);
+		SendClientMessageToAll(0xFFFF00FF,"Wizzard DumbleDore Has Respawned All Unused Useless NRGs");
 		return 1;
 }
-//==============================Prototype=============================
-public OnPlayerEnterCheckpoint(playerid)
-{
-    if(StealingA69Prot[playerid] == 1)
-        {
-            new playervehicleid = GetPlayerVehicleID(playerid);
-            if(playervehicleid == A69Prot)
-            {
-                SetPlayerScore(playerid, GetPlayerScore(playerid) + 5);
-                SetVehicleToRespawn(A69Prot);
-                GivePlayerMoney(playerid, 15000);
-                StealingA69Prot[playerid] = 0;
-                GameTextForPlayer(playerid, "You ~r~stole ~w~the ~g~Area69 Prototype ~w~!", 5000, 3);
-                new pname[24];
-                GetPlayerName(playerid, pname, 24);
-                new kk[128];
-                format(kk, sizeof(kk), "** %s (%d) successfully stole the Area69 Prototype!",pname,playerid);
-                SendClientMessageToAll(0xC93CCE00,kk);
-                SetPVarInt(playerid,"StealingTime",GetTickCount()+600000);
-                DisablePlayerCheckpoint(playerid);
-                RemovePlayerMapIcon(playerid,1);
-            }
-    }
-	return 1;
-}
+
 //===============================Respawn u cars=================================
 stock IsVehicleOccupied(vid)
 {
@@ -21395,7 +21311,8 @@ stock ReverseSpectate(playerid)
 
     stock SendMessageToAllGroupMembers(groupid, message[])
     {
-    		for(new x; x<MAX_PLAYERS; x++) if(group[x][gid] == groupid) SendClientMessage(x, 0xFFCC66, message);
+            if(!groupinfo[groupid][active]) return 0;
+            for(new x; x<MAX_PLAYERS; x++) if(group[x][gid] == groupid) SendClientMessage(x, 0xFFCC66, message);
             return 1;
     }
 
@@ -21528,7 +21445,7 @@ public OnRconCommand(cmd[])
 	    new arg_1 = argpos(cmd), arg_2 = argpos(cmd, arg_1),targetid = strval(cmd[arg_1]), message[128];
 
     	if ( !cmd[arg_1] || cmd[arg_1] < '0' || cmd[arg_1] > '9' || targetid > MAX_PLAYERS || targetid < 0 || !cmd[arg_2])
-	        print("iThe[XP-BOT]: Use like This:\"pm <playerid> <message>\"");
+	        print("iThe[XP-BOT: Use like This:\"pm <playerid> <message>\"");
 
 	    else if ( !IsPlayerConnected(targetid) ) print("This player is not connected!");
     	else
@@ -21544,7 +21461,7 @@ public OnRconCommand(cmd[])
 	{
 	    new arg_1 = argpos(cmd), message[128];
 
-    	if ( !cmd[arg_1] || cmd[arg_1] < '0') print("iThe[XP-BOT]: Use like This:\"asay  <message>\" (MessageToAdmins)");
+    	if ( !cmd[arg_1] || cmd[arg_1] < '0') print("iThe[XP-BOT: Use like This:\"asay  <message>\" (MessageToAdmins)");
 	    else
 	    {
 	        format(message, sizeof(message), "[RCON] MessageToAdmins: %s", cmd[arg_1]);
@@ -21557,7 +21474,7 @@ public OnRconCommand(cmd[])
 	if(!strcmp(cmd, "ann", .length = 3))
 	{
 	    new arg_1 = argpos(cmd), message[128];
-    	if ( !cmd[arg_1] || cmd[arg_1] < '0') print("iThe[XP-BOT]: Use like This:\"ann  <message>\" (GameTextForAll)");
+    	if ( !cmd[arg_1] || cmd[arg_1] < '0') print("iThe[XP-BOT: Use like This:\"ann  <message>\" (GameTextForAll)");
 	    else
 	    {
 	        format(message, sizeof(message), "[RCON]: %s", cmd[arg_1]);
@@ -21570,7 +21487,7 @@ public OnRconCommand(cmd[])
 	if(!strcmp(cmd, "msg", .length = 3))
 	{
 	    new arg_1 = argpos(cmd), message[128];
-    	if ( !cmd[arg_1] || cmd[arg_1] < '0') print("iThe[XP-BOT]: Use like This:\"msg  <message>\" (SendClientMessageToAll)");
+    	if ( !cmd[arg_1] || cmd[arg_1] < '0') print("iThe[XP-BOT: Use like This:\"msg  <message>\" (SendClientMessageToAll)");
 	    else
 	    {
 	        format(message, sizeof(message), "[RCON]: %s", cmd[arg_1]);
@@ -21592,7 +21509,7 @@ public OnRconCommand(cmd[])
 	    new arg_1 = argpos(cmd), targetid = strval(cmd[arg_1]);
 
     	if ( !cmd[arg_1] || cmd[arg_1] < '0' || cmd[arg_1] > '9' || targetid > MAX_PLAYERS || targetid < 0)
-	        print("iThe[XP-BOT]: Use like This:aka <playerid>");
+	        print("iThe[XP-BOT: Use like This:aka <playerid>");
 	    else if ( !IsPlayerConnected(targetid) ) print("This player is not connected!");
     	else
 	    {
@@ -22517,10 +22434,6 @@ public PingKick()
 			GetPlayerWeaponData(i, 7, weap, ammo);
 			if(ammo > 1 && weap == 38) {
 				new string[128]; format(string,sizeof(string),"INFO: %s has a mingun with %d ammo", PlayerName2(i), ammo);
-				SendClientMessage(i,red, "You You Have Been Kicked For Minigun Hack.");
-				format(string,sizeof(string),"%s Has Been Kicked By Whizard Dumble Door For Minigun Hack.",PlayerName2(i), ammo);
-				SendClientMessageToAll(red, string);  print(string);
-				SaveToFile("KickLog",string);  Kick(i);
 				MessageToAdmins(COLOR_WHITE,string);
 			}
 		}
@@ -22955,30 +22868,8 @@ stock UpdateConfig()
 		fclose(file2);	printf(" -%d Forbidden Words Loaded", ForbiddenWordCount);
 	}
 }
+
 stock VBanID(playerid,giveid,reason[])
-{
-    format(NICKBAN,20,VBPlayer(giveid));
-	if(playerid > -1)
-	{
-	    format(Vnewban,32,BanDir,VBPlayer(giveid));
-		dini_Create(Vnewban);
-		VBanSaveInfo(playerid,Vnewban,reason);
-	}
-	else
-	{
-	    format(Vnewban,32,BanDir,VBPlayer(giveid));
-		dini_Create(Vnewban);
-		VBanSaveInfo(-1,Vnewban,reason);
-	}
-	if(IsPlayerConnected(giveid))
-		VBanLoadInfo(giveid,Vnewban);
-
-	Kick(giveid);
-
-    return 1;
-}
-
-stock ABanID(playerid,giveid,reason[])
 {
     format(NICKBAN,20,VBPlayer(giveid));
 	if(playerid > -1)
@@ -23006,7 +22897,6 @@ stock ABanID(playerid,giveid,reason[])
     return 1;
 }
 
-
 stock VBanNick(playerid,nick[],reason[])
 {
     format(Vnewban,32,BanDir,nick);
@@ -23027,9 +22917,6 @@ stock VBanNick(playerid,nick[],reason[])
 	else
 	    return VBanID(playerid,giveid,reason);
 }
-
-// lIne 22921 search VBanIP and uncomment
-
 stock VBanIP(playerid,IP2[],reason[])
 {
     format(Vnewban,32,BanDir,IP2);
@@ -23293,7 +23180,7 @@ stock SendCMDMessge(playerid,command[])
 CMD:vc(playerid,params[]) {
 	#pragma unused params
 	if(PlayerInfo[playerid][dRank] >= 1 || PlayerInfo[playerid][Level] >= 1) {
- 		if(isnull(params)) return SendClientMessage(playerid, -1, "iThe[XP-BOT]: Use like This:/s [text] To Talk in V.I.P Chat");
+ 		if(isnull(params)) return SendClientMessage(playerid, -1, "iThe[XP-BOT: Use like This:/s [text] To Talk in V.I.P Chat");
 		new string[250]; format(string, sizeof(string), ""cred"V.I.P.Chat:"cgreen"[%i]"cblue"%s:"cwhite" %s",playerid, PlayerName2(playerid), params[0]);
 		return MessageSend(-1,string);
 	} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You need to be Donor rank 1 to use this command");
@@ -23398,7 +23285,7 @@ CMD:eventhelp(playerid,params[]) {
 new Join[MAX_PLAYERS];
 CMD:addplayer(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 4) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/addplayer [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/addplayer [playerid]");
 		new player1 = strval(params);
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
 		       	CMDMessageToAdmins(playerid,"ADDPLAYER");
@@ -23434,7 +23321,7 @@ CMD:addteam(playerid, params[])
    if(PlayerInfo[playerid][Level] >= 4)
    {
 	   new team[100];
-	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT]: Use like This:/addteam [teamname USA/Eur/Arab/Sov/Aus/Viet]");
+	   if(sscanf(params,"s[100]",team)) return SendClientMessage(playerid, RED,"iThe[XP-BOT: Use like This:/addteam [teamname USA/Eur/Arab/Sov/Aus/Viet]");
 	   //---------USA------------------------
 	   if(strfind(params,"USA",true) != -1) //Returns 4 (Thanks to wiki for helping in strfind).
 	   {
@@ -23544,7 +23431,7 @@ CMD:addallplayer(playerid,params[]) {
 }
 CMD:removeplayer(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 4) {
-	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/removeplayer [playerid]");
+	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT: Use like This:/removeplayer [playerid]");
 		new player1 = strval(params);
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
 		       	CMDMessageToAdmins(playerid,"REMOVEPLAYER");
@@ -23699,9 +23586,9 @@ public PayDay()
 	foreach(Player, playerid)
 	{
 	    GivePlayerScore(playerid, 10);
-        GivePlayerMoney(playerid, 50000);
-        SendClientMessage(playerid, green,"iThe[XP-INFO]Bot says: Hey, Yo, You get a Reward From our Scripter, [D]ark_[E]mperor, Ain't he Awesome? Hell Yeah!");
-		GameTextForPlayer(playerid, "~p~~h~ REWARDS UP FROM [D]ark_[E]mperor! \n ~b~YOU RECEIVED ~r~~H~ +10 SCORE ~g~\nAND ~r~~h~50000 CASH ~g~~H~FROM [D]ark_[E]mperor!", 5000, 3);
+        GivePlayerMoney(playerid, 5000);
+        SendClientMessage(playerid, green,"iThe[XP-INFO]Bot says: Hey, Yo, You get a Reward From our Srcipter, [D]ark_[E]mperor, Ain't he Awesome? Hell Yeah!");
+		GameTextForPlayer(playerid, "~p~~h~ REWARDS UP FROM [D]ark_[E]mperor! \n ~b~YOU RECEIVED ~r~~H~ +10 SCORE ~g~\nAND ~r~~h~5000 CASH ~g~~H~FROM [D]ark_[E]mperor!", 5000, 3);
 	}
 	return 1;
 }
