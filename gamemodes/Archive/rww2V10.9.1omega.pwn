@@ -1,53 +1,13 @@
-/*
-					------==== 2015 ====------
-					Call Of Duty - Real World at War II™
-					Official Xenon Professional Gaming™ Script
-					By, [R]aM[P]aGe A.k.a [YGC]SrizZ A.k.a iThe[YGC]Pro
+/*------==== 2015 ====------
+Call Of Duty - Real World At War 2
+Official Xenon Pro Gaming Script
+By, [D]ark_[E]mperor A.k.a [YGC]SrizZ A.k.a iThe[YGC]Pro
 
-					Do Not SCAM/Sell script. If Scammed, then it will lead to ban in forum.sa-mp.com
+Do Not SCAM/Sell script. If Scammed, then it will lead to ban in forum.sa-mp.com
 
-					COD_RWWII™ - - - TDM - - - V10.9.2 - - - xpsamp.co.in
-					------===== [R]aM[P]aGe Rocks =====------
-					Version V10.9.1 by Rampage aka Srijan(DAAAAAAAAAARK) Abhay.Sv aka [XP]Perfect_Boy
+COD_RWW2 - - - TDM - - - V10.9.1 - - - xpsamp.co.in
+------===== [D]ark_[E]mperor Rocks =====------
 
-									        _______
-									    .adOOOOOOOOOba.
-									   dOOOOOOOOOOOOOOOb
-									  dOOOOOOOOOOOOOOOOOb
-									 dOOOOOOOOOOOOOOOOOOOb
-									|OOOOOOOOOOOOOOOOOOOOO|
-									OP'~"YOOOOOOOOOOOP"~`YO
-									OO     `YOOOOOP'     OO
-									OOb      `OOO'      dOO
-									YOOo  &   OOO   &  oOOP
-									`OOOo     OOO     oOOO'
-									 `OOOb._,dOOOb._,dOOO'
-									  `OOOOOOOOOOOOOOOOO'
-									   OOOOOOOOOOOOOOOOO
-									   YOOOOOOOOOOOOOOOP
-									   `OOOOOOOOOOOOOOO'
-									    `OOOOOOOOOOOOO'
-									     `OOOOOOOOOOO'
-									       `~OOOOO~'
-                    ««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
-                    »»                                                                        ««
-                    »» Scripter 			       : Rampage                                  ««
-                    »» Edite                      : Perfect_Boy                               ««
-                    »» Maps Editor 		          :  Rampage , Perfect_Boy , Kitty            ««
-                    »» Admins System New          : Rampage                                   ««
-                    »» SQL SYSTEM                 :  Perfect_Boy                              ««
-                    »» Anti Cheat                 : Perfect_boy , Rampage , Mex_Ivanov        ««
-                    »» Beta Testesters            :  [XP]Sumeeth                              ««
-                    »»                                                                        ««
-                    »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
-
-
-*/
-
-
-/*
-
-SQL DUMP
 
 ALTER TABLE playerdata ADD adminlevel INT(20), oplevel INT(20), pkills INT(20), pdeaths INT(20), dlevel INT(20), phours INT(20), pminutes INT(20), pseconds INT(20)
 */
@@ -88,9 +48,7 @@ new IsRegistered[MAX_PLAYERS];
 new MoneyGiven[MAX_PLAYERS]; //Explained in the paragraph above.
 new Logged[MAX_PLAYERS];
 
-new License[MAX_PLAYERS];
-new TempAdmin[MAX_PLAYERS];
-new MinigunDM[MAX_PLAYERS];
+
 
 //++++++++++++++++++++++ANti Cheat By Perfect And Mex ++++++++++++++++++++++
 new shotTime[MAX_PLAYERS];
@@ -7364,9 +7322,6 @@ public OnPlayerConnect(playerid)
     MySQL_BanCheck(playerid);
     MySQL_BanCheck1(playerid); //for ip ban
     MoneyGiven[playerid] = -1; //Resets the variable that you will discover later in the tutorial.
-    License[playerid] = 0;
-    TempAdmin[playerid] = 0;
-    MinigunDM[playerid] = 0;
     new query[200], pname[24]; //Creates our variables.
     GetPlayerName(playerid, pname, 24); //Gets the players name
     format(query, sizeof(query), "SELECT IP FROM `playerdata` WHERE user = '%s' LIMIT 1", pname); //Formats the query, view above the code for a explanation
@@ -8064,14 +8019,13 @@ if(Logged[playerid] == 1)
         //If the player disconnects before registering,
         //we want to make sure it doesn't try update
         //so we check if the player is logged in.
-        PlayerInfo[playerid][Level] = TempAdmin[playerid];
         new score = GetPlayerScore(playerid); //Gets players score
         new money = GetPlayerMoney(playerid); //Gets players money
         new query[200], pname[24]; //Creates the variables
         GetPlayerName(playerid, pname, 24); //Gets the players name.
        	new h, m, s; TotalGameTime(playerid, h, m, s);
         format(query, sizeof(query), "UPDATE playerdata SET score=%d, money=%d WHERE user='%s'", score, money, pname);
-        format(query, sizeof(query), "UPDATE playerdata SET adminlevel=%d, oplevel=%d, pkills=%d, pdeaths=%d, dlevel=%d, phours=%d, pminutes=%d, pseconds=%d, license=%d WHERE user='%s'", PlayerInfo[playerid][Level], PlayerInfo[playerid][Helper], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][dRank], h, m, s, License[playerid], pname);
+        format(query, sizeof(query), "UPDATE playerdata SET adminlevel=%d, oplevel=%d, pkills=%d, pdeaths=%d, dlevel=%d, phours=%d, pminutes=%d, pseconds=%d WHERE user='%s'", PlayerInfo[playerid][Level], PlayerInfo[playerid][Helper], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][dRank], h, m, s, pname);
         mysql_query(query);
         //No need to store a result for a update string
 }
@@ -8080,7 +8034,7 @@ new byebye[100];
 switch(reason)
 {
  case 2: format(byebye,sizeof byebye,"~r~~h~[Kicked / Banned]~y~~h~%s has ~r~~h~left ~p~~h~the server!",GetName(playerid),playerid);
- case 0: format(byebye,sizeof byebye,"~r~~h~[Crash]~y~~h~%s has ~r~~h~left ~p~~h~the server!",GetName(playerid),playerid);
+ case 0: format(byebye,sizeof byebye,"~r~~h~[Timeout]~y~~h~%s has ~r~~h~left ~p~~h~the server!",GetName(playerid),playerid);
  case 1: format(byebye,sizeof byebye,"~r~~h~[Quit]~y~~h~%s has ~r~~h~left ~p~~h~the server!",GetName(playerid),playerid);
 }
 SendBoxMessage(byebye);
@@ -8126,9 +8080,6 @@ format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Total Players In S
 	PlayerInfo[playerid][Level] = 0;
 	PlayerInfo[playerid][Jailed] = 0;
 	PlayerInfo[playerid][Frozen] = 0; 
- 	License[playerid] = 0;
- 	TempAdmin[playerid] = 0;
- 	MinigunDM[playerid] = 0;
 
 
 	if(PlayerInfo[playerid][Jailed] == 1) KillTimer( JailTimer[playerid] );
@@ -8858,7 +8809,6 @@ else if(gClass[playerid] == SOLCON)
 public OnPlayerDeath(playerid, killerid, reason)
 {
         PlayerInfo[playerid][Deaths]++;
-        MinigunDM[playerid] = 0;
         Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
         Synching[playerid] = false;
       if(Captured[playerid][SNAKE] == 0 && IsPlayerCapturing[playerid][SNAKE] == 1)
@@ -11611,27 +11561,16 @@ public OnPlayerText(playerid, text[])
 	if(text[0] == '.' && PlayerInfo[playerid][Level] >= 1) {
 	    new string[128]; GetPlayerName(playerid,string,sizeof(string));
 		format(string,sizeof(string),"A.Chat:[%i]%s: %s",playerid,string,text[1]);
-		MessageToAdmins(0xA86EFCFF,string);
+		MessageToAdmins(0x8000FFC8,string);
 		return 0;
 	}
-    if(text[0] == ',' && PlayerInfo[playerid][Level] >= 5) {
+    if(text[0] == ',' && PlayerInfo[playerid][Level] >= 6) {
 	    new string[128]; GetPlayerName(playerid,string,sizeof(string));
 		format(string,sizeof(string),"Management.Chat:[%i]%s: %s",playerid,string,text[1]);
 		MessageTo5(GREEN,string);
 	    return 0;
 	}
-	if(text[0] == '@' && PlayerInfo[playerid][Level] >= 9) {
-	    new string[128]; GetPlayerName(playerid,string,sizeof(string));
-		format(string,sizeof(string),"Perfect.Chat:[%i]%s: %s",playerid,string,text[1]);
-		MessageToOwner(0xFF0000FF,string);
-		return 0;
-	}
-	if(text[0] == '*' && PlayerInfo[playerid][Level] >= 1) {
-	    new string[128]; GetPlayerName(playerid,string,sizeof(string));
-		format(string,sizeof(string),"Donor.Chat:[%i]%s: %s",playerid,string,text[1]);
-		MessageToDonor(0xA86EFCFF,string);
-		return 0;
-	}
+	
  	if((PlayerInfo[playerid][dRank] >= 3)&&(dsay==0))
 	  {
 	    new aName[MAX_PLAYER_NAME], string2[128];
@@ -11641,7 +11580,7 @@ public OnPlayerText(playerid, text[])
 	    SendClientMessageToAll(0xF600F6FF,string2);
         return 0;
 		}
-
+	
 	    
 	if (PlayerInfo[playerid][Muted] == 0)
 	{
@@ -11650,7 +11589,7 @@ public OnPlayerText(playerid, text[])
 
 	        new PlayerName[MAX_PLAYER_NAME];
             GetPlayerName(playerid, PlayerName, sizeof(PlayerName));
-            format(text, 1024, "%d - [Moderator]%s says:{FFFFFF} %s",playerid, PlayerName, text);
+            format(text, 1024, "%d - [Trail-Admin]%s says:{FFFFFF} %s",playerid, PlayerName, text);
             SendClientMessageToAll(GetPlayerColor(playerid), text);
             return 0;
         }
@@ -11978,27 +11917,27 @@ if(pickupid == Pickup[5] || pickupid == Pickup[6] || pickupid == Pickup[7] || pi
 
     if(pickupid == RP && GetPlayerTeam(playerid) != TEAM_SOVIET) return SendClientMessage(playerid, 0xFF0000AA, "You can't use other team briefcase.");
     {
-    if(pickupid == RP) ShowPlayerDialog(playerid, 2, DIALOG_STYLE_LIST, "Briefcase", "Health - 5000$\nArmour - 5500$\n\nWeapons\nDeathmatch stadium\nRunnies Deathmatch\nBuy License\nMinigun Stadium", "Select", "Cancel");
+    if(pickupid == RP) ShowPlayerDialog(playerid, 2, DIALOG_STYLE_LIST, "Briefcase", "Health - 5000$\nArmour - 5500$\n\nWeapons\nDeathmatch stadium\nRunnies Deathmatch", "Select", "Cancel");
     }
     if(pickupid == EP && GetPlayerTeam(playerid) != TEAM_EURASIA) return SendClientMessage(playerid, 0xFF0000AA, "You can't use other team briefcase.");
     {
-    if(pickupid == EP) ShowPlayerDialog(playerid, 2, DIALOG_STYLE_LIST, "Briefcase", "Health - 5000$\nArmour - 5500$\n\nWeapons\nDeathmatch stadium\nRunnies Deathmatch\nBuy License\nMinigun Stadium", "Select", "Cancel");
+    if(pickupid == EP) ShowPlayerDialog(playerid, 2, DIALOG_STYLE_LIST, "Briefcase", "Health - 5000$\nArmour - 5500$\n\nWeapons\nDeathmatch stadium\nRunnies Deathmatch", "Select", "Cancel");
     }
     if(pickupid == AP && GetPlayerTeam(playerid) != TEAM_ARAB) return SendClientMessage(playerid, 0xFF0000AA, "You can't use other team briefcase.");
     {
-    if(pickupid == AP) ShowPlayerDialog(playerid, 2, DIALOG_STYLE_LIST, "Briefcase", "Health - 5000$\nArmour - 5500$\n\nWeapons\nDeathmatch stadium\nRunnies Deathmatch\nBuy License\nMinigun Stadium", "Select", "Cancel");
+    if(pickupid == AP) ShowPlayerDialog(playerid, 2, DIALOG_STYLE_LIST, "Briefcase", "Health - 5000$\nArmour - 5500$\n\nWeapons\nDeathmatch stadium\nRunnies Deathmatch", "Select", "Cancel");
     }
     if(pickupid == A2P && GetPlayerTeam(playerid) != TEAM_AUS) return SendClientMessage(playerid, 0xFF0000AA, "You can't use other team briefcase.");
     {
-    if(pickupid == A2P) ShowPlayerDialog(playerid, 2, DIALOG_STYLE_LIST, "Briefcase", "Health - 5000$\nArmour - 5500$\n\nWeapons\nDeathmatch stadium\nRunnies Deathmatch\nBuy License\nMinigun Stadium", "Select", "Cancel");
+    if(pickupid == A2P) ShowPlayerDialog(playerid, 2, DIALOG_STYLE_LIST, "Briefcase", "Health - 5000$\nArmour - 5500$\n\nWeapons\nDeathmatch stadium\nRunnies Deathmatch", "Select", "Cancel");
     }
     if(pickupid == MP && GetPlayerTeam(playerid) != TEAM_USA) return SendClientMessage(playerid, 0xFF0000AA, "You can't use other team briefcase.");
     {
-    if(pickupid == MP) ShowPlayerDialog(playerid, 2, DIALOG_STYLE_LIST, "Briefcase", "Health - 5000$\nArmour - 5500$\n\nWeapons\nDeathmatch stadium\nRunnies Deathmatch\nBuy License\nMinigun Stadium", "Select", "Cancel");
+    if(pickupid == MP) ShowPlayerDialog(playerid, 2, DIALOG_STYLE_LIST, "Briefcase", "Health - 5000$\nArmour - 5500$\n\nWeapons\nDeathmatch stadium\nRunnies Deathmatch", "Select", "Cancel");
     }
     if(pickupid == VE && GetPlayerTeam(playerid) != TEAM_MARVEL) return SendClientMessage(playerid, 0xFF0000AA, "You can't use other team briefcase.");
     {
-    if(pickupid == VE) ShowPlayerDialog(playerid, 2, DIALOG_STYLE_LIST, "Briefcase", "Health - 5000$\nArmour - 5500$\n\nWeapons\nDeathmatch stadium\nRunnies Deathmatch\nBuy License\nMinigun Stadium", "Select", "Cancel");
+    if(pickupid == VE) ShowPlayerDialog(playerid, 2, DIALOG_STYLE_LIST, "Briefcase", "Health - 5000$\nArmour - 5500$\n\nWeapons\nDeathmatch stadium\nRunnies Deathmatch", "Select", "Cancel");
     }
 	{
  }
@@ -12063,21 +12002,10 @@ new AirCraft = GetVehicleModel(GetPlayerVehicleID(playerid));
     }
 	new Rhinomodel = GetVehicleModel(GetPlayerVehicleID(playerid));
 	if (gClass[playerid] != ENGINEER && PlayerInfo[playerid][OnDuty] != 1 && gClass[playerid] != DONOR) {
-			if(Rhinomodel == 432) {
-			SendClientMessage(playerid, red, "You Need To Be Rank ENGINEER/DONOR(3) To Drive tanks!");
+		if(Rhinomodel == 432) {
+			SendClientMessage(playerid, red, "You Need To Be Rank PILOT/DONOR(3) To Drive tanks!");
 			RemovePlayerFromVehicle(playerid);
-			if(License[playerid] == 0 || License[playerid] == 2) {
-			SendClientMessage(playerid, red, "You Need To Own A License Read /license To Drive tanks!");
-			RemovePlayerFromVehicle(playerid);
-			}
 		}
-	}
-	if(Rhinomodel == 432)
-	{
-			if(License[playerid] == 0 || License[playerid] == 2) {
-			SendClientMessage(playerid, red, "You Need To Own A License Read /license To Drive tanks!");
-			RemovePlayerFromVehicle(playerid);
-			}
 	}
 	new SEA = GetVehicleModel(GetPlayerVehicleID(playerid));
 	if (gClass[playerid] != PILOT && gClass[playerid] != SCOUT && PlayerInfo[playerid][OnDuty] != 1 && gClass[playerid] != DONOR) {
@@ -12091,36 +12019,14 @@ new AirCraft = GetVehicleModel(GetPlayerVehicleID(playerid));
 		if(Hydramodel == 520) {
 			SendClientMessage(playerid, red, "You Need To Be Rank PILOT/DONOR(3) To Drive hydra!");
 			RemovePlayerFromVehicle(playerid);
-			if(License[playerid] == 0 || License[playerid] == 2) {
-			SendClientMessage(playerid, red, "You Need To Own A License Read /license To Drive hydra!");
-			RemovePlayerFromVehicle(playerid);
-			}
 	 	}
-	}
-	if(Hydramodel == 520)
-	{
-			if(License[playerid] == 0 || License[playerid] == 2) {
-			SendClientMessage(playerid, red, "You Need To Own A License Read /license To Drive tanks!");
-			RemovePlayerFromVehicle(playerid);
-			}
 	}
 	new Huntermodel = GetVehicleModel(GetPlayerVehicleID(playerid));
 	if (gClass[playerid] != PILOT && PlayerInfo[playerid][OnDuty] != 1 && gClass[playerid] != DONOR) {
 		if(Huntermodel == 425) {
 			SendClientMessage(playerid, red, "You Need To Be Rank PILOT/DONOR(3) To Drive Hunters!");
 			RemovePlayerFromVehicle(playerid);
-			if(License[playerid] == 0 || License[playerid] == 2) {
-			SendClientMessage(playerid, red, "You Need To Own A License Read /license To Drive Hunters!");
-			RemovePlayerFromVehicle(playerid);
-			}
 		}
-	}
-	if(Huntermodel == 425)
-	{
-			if(License[playerid] == 0 || License[playerid] == 2) {
-			SendClientMessage(playerid, red, "You Need To Own A License Read /license To Drive tanks!");
-			RemovePlayerFromVehicle(playerid);
-			}
 	}
 	return 1;
 }
@@ -13148,44 +13054,6 @@ if(response)
 	    			}
 	    			else return SendClientMessage(playerid, RED,"You cannot join DM while in AntiSK protection! Try again later");
            	 	}
-           	case 5:
-    		  {
- 		  			if(GetPlayerMoney(playerid) < 50000) return SendClientMessage(playerid, 0xFF0000AA, "You Don't Have Enough Cash To Do This.");
-        			GivePlayerMoney(playerid, -50000);
-    				if(License[playerid] == 1 || License[playerid] == 2)
-					SendClientMessage(playerid, COLOR_WHITE, "You Already Have A license Or Its Been revoked Read /license");
-					if(License[playerid] == 0)
-					License[playerid] = 1;
-					SendClientMessage(playerid, COLOR_WHITE, "You Bought A License Read license");
-			  }
-           	case 6:
-    		  {
-				   if(AntiSK[playerid] == 0)
-				   {
-                        Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
-                        GameTextForPlayer(playerid, "~r~use /kill~n~~w~to exit minigun~n~ ~r~stadium", 3000, 3);
-						SetPlayerTeam(playerid, -1);
-	        	        SetPlayerSkin(playerid, 299);
-	        	        SetPlayerHealth(playerid, 100);
-	        	        SetPlayerArmour(playerid, 100);
-	        	        SetPlayerColor(playerid, 0xFFFFFFFF);
-	        	        MinigunDM[playerid] = 1;
-	        	        SetPlayerPos(playerid, 249.64, 428.47, 1.57);
-	        	        SetPlayerInterior(playerid, 15);
-	        	        DM[playerid] = Create3DTextLabel("Minigun-Match\nFighter", 0xFFFFFFFF, 30.0, 40.0, 50.0, 40.0, 0);
-                        Attach3DTextLabelToPlayer(DM[playerid], playerid, 0.0, 0.0, 0.5);
-						ResetPlayerWeapons(playerid);
-						GivePlayerWeapon(playerid, 38, 50000);
-						new name[MAX_PLAYER_NAME];
-						GetPlayerName(playerid, name, sizeof(name));
-						new string[128];
-						format(string, sizeof(string), "~y~%s Has Joined ~g~Minigun Stadium..", name);
-	    				SendBoxMessage(string);
-	    			}
-	    			else return SendClientMessage(playerid, RED,"You cannot join DM while in AntiSK protection! Try again later");
-			  }
-			  
-    		  
         	}
     	    }
 	}
@@ -14920,7 +14788,6 @@ CMD:help2(playerid, params[])
 CMD:kill(playerid, params[])
 {
 SetPlayerHealth(playerid, 0.0);
-MinigunDM[playerid] = 0;
 SendClientMessage(playerid, -1, "You Have commited a Suicide");
 return true;
 }
@@ -14953,179 +14820,8 @@ return 1;
 }
 return 0;
 }
-CMD:license(playerid, params[])
-{
-if(PlayerInfo[playerid][Level] >= 0)
-{
-	if(License[playerid] == 0)
-	ShowPlayerDialog(playerid,1100,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 License Notes:","\n\n"cgreen"You Need a License To Drive Heavy Vehicles Like Hunter, Hydra\nCurently Your Do Not Have A Heavy Vehicle License\nYou can Buy A license From The Briefcase Or Ask An Admin\nLicense Will Cost You 50000 $ Ingame Cash \nBase Raping Will lead To license being Revoked\n Attacking Bases With Heavy Vehicles IS Base Rape/n/n "cwhite"License Status "cred" [NO LICENSE]","Ok","Cancel");
-	if(License[playerid] == 1)
-	ShowPlayerDialog(playerid,1102,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 License Notes:","\n\n"cgreen"Congradulations!!!\nYou Now Own A Heavy Vehicle License\nYou can Now Drive Heavy Vehicles\nBeware Do Not Break Rules And BAse Rape\nYour License Could Be Revoked For Base Raping\nBase Rape Means Attacking BAses With Heavy Vehicles\n\n"cwhite"License Status "cgreen" [YES]","Ok","Cancel");
-	if(License[playerid] == 2)
-	ShowPlayerDialog(playerid,1103,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 License Notes:","\n\n"cred"Your License Have Been Revoked For Base Raping\nYou have To apply At forums For Your License\nForums xpsamp.co.in\nMake A Topic In License Appeals Board\nIf your License App is Accepted Please PM a LV5+ Admin\n\n"cwhite"License Status "cred" [REVOKED]","Ok","Cancel");
-	return 1;
-	}
-return 0;
-}
-CMD:minigundm(playerid, params[])
-{
-if(PlayerInfo[playerid][Level] >= 0)
-{
-	if(AntiSK[playerid] == 0)
- 	{
-		Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
-		GameTextForPlayer(playerid, "~r~use /kill~n~~w~to exit minigun~n~ ~r~stadium", 3000, 3);
-		SetPlayerTeam(playerid, -1);
-  		SetPlayerSkin(playerid, 299);
-  		SetPlayerHealth(playerid, 100);
-		SetPlayerArmour(playerid, 100);
-  		SetPlayerColor(playerid, 0xFFFFFFFF);
-		MinigunDM[playerid] = 1;
-  		SetPlayerPos(playerid, 249.64, 428.47, 1.57);
- 		SetPlayerInterior(playerid, 15);
-  		DM[playerid] = Create3DTextLabel("Minigun-Match\nFighter", 0xFFFFFFFF, 30.0, 40.0, 50.0, 40.0, 0);
-	  	Attach3DTextLabelToPlayer(DM[playerid], playerid, 0.0, 0.0, 0.5);
-		ResetPlayerWeapons(playerid);
-		GivePlayerWeapon(playerid, 38, 50000);
-		new name[MAX_PLAYER_NAME];
-		GetPlayerName(playerid, name, sizeof(name));
-		new string[128];
-		format(string, sizeof(string), "~y~%s Has Joined ~g~Minigun Stadium..", name);
-		SendBoxMessage(string);
-  		SendClientMessageToAll(green, string);
-	}
-	else return SendClientMessage(playerid, RED,"You cannot join DM while in AntiSK protection! Try again later");
-	return 1;
-	}
-return 0;
-}
-CMD:mgdm(playerid, params[])
-            return cmd_minigundm(playerid, params);
-
-CMD:acmds(playerid, params[])
-{
-new radiolink[100];
-if(sscanf(params,"s[100]", radiolink)) return SendClientMessage(playerid, 0xFFFFFFFF,"use /acmds [1 - 5]");
-if(strfind(radiolink, "1", true) != -1)
-{
-if(PlayerInfo[playerid][Level] >= 1)
-ShowPlayerDialog(playerid,1110,DIALOG_STYLE_MSGBOX ,""cred"Admin Level 1:","\n"cgreen".[Text] For A.Chat\n/async\n/afk\n/warn\n/kick\n/aka\n/ip\n/weaps\n/jail\n/getid\n/serverinfo\n/astats","Ok","Cancel");
-}
-else if(strfind(radiolink, "2", true) != -1)
-{
-if(PlayerInfo[playerid][Level] >= 2)
-ShowPlayerDialog(playerid,1120,DIALOG_STYLE_MSGBOX ,""cred"Admin Level 2:","\n"cgreen"/adminduty\n/aarea\n/setinterior\n/setworld\n/car\n/slap\n/burn\n/explode\n/disarm\n/rangecheck\n/sv\n/dv\n/afix\n/spawn\n/get\n/vget\n/goto\n/vgoto\n/mute","Ok","Cancel");
-}
-else if(strfind(radiolink, "3", true) != -1)
-{
-if(PlayerInfo[playerid][Level] >= 3)
-ShowPlayerDialog(playerid,1130,DIALOG_STYLE_MSGBOX ,""cred"Admin Level 3:","\n"cgreen"/givelicense\n/revokelicense\n/giveweapon\n/sethealth\n/setarmour\n/setskin\n/akill\n/givecar\n/eject\n/unbound\n/settime\n/freeze\n/unfreeze\n/givecash","Ok","Cancel");
-}
-else if(strfind(radiolink, "4", true) != -4)
-{
-if(PlayerInfo[playerid][Level] >= 4)
-ShowPlayerDialog(playerid,1140,DIALOG_STYLE_MSGBOX ,""cred"Admin Level 4:","\n"cgreen"/gteam\n/steam\n/freezeteam\n/unfreezeteam\n/disarmteam\n/ruc\n/desnrg\n/gas\n/ann","Ok","Cancel");
-}
-else if(strfind(radiolink, "5", true) != -5)
-{
-if(PlayerInfo[playerid][Level] >= 5)
-ShowPlayerDialog(playerid,1150,DIALOG_STYLE_MSGBOX ,""cred"Admin Level 5:","\n"cgreen",[Text] Management.Chat\n/setcash\n/setscore\n/settester\n/unsettester\n/setkills\n/setdeaths","Ok","Cancel");
-}
-return 1;
-}
 
 
-
-
-
-CMD:baserape(playerid, params[])
-{
-if(PlayerInfo[playerid][Level] >= 0)
-{
-	ShowPlayerDialog(playerid,1104,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 Base Rape:","\n\n"cgreen"You Need a License To Drive Heavy Vehicles Like Hunter, Hydra\nCurently Your Do Not Have A Heavy Vehicle License\nYou can Buy A license From The Briefcase Or Ask An Admin\nLicense Will Cost You 50000 $ Ingame Cash \nBase Raping Will lead To license being Revoked\n Attacking Bases With Heavy Vehicles IS Base Rape/n","Ok","Cancel");
-	return 1;
-	}
-return 0;
-}
-
-CMD:givelicense(playerid, params[])
-{
-if(PlayerInfo[playerid][Level] >= 3)
-{
-	new targetid;
-	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct iThe[XP-BOT]: Use like This:/givelicense [playerid]");
-	if(targetid != INVALID_PLAYER_ID && targetid != playerid)
-	{
-	    new tname[MAX_PLAYER_NAME], name[MAX_PLAYER_NAME], string[128];
-	    GetPlayerName(playerid, name, sizeof(name));
-	    GetPlayerName(targetid, tname, sizeof(tname));
-	    format(string, sizeof(string), "Admin %s has given a license to %s so thank him %s . And Dont forget to read /license", name, tname, tname);
-	    SendClientMessageToAll(COLOR_PINK, string);
-	    CMDMessageToAdmins(playerid,"GIVELICENSE");
-		if(License[targetid] == 1)
-        SendClientMessage(playerid, RED, "iThe[XP-INFO]Bot: Player already HAs a License");
-		if(License[targetid] == 2)
-		SendClientMessage(playerid, RED, "iThe[XP-INFO]Bot: Player has Got his License Revoked Use /reseticense");
-		if(License[targetid] == 0)
-		License[targetid] = 1;
-	}
-	else return SendClientMessage(playerid, RED, "iThe[XP-INFO]Bot: Playerid is yourself reported you to perfect for commeand abuse");
-	return 1;
-}
-return 0;
-}
-CMD:revokelicense(playerid, params[])
-{
-if(PlayerInfo[playerid][Level] >= 3)
-{
-	new targetid;
-	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct iThe[XP-BOT]: Use like This:/givelicense [playerid]");
-	if(targetid != INVALID_PLAYER_ID)
-	{
-	    new tname[MAX_PLAYER_NAME], name[MAX_PLAYER_NAME], string[128];
-	    GetPlayerName(playerid, name, sizeof(name));
-	    GetPlayerName(targetid, tname, sizeof(tname));
-	    format(string, sizeof(string), "Admin %s has revoked the license of %s so thank him %s . [Reason: Base Rape]", name, tname, tname);
-	    SendClientMessageToAll(COLOR_PINK, string);
-	    CMDMessageToAdmins(playerid,"REVOKELICENSE");
-		if(License[targetid] == 0)
-        SendClientMessage(playerid, RED, "iThe[XP-INFO]Bot: Player dosent have a License");
-		if(License[targetid] == 2)
-		SendClientMessage(playerid, RED, "iThe[XP-INFO]Bot: Player has Got his License Revoked Use /reseticense");
-		if(License[targetid] == 1)
-		License[targetid] = 2;
-	}
-	else return SendClientMessage(playerid, RED, "iThe[XP-INFO]Bot: Playerid is yourself reported you to perfect for commeand abuse");
-	return 1;
-}
-return 0;
-}
-CMD:resetlicense(playerid, params[])
-{
-if(PlayerInfo[playerid][Level] >= 5)
-{
-	new targetid;
-	if(sscanf(params, "u", targetid)) return SendClientMessage(playerid, COLOR_YELLOW, "Correct iThe[XP-BOT]: Use like This:/givelicense [playerid]");
-	if(targetid != INVALID_PLAYER_ID)
-	{
-	    new tname[MAX_PLAYER_NAME], name[MAX_PLAYER_NAME], string[128];
-	    GetPlayerName(playerid, name, sizeof(name));
-	    GetPlayerName(targetid, tname, sizeof(tname));
-	    format(string, sizeof(string), "Admin %s has revoked the license of %s so thank him %s . [Reason: Base Rape]", name, tname, tname);
-	    SendClientMessageToAll(COLOR_PINK, string);
-	    CMDMessageToAdmins(playerid,"RESETLICENSE");
-		if(License[targetid] == 0)
-        SendClientMessage(playerid, RED, "iThe[XP-INFO]Bot: Player dosent have a License");
-		if(License[targetid] == 1)
-		SendClientMessage(playerid, RED, "iThe[XP-INFO]Bot: Player already Has a License");
-		if(License[targetid] == 2)
-		License[targetid] = 1;
-	}
-	else return SendClientMessage(playerid, RED, "iThe[XP-INFO]Bot: Playerid is yourself reported you to perfect for commeand abuse");
-	return 1;
-}
-return 0;
-}
 
 CMD:savestats(playerid, params[])
 {
@@ -15251,7 +14947,7 @@ CMD:rapedup(playerid, params[])
 CMD:hidemyass(playerid,params[])
 {
     #pragma unused params
-	if (PlayerInfo[playerid][Level] >= 6)
+	if (PlayerInfo[playerid][Level] >= 4)
 	{
 	    if (PlayerInfo[playerid][Hide] == 1)
  		return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You are already have Hidden in the Admin List!");
@@ -15265,7 +14961,7 @@ CMD:hidemyass(playerid,params[])
 CMD:unhidemyass(playerid,params[])
 {
     #pragma unused params
-	if (PlayerInfo[playerid][Level] >= 6)
+	if (PlayerInfo[playerid][Level] >= 4)
 	{
 	    if (PlayerInfo[playerid][Hide] == 0)
  		return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You are already have Visible in the Admin List!");
@@ -15278,7 +14974,7 @@ CMD:unhidemyass(playerid,params[])
 CMD:showmyass(playerid,params[])
 {
     #pragma unused params
-	if(PlayerInfo[playerid][Level] >= 6)
+	if(PlayerInfo[playerid][Level] >= 4)
 	{
  		if (PlayerInfo[playerid][Hide] != 1)
  		return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You are not Hidden in the Admin List!");
@@ -15302,7 +14998,7 @@ CMD:donorpricezzz(playerid, params[])
 */
 CMD:donorprice(playerid, params[])
 {
-ShowPlayerDialog(playerid,0,DIALOG_STYLE_MSGBOX ,"COD-RWW2 Donor Prices:","\n_________|- Real World At War 2™ Donor price -|_________\nDonor Rank in forum (2 Dollars)\nDonor Rank 1 (5 Dollars)\nDonor Rank 2 (10 Dollars)\nDonor Rank 3 (15 Dollars)\nDonor Rank 4 (25 Dollars)\nDonor Rank 5 (30 Dollars) [/donorpack]\nOperator Stats (15 Dollars)\nCheap Donor Prices And Cool Packs","Ok","Cancel");
+ShowPlayerDialog(playerid,0,DIALOG_STYLE_MSGBOX ,"COD-RWW2 Donor Prices:","\n_________|- Real World At War 2™ Donor price -|_________\nDonor Rank in forum (3 euro)\nDonor Rank 1 (9 euro)\nDonor Rank 2 (13 euro)\nDonor Rank 3 (17 euro)\nDonor Pack 1 (36 euro) [/donorpack]\nOperator Stats (15 Euro)\nCheap Donor Prices And Cool Packs","Ok","Cancel");
 return 1;
 }
 CMD:sotheme(playerid, params[])
@@ -15323,59 +15019,9 @@ return 1;
 CMD:donorpack(playerid, params[])
 {
 	SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2™ Donor Pack -|_________");
-	SendClientMessage(playerid, COLOR_GREEN, "Donor Pack 1 Price 5.00$ ");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Donor Lv 1");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +15000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Inagem Score +2500");
-	SendClientMessage(playerid, COLOR_ORANGE, "See /donorpack2 for Pack 2");
-	return true;
-}
-CMD:donorpack2(playerid, params[])
-{
-	SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2™ Donor Pack -|_________");
-	SendClientMessage(playerid, COLOR_GREEN, "Donor Pack 2 Price 10.00$ ");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Donor Lv 2");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +50000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Inagem Score +5000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Server Tester / Help Operator Status");
-	SendClientMessage(playerid, COLOR_ORANGE, "See /donorpack3 for Pack 3");
-	return true;
-}
-CMD:donorpack3(playerid, params[])
-{
-	SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2™ Donor Pack -|_________");
-	SendClientMessage(playerid, COLOR_GREEN, "Donor Pack 3 Price 15.00$ ");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Donor Lv 3 (Premium Account)");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +75000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Inageme Score +10000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Server Tester / Help Operator Status");
-	SendClientMessage(playerid, COLOR_ORANGE, "See /donorpack4 for Pack 4 With Adimin Levels");
-	return true;
-}
-CMD:donorpack4(playerid, params[])
-{
-	SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2™ Donor Pack -|_________");
-	SendClientMessage(playerid, COLOR_GREEN, "Donor Pack 4 Price 20.00$ ");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Donor Lv 3 (Premium Account)");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +20000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Inagem Score +25000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Access To Donor Chat");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Admin Level 1");
-	SendClientMessage(playerid, COLOR_ORANGE, "See /donorpack5 for Pack 5");
-	return true;
-}
-
-CMD:donorpack5(playerid, params[])
-{
-	SendClientMessage(playerid, COLOR_ORANGE, "_________|- Real World At War 2™ Donor Pack -|_________");
-	SendClientMessage(playerid, COLOR_GREEN, "Donor Pack 4 Price 25.00$ ");
-	SendClientMessage(playerid, COLOR_GREEN, "Donor Lv 4 (Premium Account)");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Ingame Cash +50000");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Inageme Score +30000");
-	SendClientMessage(playerid, COLOR_GREEN, "-->Access To Special Donor Area Ingame");
-	SendClientMessage(playerid, COLOR_GREEN, "->Special Ranks On Forums");
-	SendClientMessage(playerid, COLOR_GREEN, "--> Admin Level 2");
-	SendClientMessage(playerid, COLOR_ORANGE, "See More Packs On Forums");
+	SendClientMessage(playerid, COLOR_GREEN, "Donor pack price(35 euro)");
+	SendClientMessage(playerid, COLOR_GREEN, "You will Get Admin lvl 4 And Donor Rank 3");
+	SendClientMessage(playerid, COLOR_GREEN, "35000 score and 12000 kills and 1000k cash With this pack");
 	return true;
 }
 CMD:commands(playerid, params[])
@@ -15592,7 +15238,7 @@ CMD:notes(playerid, params[])
 CMD:credits1(playerid, params[]) {
 	SendClientMessage(playerid, green,"Server Credits:");
 	SendClientMessage(playerid, green,"Server is Re-Scripted By [D]ark_[E]mperor");
-	SendClientMessage(playerid, green,"Server hosted By Perfect_Boy");
+	SendClientMessage(playerid, green,"Server hosted By [D]ark_[E]mperor");
 	return 1;
 }
 
@@ -15631,40 +15277,6 @@ CMD:enablehs(playerid,params[]) // can i show u something? somwthing what?
 				format(string,sizeof(string),"Administrator %s has enabled headshot system.",pName(playerid));
                 SendClientMessageToAll(0x0080FFFF,string);
                 SendRconCommand("loadfs hs");
-                SendClientMessage(playerid,blue,"Filter Script Succesfully loaded");
-		}
-	  else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
-	}
-	else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You must be logged in to use this commands");
-	return 1;
-}
-CMD:enablepump(playerid,params[]) // can i show u something? somwthing what?
-{
-	if(PlayerInfo[playerid][LoggedIn] == 1)
-	{
-		if(PlayerInfo[playerid][Level] >= 8)
-		{
-				new string[128];
-				format(string,sizeof(string),"Administrator %s has enabled pumpkin system.",pName(playerid));
-                SendClientMessageToAll(0x0080FFFF,string);
-                SendRconCommand("loadfs halo");
-                SendClientMessage(playerid,blue,"Filter Script Succesfully loaded");
-		}
-	  else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
-	}
-	else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You must be logged in to use this commands");
-	return 1;
-}
-CMD:disablepump(playerid,params[]) // can i show u something? somwthing what?
-{
-	if(PlayerInfo[playerid][LoggedIn] == 1)
-	{
-		if(PlayerInfo[playerid][Level] >= 8)
-		{
-				new string[128];
-				format(string,sizeof(string),"Administrator %s has disable pumpkin system.",pName(playerid));
-                SendClientMessageToAll(0x0080FFFF,string);
-                SendRconCommand("unloadfs halo");
                 SendClientMessage(playerid,blue,"Filter Script Succesfully loaded");
 		}
 	  else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
@@ -16056,7 +15668,7 @@ if(PlayerInfo[playerid][Level] >= 6)
 CMD:credits(playerid,params[]) {
 if(PlayerInfo[playerid][Level] >= 0)
 {
-    ShowPlayerDialog(playerid, 802, DIALOG_STYLE_MSGBOX, ""cred"COD-Real World At War 2 Credits", ""cgreen"Credits:\n\nScripted by [D]ark_[E]mperor\nServer Owned And Hosted by Perfect_Boy\nBeta Tester: [XP]Sumeeth \n\n------------------------------\n\nScript Made by [D]ark_[E]mperor, "cred"Not allowed to Scam And Sell Script\n\n\nCall Of Duty : Real World At War 2 V10.9.2 ", "Okay", "Back");
+    ShowPlayerDialog(playerid, 802, DIALOG_STYLE_MSGBOX, ""cred"COD-Real World At War 2 Credits", ""cgreen"Credits:\n\nScripted by [D]ark_[E]mperor\nServer Owned And Hosted by [D]ark_[E]mperor\nBeta Tester: [XP]Sumeeth \n\n------------------------------\n\nScript Made by [D]ark_[E]mperor, "cred"Not allowed to Scam And Sell Script\n\n\nCall Of Duty : Real World At War 2 V10.9.1 ", "Okay", "Back");
     }
 	return 1;
 }
@@ -16316,14 +15928,12 @@ CMD:helpme(playerid, params[])
 	GetPlayerName(playerid, Name1, sizeof(Name1));
 	format(str, sizeof(str),"{00FFFF}[HELP MSG From %s]:{00FFF0} %s",Name1, str);
 	MessageToTwice(red, str);
-	format(str, sizeof(str),"{00FFFF}[SERVER MSG Use /apm %d]:{00FFF0} To Reply To Him",playerid);
-	MessageToTwice(red, str);
 	SendClientMessage(playerid, yellow,"Your Request has been sent to online Administrators, Please Wait for their Reply.");
 	return 1;
 }
 
 CMD:giveweapon(playerid,params[]) {
-	if(PlayerInfo[playerid][Level] >= 3) {
+	if(PlayerInfo[playerid][Level] >= 2) {
 	    new tmp[256], tmp2[256], tmp3[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index), tmp3 = strtok(params,Index);
 	    if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/giveweapon [playerid] [weapon id/weapon name] [ammo]");
 		new player1 = strval(tmp), weap, ammo, WeapName[32], string[128];
@@ -16742,7 +16352,7 @@ CMD:settime(playerid,params[]) {
 }
 
 CMD:setworld(playerid,params[]) {
-	if(PlayerInfo[playerid][Level] >= 2) {
+	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
 	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setworld [playerid] [virtual world]");
 		new player1 = strval(tmp), time = strval(tmp2), string[128];
@@ -16758,7 +16368,7 @@ CMD:setworld(playerid,params[]) {
 }
 
 CMD:setinterior(playerid,params[]) {
-	if(PlayerInfo[playerid][Level] >= 2) {
+	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
 	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setinterior [playerid] [interior]");
 		new player1 = strval(tmp), time = strval(tmp2), string[128];
@@ -17183,39 +16793,6 @@ CMD:ban(playerid, params[])
   } else return SendClientMessage(playerid, C_RED,"You are not authorized to use this command!");
   return 1;
 }
-CMD:checkacc(playerid, params[])// search for existing bans
-{
-  if(PlayerInfo[playerid][Level] >= 2)
-  {
-    new target[50], admin[50], player[50], reason[100], IP[16];
-    if(sscanf(params,"s[50]", target)) return SendClientMessage(playerid, C_RED,"USAGE: /sban [player name]");
-    new query[200];
-    format(query, sizeof(query),"SELECT user,score,adminlevel,IP FROM `playerdata` WHERE `user`='%s' LIMIT 1", target);
-    mysql_query(query);
-    mysql_store_result();
-    CMDMessageToAdmins(playerid,"CHECKACC");
-    new rows = mysql_num_rows();
-    if(rows == 1)
-    {
-      while(mysql_fetch_row(query))
-      {
-        mysql_fetch_field_row(admin, "user");
-        mysql_fetch_field_row(player, "score");
-        mysql_fetch_field_row(IP, "IP");
-        mysql_fetch_field_row(reason, "adminlevel");
-      }
-      new string[128];
-      format(string, sizeof(string),"Username: %s  | Score:%s | Admin Level:%s | IP:%s " , admin, player, reason, IP);
-      SendClientMessage(playerid, C_RED, string);
-    }
-    if(!rows)
-    {
-      SendClientMessage(playerid, C_RED,"SERVER: No ban found on this name!");
-    }
-  }
-  else return SendClientMessage(playerid, C_RED,"You are not authorized to use this command!");
-  return 1;
-}
 
 CMD:unban(playerid, params[])
 {
@@ -17408,7 +16985,7 @@ CMD:sfile(playerid,params[]) {
 
 CMD:gmx(playerid, params[])
 {
-        if(PlayerInfo[playerid][Level] >= 8) {
+        if(PlayerInfo[playerid][Level] >= 7) {
         SCM(playerid,-1,"Server has been successfully restarted.");
         return SendRconCommand("gmx");
         } else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
@@ -17525,7 +17102,7 @@ CMD:lcommands(playerid,params[]) {
 	return 1;
 }
 
-CMD:acmds0(playerid,params[]) {
+CMD:acmds(playerid,params[]) {
 	#pragma unused params
 	if(PlayerInfo[playerid][Level] >= 1)
 	{
@@ -17625,12 +17202,11 @@ CMD:lconfig(playerid,params[]) {
 	return 1;
 }
 
-CMD:astats(playerid,params[]) {
+CMD:getinfo(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 1 || IsPlayerAdmin(playerid)) {
 	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/getinfo [playerid]");
 	    new player1, string[128];
 	    player1 = strval(params);
-	    CMDMessageToAdmins(playerid,"ASTATS");
 
 	 	if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
 		    new Float:player1health, Float:player1armour, playerip[128], Float:x, Float:y, Float:z, tmp2[256], file[256],
@@ -18274,17 +17850,10 @@ CMD:getid(playerid,params[]) {
 	if(found == 0) SendClientMessage(playerid, lightblue, "No players have this in their nick");
 	return 1;
 }
-CMD:msay(playerid,params[]) {
-	#pragma unused params
-	if(PlayerInfo[playerid][Level] >= 1) {
- 		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/osay [text]");
-		new string[128]; format(string, sizeof(string), "*Moderator %s: %s", PlayerName2(playerid), params[0] );
-		return SendClientMessageToAll(COLOR_PINK,string);
-	} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You need to be Server Tester to use this command");
-}
+
 CMD:asay(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][Level] >= 2) {
+	if(PlayerInfo[playerid][Level] >= 1) {
  		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/asay [text]");
 		new string[128]; format(string, sizeof(string), "***Admin %s: %s", PlayerName2(playerid), params[0] );
 		return SendClientMessageToAll(COLOR_PINK,string);
@@ -18475,7 +18044,6 @@ CMD:flip(playerid,params[]) {
 
 CMD:destroycar(playerid,params[]) {
 	#pragma unused params
-	CMDMessageToAdmins(playerid,"DV");
 	if(PlayerInfo[playerid][Level] >= 5) return EraseVehicle(GetPlayerVehicleID(playerid));
 	else return SendClientMessage(playerid,red,"[LEVEL-INFO]:You Are Not Consisting The Level Required For This Command");
 }
@@ -19216,7 +18784,7 @@ CMD:dcmds(playerid,params[]) {
    return 1;
 }
 CMD:setdonor(playerid,params[]) {
-if(PlayerInfo[playerid][Level] >= 9) {
+if(PlayerInfo[playerid][Level] >= 10) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
 	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric2(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setdonor [playerid] [Level] | Note : Max Levels = 3 |");
 		new player1 = strval(tmp), skin = strval(tmp2), string[128];
@@ -19546,7 +19114,7 @@ CMD:weaps(playerid,params[]) {
 
 
 CMD:aka(playerid,params[]) {
-    if(PlayerInfo[playerid][Level] >= 1 || IsPlayerAdmin(playerid)) {
+    if(PlayerInfo[playerid][Level] >= 3 || IsPlayerAdmin(playerid)) {
 	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/aka [playerid]");
     	new player1, playername[MAX_PLAYER_NAME], str[128], tmp3[50];
 		player1 = strval(params);
@@ -19560,7 +19128,7 @@ CMD:aka(playerid,params[]) {
 }
 
 CMD:screen(playerid,params[]) {
-	if(PlayerInfo[playerid][Level] >= 4) {
+	if(PlayerInfo[playerid][Level] >= 2) {
 	    new tmp[256], tmp2[256], Index;		tmp = strtok(params,Index), tmp2 = strtok(params,Index);
 	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/screen [playerid] [text]");
     	new player1, playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
@@ -19606,7 +19174,7 @@ CMD:aoffduty(playerid, params[]) return SendClientMessage(playerid, red,"Changed
 
 CMD:adminduty(playerid,params[])
 {
-   if(PlayerInfo[playerid][Level] >= 2)
+   if(PlayerInfo[playerid][Level] >= 1)
    {
        if(AntiSK[playerid] == 0)
 		 {
@@ -19619,15 +19187,15 @@ CMD:adminduty(playerid,params[])
          SetPlayerSkin(playerid,217);
          SetPlayerTeam(playerid,6);
          SetVehicleHealth(VID[playerid], 9999999999.0);
-//         Duty[playerid] = Create3DTextLabel("On Duty Admin\n!!Do Not Attack!!", 0xF600F6FF, 30.0, 40.0, 50.0, 40.0, 0);
-//         Attach3DTextLabelToPlayer(Duty[playerid], playerid, 0.0, 0.0, 0.5);
+         Duty[playerid] = Create3DTextLabel("On Duty Admin\n!!Do Not Attack!!", 0xF600F6FF, 30.0, 40.0, 50.0, 40.0, 0);
+         Attach3DTextLabelToPlayer(Duty[playerid], playerid, 0.0, 0.0, 0.5);
    	     SetPlayerColor(playerid, 0xF600F6FF);
          SetPlayerHealth(playerid, 100000000000.0);
          SetPlayerArmour(playerid, 100000000000.0);
 		 ResetPlayerWeapons(playerid);
          GivePlayerWeapon(playerid, 38,999999999);
-//         Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
-//         Update3DTextLabelText(DM[playerid], 0xFFFFFFFF, " ");
+         Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
+         Update3DTextLabelText(DM[playerid], 0xFFFFFFFF, " ");
          gTeam[playerid] = TEAM_MERC;
          gClass[playerid] = CLASS;
          }
@@ -19638,7 +19206,7 @@ CMD:adminduty(playerid,params[])
          format(str, sizeof(str), "Administrator %s is now off Admin duty!", AdminName);
          SendClientMessageToAll(0xFD01FDAA, str);
          SetPlayerHealth(playerid, 0);
-//         Delete3DTextLabel(Duty[playerid]);
+         Delete3DTextLabel(Duty[playerid]);
 //         Update3DTextLabelText(RankLabel[playerid], 0xFFFFFFFF, " ");
 //         Update3DTextLabelText(Duty[playerid], 0xFFFFFFFF, " ");
 		 ForceClassSelection(playerid);
@@ -19715,7 +19283,7 @@ CMD:admins(playerid, params[])
                 {
                     switch(PlayerInfo[i][Level])
                     {
-                        case 1: AdmRank = "{FFD700}[Moderator]";
+                        case 1: AdmRank = "{FFD700}[Trial Admin]";
                         case 2: AdmRank = "{FF4500}[Junior Admin]";
                         case 3: AdmRank = "{1E90FF}[Senior Admin]";
                         case 4: AdmRank = "{0000CD}[Lead Admin]";
@@ -19879,7 +19447,6 @@ CMD:setlevel(playerid,params[]) {
   					format(query, sizeof(query), "UPDATE playerdata SET adminlevel=%d WHERE user='%s'", PlayerInfo[playerid][Level], playername);
 					dUserSetINT(PlayerName2(player1)).("level",(level));
 					PlayerInfo[player1][Level] = level;
-					TempAdmin[player1] = level;
 					return PlayerPlaySound(player1,1057,0.0,0.0,0.0);
 				} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: Player must be registered and logged in to be admin");
 			} else return SendClientMessage(playerid, red, "Player is not connected");
@@ -20092,7 +19659,7 @@ CMD:apm(playerid, params[])
 			  {
 		   		format(str, sizeof(str),"Admin PM to [%d]%s: %s", id, PlayerName2(id), str2);
 		   		SendClientMessage(playerid, yellow, str);
-		   		format(str, sizeof(str),"Admin PM [%d]%s: %s",playerid, PlayerName2(playerid), str2);
+		   		format(str, sizeof(str),"Admin PM: %s", str2);
 		   		SendClientMessage(id, COLOR_PINK, str);
 		   		PlayerPlaySound(id,1085,0.0,0.0,0.0);
 		   		MessageTo4(grey, adminstr);
@@ -20368,12 +19935,7 @@ return 1;
 }
 
 CMD:cc(playerid,params[]) {
-    #pragma unused params
-	if(PlayerInfo[playerid][Level] >= 2) {
-		CMDMessageToAdmins(playerid,"CLEARCHAT");
-		for(new i = 0; i < 11; i++) SendClientMessageToAll(green," ");
-		SendClientMessage(playerid,blue,"Chat Has been cleared by admins!!"); return 1;
- 	} else return SendClientMessage(playerid,red,"ERROR: You need to be level 2 to use this command");
+	 return cmd_clearchat(playerid, params);
 }
 CMD:caps(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 3) {
@@ -21389,13 +20951,18 @@ CMD:login(playerid,params[])
 
 }
 
+
 CMD:changepass(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1)	{
-		SendClientMessage(playerid,red, "iThe[XP-INFO]Bot: You must go to http://xpsamp.co.in/usercp/   To change your Password");
-		return SendClientMessage(playerid,yellow,"Login With Your Ingame Details There And Select Change Password");
+		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/changepass [new password]");
+		if(strlen(params) < 4) return SendClientMessage(playerid,red,"ACCOUNT: Incorrect password length");
+		new string[128];
+		dUserSetINT(PlayerName2(playerid)).("password_hash",udb_hash(params) );
+		PlayerPlaySound(playerid,1057,0.0,0.0,0.0);
+        format(string, sizeof(string),"ACCOUNT: You have successfully changed your password to \"%s\"",params);
+		return SendClientMessage(playerid,yellow,string);
 	} else return SendClientMessage(playerid,red, "iThe[XP-INFO]Bot: You must have an account to use this command");
 }
-
 CMD:setname(playerid, params[])
 {
         if(PlayerInfo[playerid][Level] >= 5)	{
@@ -21580,19 +21147,6 @@ stock GetVehicleSpeed(vehicleid, get3d)
         GetVehicleVelocity(vehicleid, x, y, z);
         return SpeedCheck(x, y, z, 100.0, get3d);
 }
-//Map Teleport
-
-public OnPlayerClickMap(playerid, Float:fX, Float:fY, Float:fZ)
-{
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8)
-	{
-    	SetPlayerPosFindZ(playerid, fX, fY, fZ);
-    	CMDMessageToAdmins(playerid,"MAPTP");
-    }
-    return 1;
-}
-
-
 //+++++++++++++++++++++++++++++++++Anti crash By abhay
 public OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY, Float:fZ)
 {
@@ -22267,9 +21821,6 @@ stock MySQL_Login(playerid)
         mysql_fetch_field_row(savingstring, "phours");PlayerInfo[playerid][hours] = strval(savingstring);
         mysql_fetch_field_row(savingstring, "pminutes");PlayerInfo[playerid][mins] = strval(savingstring);
         mysql_fetch_field_row(savingstring, "pseconds");PlayerInfo[playerid][secs] = strval(savingstring);
-        mysql_fetch_field_row(savingstring, "license");License[playerid] = strval(savingstring);
-        
-        TempAdmin[playerid] = PlayerInfo[playerid][Level];
         //If you are wondering why I'm using savingstring instead
         //Of a variable like using MoneyGiven right away, it's because
         //mysql_fetch_field_row requires a string.
@@ -23685,7 +23236,7 @@ public PingKick()
 	new weap, ammo;
 	for(new i = 0; i < MAX_PLAYERS; i++)
 	{
-		if(IsPlayerConnected(i) && PlayerInfo[i][Level] == 0 && MinigunDM[i] == 0)
+		if(IsPlayerConnected(i) && PlayerInfo[i][Level] == 0)
 		{
 			GetPlayerWeaponData(i, 7, weap, ammo);
 			if(ammo > 1 && weap == 38) {
@@ -23907,24 +23458,6 @@ public MessageTo5(color,const string[])
 	}
 	return 1;
 }
-forward MessageToOwner(color,const string[]);
-public MessageToOwner(color,const string[])
-{
-	for(new i = 0; i < MAX_PLAYERS; i++)
-	{
-		if(IsPlayerConnected(i) == 1) if (PlayerInfo[i][Level] >= 9) SendClientMessage(i, color, string);
-	}
-	return 1;
-}
-forward MessageToDonor(color,const string[]);
-public MessageToDonor(color,const string[])
-{
-	for(new i = 0; i < MAX_PLAYERS; i++)
-	{
-		if(IsPlayerConnected(i) == 1) if (PlayerInfo[i][dRank] >= 1) SendClientMessage(i, color, string);
-	}
-	return 1;
-}
 forward MessageTo6(color,const string[]);
 public MessageTo6(color,const string[])
 {
@@ -24013,7 +23546,7 @@ if(Logged[playerid] == 1)
         new query[200], pname[24]; //Creates the variables
         GetPlayerName(playerid, pname, 24); //Gets the players name.
         new h, m, s; TotalGameTime(playerid, h, m, s);
-        format(query, sizeof(query), "UPDATE playerdata SET score=%d, money=%d, adminlevel=%d, oplevel=%d, pkills=%d, pdeaths=%d, dlevel=%d, phours=%d, pminutes=%d, pseconds=%d WHERE user='%s'", score, money, TempAdmin[playerid], PlayerInfo[playerid][Helper], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][dRank], h, m, s, pname);
+        format(query, sizeof(query), "UPDATE playerdata SET score=%d, money=%d, adminlevel=%d, oplevel=%d, pkills=%d, pdeaths=%d, dlevel=%d, phours=%d, pminutes=%d, pseconds=%d WHERE user='%s'", score, money, PlayerInfo[playerid][Level], PlayerInfo[playerid][Helper], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][dRank], h, m, s, pname);
         mysql_query(query);
         //No need to store a result for a update string
 }
