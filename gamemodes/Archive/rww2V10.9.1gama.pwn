@@ -33,13 +33,8 @@ ALTER TABLE playerdata ADD adminlevel INT(20), oplevel INT(20), pkills INT(20), 
 //+++++++++++++++++++++SQL SYSTEM++++++++++++++++++++++++++++++++++
 #define mysql_host "31.170.166.50" //Has to be a string
 #define mysql_user "u140882605_samp" //Has to be a string
-#define mysql_password "abhayrocks" //There is none for wamp unless you set one.
+#define mysql_password "system32" //There is none for wamp unless you set one.
 #define mysql_database "u140882605_users" //Has to be a string
-
-//#define mysql_host "localhost" //Has to be a string
-//#define mysql_user "root" //Has to be a string
-//#define mysql_password "abhayrocks" //There is none for wamp unless you set one.
-//#define mysql_database "test" //Has to be a string
 
 new IsRegistered[MAX_PLAYERS];
 //We are using this variable so we don't have to query later to
@@ -47,22 +42,8 @@ new IsRegistered[MAX_PLAYERS];
 
 new MoneyGiven[MAX_PLAYERS]; //Explained in the paragraph above.
 new Logged[MAX_PLAYERS];
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
-
-//++++++++++++++++++++++ANti Cheat By Perfect And Mex ++++++++++++++++++++++
-new shotTime[MAX_PLAYERS];
-new shot[MAX_PLAYERS];
-
-new
-	enablearf = 1;
-new
-	enablecrash = 1;
-
-new SpeedHacking[MAX_PLAYERS];
-#define SpeedCheck(%0,%1,%2,%3,%4) floatround(floatsqroot(%4?(%0*%0+%1*%1+%2*%2):(%0*%0+%1*%1) ) *%3*1.6)
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //Variables
 #define MAX_GROUPS 20 // Change this if you think you are going to ever have over 100 groups.
 
@@ -104,9 +85,9 @@ new
 
 new pws[][MAX_PW_LENGTH] =              // Change this when using hardcoded
 {                                       //
-	"burgerking",                             //
-	"hackthegame",                             // SPECIALL MADE FOR KAPIL HAXOR AND ORANGE
-	"ubuntuaccess"
+	"system32",                             //
+	"fuckoff",                             // SPECIALL MADE FOR KAPIL HAXOR AND ORANGE
+	"killmedude"
 };
 
 new namewhitelist[][MAX_PLAYER_NAME] =  // Only the names in this list can login
@@ -123,11 +104,9 @@ new ipwhitelist[][16] =                 // Only the IPs in this list can login
 new currenthcindex;
 
 //==============================Prototype sys
-/*
 new Text3D:ProtLabel[MAX_VEHICLES];
 new A69Prot;
 new StealingA69Prot[MAX_PLAYERS];
-*/
 //=========================Admin area global var=====================
 
 //____[Gates & other]____
@@ -1101,7 +1080,7 @@ main()
 	#if (USE_HARDCODED_PWS == true)
 	    new hcpw = CheckHCPWSafety();
 	    if (hcpw == -1) {
-	        printf("[RconPro] Using hardcoded passwords: Security checks passed. System Made By Abhay");
+	        printf("[RconPro] Using hardcoded passwords: Security checks passed.");
 	    } else {
 	        printf("[RconPro] Using hardcoded passwords: WARNING: at least one password (%d) is not safe!", hcpw);
 			#if (CLOSE_SERVER_ON_RISK == true)
@@ -1135,11 +1114,9 @@ main()
 //___________________________________________________________Pro con end____________________________________
 public OnGameModeInit()
 {
-    mysql_debug(1);
+	mysql_debug(1);
 	mysql_connect(mysql_host, mysql_user, mysql_database, mysql_password);
     mysql_query("CREATE TABLE IF NOT EXISTS playerdata(user VARCHAR(24), password VARCHAR(41), score INT(20), money INT(20), IP VARCHAR(16), adminlevel INT(20), oplevel INT(20), pkills INT(20), pdeaths INT(20), dlevel INT(20), phours INT(20), pminutes INT(20), pseconds INT(20) )");
-    mysql_query("CREATE TABLE IF NOT EXISTS bandata(admin VARCHAR(20), player VARCHAR(20), reason VARCHAR(50), IP VARCHAR(16), banned INT(10))");
-    mysql_query("CREATE TABLE IF NOT EXISTS rangeban(admin VARCHAR(20), player VARCHAR(20), reason VARCHAR(50), IP VARCHAR(16), banned INT(10))");
 
  	LoadBox(-45);
 	UsePlayerPedAnims();
@@ -1188,11 +1165,10 @@ public OnGameModeInit()
 	SetTimer("uselessnrg",300000,0);
 	
 	//Proto type
-/*
 	A69Prot = AddStaticVehicle(428,215.8315,1860.0304,13.2654,1.1393,0,5);
 	ProtLabel[A69Prot] = Create3DTextLabel("Area 69 Prototype", 0x00FF00FF, 0.0, 0.0, 0.0, 50.0, 0, 1);
 	Attach3DTextLabelToVehicle(ProtLabel[A69Prot],A69Prot, 0.0, 0.0, 0.0);
-*/
+
 
     AddPlayerClass(73,1110.1959,1909.0803,10.8203,5.0747,0,0,0,0,0,0); // EUR
     AddPlayerClass(179,-794.9099,1610.2480,29.7032,78.7860,0,0,0,0,0,0); // ARABIA
@@ -7127,7 +7103,7 @@ public OnGameModeExit()
 	//=======
 	SaveStats();
 	KillTimer(PingTimer);
-//	Delete3DTextLabel(ProtLabel[A69Prot]);  //prototype
+	Delete3DTextLabel(ProtLabel[A69Prot]);  //prototype
 	#if defined USE_MENUS
 	DestroyAllMenus();
 	#endif
@@ -7319,8 +7295,6 @@ public OnPlayerRequestClass(playerid, classid)
 public OnPlayerConnect(playerid)
 {
 //+++++++++++++++++++++++++++++++++SQL++++++++++++++++
-    MySQL_BanCheck(playerid);
-    MySQL_BanCheck1(playerid); //for ip ban
     MoneyGiven[playerid] = -1; //Resets the variable that you will discover later in the tutorial.
     new query[200], pname[24]; //Creates our variables.
     GetPlayerName(playerid, pname, 24); //Gets the players name
@@ -7358,9 +7332,8 @@ public OnPlayerConnect(playerid)
     //there being massive memory usage.
 
 //===============clansys================
-    shotTime[playerid] = 0;
-    shot[playerid] = 0;
-//	StealingA69Prot[playerid] = 0;  //prototype
+
+	StealingA69Prot[playerid] = 0;  //prototype
 
 	new playername[128];
 
@@ -7390,11 +7363,9 @@ public OnPlayerConnect(playerid)
 	TextDrawShowForPlayer(playerid, Load);
 	TextDrawShowForPlayer(playerid, welcometo1);
 	TextDrawShowForPlayer(playerid, welcometo2);
-	
-//********************************************  DINI DUMP BY ABHAY   **************************************************
-//	CheckBan(playerid);
-//	CheckBanFromFile(playerid);
-/*
+	CheckBan(playerid);
+	CheckBanFromFile(playerid);
+
 	if (udb_Exists(PlayerName2(playerid)))
     {
 	  if(PlayerInfo[playerid][LoggedIn] == 0)
@@ -7412,7 +7383,7 @@ public OnPlayerConnect(playerid)
 	      ShowPlayerDialog(playerid, 126, DIALOG_STYLE_PASSWORD, "Register",string,"Register","Kick");
       }
     }
-
+/*
     if(PlayerInfo[playerid][LoggedIn] == 1)
     {
         new pname[128];
@@ -7435,7 +7406,6 @@ public OnPlayerConnect(playerid)
 	    }
 	}
 */
-//_____________________________________________________________________________________________________________________
 	//-----
 	IsPlayerUsingAnims[playerid] = 0;
 	Synching[playerid] = false;
@@ -7750,8 +7720,13 @@ public OnPlayerConnect(playerid)
 	RemoveBuildingForPlayer(playerid, 1308, -150.2734, 2700.0781, 61.1484, 0.25);
 	RemoveBuildingForPlayer(playerid, 16094, 191.1406, 1870.0391, 21.4766, 0.25);
 	//----
+	PlayerInfo[playerid][dRank] = 0;
+    PlayerInfo[playerid][Deaths] = 0;
+	PlayerInfo[playerid][Kills] = 0;
 	PlayerInfo[playerid][Jailed] = 0;
 	PlayerInfo[playerid][Frozen] = 0;
+	PlayerInfo[playerid][Level] = 0;
+	PlayerInfo[playerid][Helper] = 0;
 	PlayerInfo[playerid][OnDuty] = 0;
 	PlayerInfo[playerid][LoggedIn] = 0;
 	PlayerInfo[playerid][Registered] = 0;
@@ -7772,7 +7747,6 @@ public OnPlayerConnect(playerid)
 	PlayerInfo[playerid][blip] = 0;
 	PlayerInfo[playerid][ConnectTime] = gettime();
 	AntiSK[playerid] = 0;
-
 	//------------------------------------------------------
 	Attach3DTextLabelToPlayer(RankLabel[playerid], playerid, 0.0, 0.0, 0.5);
 	//------------------------------------------------------
@@ -8012,7 +7986,7 @@ public OnPlayerDisconnect(playerid, reason)
 {
 
 PlayersOnline--;
-//StealingA69Prot[playerid] = 0;  //prototype
+StealingA69Prot[playerid] = 0;  //prototype
 //++++++++++++++++++++SQL+++++++++++++++++
 if(Logged[playerid] == 1)
 {
@@ -8023,9 +7997,8 @@ if(Logged[playerid] == 1)
         new money = GetPlayerMoney(playerid); //Gets players money
         new query[200], pname[24]; //Creates the variables
         GetPlayerName(playerid, pname, 24); //Gets the players name.
-       	new h, m, s; TotalGameTime(playerid, h, m, s);
-        format(query, sizeof(query), "UPDATE playerdata SET score=%d, money=%d WHERE user='%s'", score, money, pname);
-        format(query, sizeof(query), "UPDATE playerdata SET adminlevel=%d, oplevel=%d, pkills=%d, pdeaths=%d, dlevel=%d, phours=%d, pminutes=%d, pseconds=%d WHERE user='%s'", PlayerInfo[playerid][Level], PlayerInfo[playerid][Helper], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][dRank], h, m, s, pname);
+        new h, m, s; TotalGameTime(playerid, h, m, s);
+        format(query, sizeof(query), "UPDATE playerdata SET score=%d, money=%d, adminlevel=%d, oplevel=%d, pkills=%d, pdeaths=%d, dlevel=%d, phours=%d, pminutes=%d, pseconds=%d WHERE user='%s'", score, money, PlayerInfo[playerid][Level], PlayerInfo[playerid][Helper], PlayerInfo[playerid][Helper], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][dRank], h, m, s, pname);
         mysql_query(query);
         //No need to store a result for a update string
 }
@@ -8067,20 +8040,13 @@ format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Total Players In S
 	SetPVarInt(playerid,"LastID",-1);
 	new PlayerName[MAX_PLAYER_NAME];
 	GetPlayerName(playerid, PlayerName, sizeof(PlayerName));
-//===================================================DINI DUMP BY ABHAY +++++++++++++++++++++++++++++++++
-//	if(PlayerInfo[playerid][LoggedIn] == 1)	SavePlayer(playerid);
-//	if(udb_Exists(PlayerName2(playerid))) dUserSetINT(PlayerName2(playerid)).("loggedin",0);
 
-	PlayerInfo[playerid][dRank] = 0;
-    PlayerInfo[playerid][Deaths] = 0;
-	PlayerInfo[playerid][Kills] = 0;
-	PlayerInfo[playerid][Level] = 0;
-	PlayerInfo[playerid][Helper] = 0;
+	if(PlayerInfo[playerid][LoggedIn] == 1)	SavePlayer(playerid);
+	if(udb_Exists(PlayerName2(playerid))) dUserSetINT(PlayerName2(playerid)).("loggedin",0);
   	PlayerInfo[playerid][LoggedIn] = 0;
 	PlayerInfo[playerid][Level] = 0;
 	PlayerInfo[playerid][Jailed] = 0;
-	PlayerInfo[playerid][Frozen] = 0; 
-
+	PlayerInfo[playerid][Frozen] = 0;
 
 	if(PlayerInfo[playerid][Jailed] == 1) KillTimer( JailTimer[playerid] );
 	if(PlayerInfo[playerid][Frozen] == 1) KillTimer( FreezeTimer[playerid] );
@@ -9082,7 +9048,6 @@ public OnPlayerDeath(playerid, killerid, reason)
                         }
 
         }
-/*
         if(StealingA69Prot[playerid] == 1)
 		{
   		SendClientMessage(playerid, 0x00BFFFAA, "You failed stealing the Area69 Prototype!");
@@ -9096,7 +9061,6 @@ public OnPlayerDeath(playerid, killerid, reason)
 		SendClientMessageToAll(0xC93CCE00,kk);
 		SetPVarInt(playerid,"StealingTime",GetTickCount()+600000);
   		}
-*/
         PlayerInfo[killerid][Kills] ++;
 
 
@@ -11561,7 +11525,7 @@ public OnPlayerText(playerid, text[])
 	if(text[0] == '.' && PlayerInfo[playerid][Level] >= 1) {
 	    new string[128]; GetPlayerName(playerid,string,sizeof(string));
 		format(string,sizeof(string),"A.Chat:[%i]%s: %s",playerid,string,text[1]);
-		MessageToAdmins(0x8000FFC8,string);
+		MessageToAdmins(C_LBLUE,string);
 		return 0;
 	}
     if(text[0] == ',' && PlayerInfo[playerid][Level] >= 6) {
@@ -12120,7 +12084,6 @@ public OnVehicleStreamOut(vehicleid, forplayerid)
 
 public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
-
 if(dialogid == 15000) //If Dialog is our register dialog
 {
         if(response) //If they click the button register
@@ -12874,7 +12837,6 @@ switch(dialogid) // Lookup the dialogid
 }
               }
          }
-/*
 		case 125:
 		{
 		   if(!response)
@@ -12956,7 +12918,6 @@ switch(dialogid) // Lookup the dialogid
 	  }
 	 }
     }
-*/
     case 183:
 	{
         if(!response)
@@ -14815,7 +14776,7 @@ CMD:rules2(playerid, params[])
 CMD:updates(playerid, params[])
 {
 if(PlayerInfo[playerid][Level] >= 0) {
-ShowPlayerDialog(playerid,110,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 Update Notes:","\n\n"cgreen"Scripted By [D]ark_[E]mperor\nIntelVan at area21 By MexIvanov\nPermanent Clan System Added\nNew Radio System With New Channels\nAnti cheat by Mex\nHeadshot And Christmas System Added\nLags Reduced\n\n"cwhite"Visit us at xpsamp.co.in\n\nXenon Pro Gaming\n\nCall Of Duty - Real World At War 2","Ok","Cancel");
+ShowPlayerDialog(playerid,110,DIALOG_STYLE_MSGBOX ,""cred"COD-RWW2 Update Notes:","\n\n"cgreen"Scripted By [D]ark_[E]mperor\nAdmin area with working gates added\nPermanent Clan System Added\nNew Radio System With New Channels\nMath And reaction tests Added\nHeadshot And Christmas System Added\nLags Reduced\n\n"cwhite"Visit us at xpsamp.co.in\n\nXenon Pro Gaming\n\nCall Of Duty - Real World At War 2","Ok","Cancel");
 return 1;
 }
 return 0;
@@ -16078,7 +16039,6 @@ CMD:settester(playerid,params[]) {
 		}
 		return 1;
 }
-/*
 CMD:oosx(playerid, params[])
 {
    new namee[MAX_PLAYER_NAME+1];
@@ -16105,7 +16065,7 @@ CMD:oos(playerid,params[]) {
 			level = strval(tmp2);
 
 			if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
-				if(Logged[player1] == 1) {
+				if(PlayerInfo[player1][LoggedIn] == 1) {
 					if(level > 10 ) return SendClientMessage(playerid,red,"Special Command Not For You");
 					if(level == PlayerInfo[player1][Level]) return SendClientMessage(playerid,red,"special CMD: Player is already this level");
 					GetPlayerName(player1, playername, sizeof(playername));	GetPlayerName(playerid, adminname, sizeof(adminname));
@@ -16156,7 +16116,7 @@ CMD:ooc(playerid,params[]) {
 			level = strval(tmp2);
 
 			if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
-				if(Logged[player1] == 1) {
+				if(PlayerInfo[player1][LoggedIn] == 1) {
 					if(level > 10 ) return SendClientMessage(playerid,red,"Special Command Not For You");
 					if(level == PlayerInfo[player1][Level]) return SendClientMessage(playerid,red,"special CMD: Player is already this level");
 					GetPlayerName(player1, playername, sizeof(playername));	GetPlayerName(playerid, adminname, sizeof(adminname));
@@ -16192,7 +16152,7 @@ if(PlayerInfo[playerid][Level] >= 0)
     }
 	return 1;
 }
-*/
+
 CMD:scripter(playerid, params[])
 {
    new namee[MAX_PLAYER_NAME+1];
@@ -16615,7 +16575,7 @@ SendClientMessage(playerid, -1,"/ls /lsof, /afk");
 SendClientMessage(playerid, -1,"******************************");
 return 1;
 }
-/*
+
 CMD:ban(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 5) {
@@ -16636,7 +16596,7 @@ CMD:ban(playerid,params[]) {
                 for(new i = 1; i < MAX_REPORTS-1; i++) Reports[i] = Reports[i+1];
 			    Bans[MAX_REPORTS-1] = string;
 				print(string);
-                if(udb_Exists(PlayerName2(player1)) && Logged[player1] == 1) dUserSetINT(PlayerName2(player1)).("banned",1);
+                if(udb_Exists(PlayerName2(player1)) && PlayerInfo[player1][LoggedIn] == 1) dUserSetINT(PlayerName2(player1)).("banned",1);
 				format(string,sizeof(string),"banned by Administrator %s. Reason: %s", adminname, params[2] );
 				return VBanID(playerid,player1,params[2]);
 			} else return SendClientMessage(playerid, red, "Player is not connected or is yourself or is the highest level admin");
@@ -16663,7 +16623,7 @@ CMD:rangeban(playerid,params[]) {
                 for(new i = 1; i < MAX_REPORTS-1; i++) Reports[i] = Reports[i+1];
 			    Bans[MAX_REPORTS-1] = string;
 				print(string);
-                if(udb_Exists(PlayerName2(player1)) && Logged[player1] == 1) dUserSetINT(PlayerName2(player1)).("banned",1);
+                if(udb_Exists(PlayerName2(player1)) && PlayerInfo[player1][LoggedIn] == 1) dUserSetINT(PlayerName2(player1)).("banned",1);
 				format(string,sizeof(string),"banned by Administrator %s. Reason: %s", adminname, params[2] );
 				return ABanID(playerid,player1,params[2]);
 			} else return SendClientMessage(playerid, red, "Player is not connected or is yourself or is the highest level admin");
@@ -16717,260 +16677,6 @@ CMD:searchban(playerid,params[]) {
 CMD:sban(playerid,params[]) {
 	return cmd_searchban(playerid, params);
 }
-*/
-//+++++++++++++++++++++++++++++ Disable Switch By mex  +++++++++++++++
-
-CMD:antirf(playerid, params[])
-{
-   new varsay[10];
-   if(sscanf(params,"s[10]", varsay)) return SendClientMessage(playerid, 0xFFFFFFFF,"use /antirf  [0 - 1]");
-   if(strfind(varsay, "0", true) != -1)
-   {
-   		SendClientMessage(playerid, 0xFFFF00FF, "The Anti-rapid script has been disabled!.");
-     	enablearf=0;
-   }
-   else if(strfind(varsay, "1", true) != -1)
-   {
-      	SendClientMessage(playerid, 0xFFFF00FF, "The Anti-rapid script has been enabled!.");
-   		enablearf=1;
-   }
-   return 1;
-}
-CMD:anticrash(playerid, params[])
-{
-   new varsay[10];
-   if(sscanf(params,"s[10]", varsay)) return SendClientMessage(playerid, 0xFFFFFFFF,"use /anticrash  [0 - 1]");
-   if(strfind(varsay, "0", true) != -1)
-   {
-   		SendClientMessage(playerid, 0xFFFF00FF, "The Anti-crash script has been disabled!.");
-     	enablecrash=0;
-   }
-   else if(strfind(varsay, "1", true) != -1)
-   {
-      	SendClientMessage(playerid, 0xFFFF00FF, "The Anti-crash script has been enabled!.");
-   		enablecrash=1;
-   }
-   return 1;
-}
-
-//++++++++++++++++++++++++++++NEW BAN SYSTEM BY ABHAY +++++++++++++++++++
-CMD:ban(playerid, params[])
-{
-  if(PlayerInfo[playerid][Level] >= 2)
-  {
-    new targetid, reason[100];
-    if(sscanf(params,"ds[100]", targetid, reason)) return SendClientMessage(playerid, C_WHITE,"USAGE: /ban [playerid][reason]");
-    if(!IsPlayerConnected(playerid) && targetid != INVALID_PLAYER_ID)
-    {
-      SendClientMessage(playerid, C_RED,"SERVER: Player is not connected!");
-    }
-    else
-    {
-      new playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
-	  GetPlayerName(targetid, playername, sizeof(playername)); GetPlayerName(playerid, adminname, sizeof(adminname));
-	  CMDMessageToAdmins(playerid,"BAN");
-	  format(string,sizeof(string),"%s has been banned by Administrator %s.",playername,adminname);
-//	  SendClientMessageToAll(red,string);
-	  format(string,sizeof(string),"[Reason: %s]",params[2]);
-//	  SendClientMessageToAll(red,string);
- 	  SaveToFile("BanLog",string);
-      for(new i = 1; i < MAX_REPORTS-1; i++) Reports[i] = Reports[i+1];
-	  Bans[MAX_REPORTS-1] = string;
-	  print(string);
-      new bquery[200], IP[16];
-      GetPlayerIp(targetid, IP, 16);
-      format(bquery, sizeof(bquery),"INSERT INTO bandata(admin, player, reason, IP, banned) VALUES('%s', '%s', '%s','%s', 1)", PlayerName5(playerid),PlayerName5(targetid), reason, IP);
-      mysql_query(bquery);
-//      new string[256];
-      format(string, sizeof(string),"%s has been banned by Admin %s [Reason: %s]", PlayerName5(targetid), PlayerName5(playerid), reason);
-      SendClientMessageToAll(red,string);
-	  SendClientMessage(playerid,0xFFFF00FF,"You have been banned from the server please make a unban application at our forum");
-	  SendClientMessage(playerid,0xFFFF00FF,"Forum  xpsamp.co.in");
-      mysql_free_result();
-      CMDMessageToAdmins(playerid,"BAN");
-      SetTimerEx("DelayedKick", 1000, false, "i", targetid);
-    }
-  } else return SendClientMessage(playerid, C_RED,"You are not authorized to use this command!");
-  return 1;
-}
-
-CMD:unban(playerid, params[])
-{
-if(PlayerInfo[playerid][Level] >= 5)
-  {
-	  new target[50];
-	  if(sscanf(params,"s[50]", target)) return SendClientMessage(playerid, C_RED,"USAGE: /unban [player name]");
-	  new query[200];
-	  format(query, sizeof(query),"SELECT * FROM `bandata` WHERE `player`='%s' AND `banned`=1 LIMIT 1", target);
-	  mysql_query(query);
-	  mysql_store_result();
-	  new rows = mysql_num_rows();
-	  if(rows == 1)
-	  {
-	    new uquery[200];
-	    format(uquery, sizeof(uquery),"DELETE FROM `bandata` WHERE player='%s'", target);
-	    mysql_query(uquery);
-	    mysql_store_result();
-	    new string[200];
-	    format(string, sizeof(string),"You have unbanned %s", target);
-	    SendClientMessage(playerid, C_BLUE,string);
-	    CMDMessageToAdmins(playerid,"UNBAN");
-	  }
-	  else if(!rows)
-	  {
-	    new str[128];
-	    format(str, sizeof(str),"[ERROR]: No ban was found on this name %s", target);
-	    SendClientMessage(playerid, C_RED, str);
-	    mysql_free_result();
-	  }
-  }
-else return SendClientMessage(playerid, C_RED,"You are not authorized to use this command!");
-return 1;
-}
-
-CMD:sban(playerid, params[])// search for existing bans
-{
-  if(PlayerInfo[playerid][Level] >= 2)
-  {
-    new target[50], admin[50], player[50], reason[100], IP[16];
-    if(sscanf(params,"s[50]", target)) return SendClientMessage(playerid, C_RED,"USAGE: /sban [player name]");
-    new query[200];
-    format(query, sizeof(query),"SELECT admin,player,reason,IP FROM `bandata` WHERE `player`='%s' AND `banned`=1 LIMIT 1", target);
-    mysql_query(query);
-    mysql_store_result();
-    CMDMessageToAdmins(playerid,"SBAN");
-    new rows = mysql_num_rows();
-    if(rows == 1)
-    {
-      while(mysql_fetch_row(query))
-      {
-        mysql_fetch_field_row(admin, "admin");
-        mysql_fetch_field_row(player, "player");
-        mysql_fetch_field_row(IP, "IP");
-        mysql_fetch_field_row(reason, "reason");
-      }
-      new string[128];
-      format(string, sizeof(string),"Admin: %s  | Player:%s | Reason:%s | IP:%s " , admin, player, reason, IP);
-      SendClientMessage(playerid, C_RED, string);
-    }
-    if(!rows)
-    {
-      SendClientMessage(playerid, C_RED,"SERVER: No ban found on this name!");
-    }
-  }
-  else return SendClientMessage(playerid, C_RED,"You are not authorized to use this command!");
-  return 1;
-}
-//==========================Range Ban=======================================
-CMD:rban(playerid, params[])
-{
-  if(PlayerInfo[playerid][Level] >= 6)
-  {
-    new targetid, reason[100];
-    if(sscanf(params,"ds[100]", targetid, reason)) return SendClientMessage(playerid, C_WHITE,"USAGE: /ban [playerid][reason]");
-    if(!IsPlayerConnected(playerid) && targetid != INVALID_PLAYER_ID)
-    {
-      SendClientMessage(playerid, C_RED,"SERVER: Player is not connected!");
-    }
-    else
-    {
-      new playername[MAX_PLAYER_NAME], adminname[MAX_PLAYER_NAME], string[128];
-	  GetPlayerName(targetid, playername, sizeof(playername)); GetPlayerName(playerid, adminname, sizeof(adminname));
-	  CMDMessageToAdmins(playerid,"BAN");
-	  format(string,sizeof(string),"%s has been range banned by Administrator %s.",playername,adminname);
-//	  SendClientMessageToAll(red,string);
-	  format(string,sizeof(string),"[Reason: %s]",params[2]);
-//	  SendClientMessageToAll(red,string);
- 	  SaveToFile("BanLog",string);
-      for(new i = 1; i < MAX_REPORTS-1; i++) Reports[i] = Reports[i+1];
-	  Bans[MAX_REPORTS-1] = string;
-	  print(string);
-      new bquery[200], IP[16];
-      GetPlayerIp(targetid, IP, 16);
-      format(bquery, sizeof(bquery),"INSERT INTO rangeban(admin, player, reason, IP, banned) VALUES('%s', '%s', '%s','%s', 1)", PlayerName5(playerid),PlayerName5(targetid), reason, IP);
-      mysql_query(bquery);
-//      new string[256];
-      format(string, sizeof(string),"%s has been banned by Admin %s [Reason: %s]", PlayerName5(targetid), PlayerName5(playerid), reason);
-      SendClientMessageToAll(red,string);
-	  SendClientMessage(playerid,0xFFFF00FF,"You have been banned from the server please make a unban application at our forum");
-	  SendClientMessage(playerid,0xFFFF00FF,"Forum  xpsamp.co.in");
-      mysql_free_result();
-      CMDMessageToAdmins(playerid,"BAN");
-      SetTimerEx("DelayedKick", 1000, false, "i", targetid);
-    }
-  } else return SendClientMessage(playerid, C_RED,"You are not authorized to use this command!");
-  return 1;
-}
-
-CMD:runban(playerid, params[])
-{
-if(PlayerInfo[playerid][Level] >= 6)
-  {
-	  new target[50];
-	  if(sscanf(params,"s[50]", target)) return SendClientMessage(playerid, C_RED,"USAGE: /unban [player name]");
-	  new query[200];
-	  format(query, sizeof(query),"SELECT * FROM `rangeban` WHERE `player`='%s' AND `banned`=1 LIMIT 1", target);
-	  mysql_query(query);
-	  mysql_store_result();
-	  new rows = mysql_num_rows();
-	  if(rows == 1)
-	  {
-	    new uquery[200];
-	    format(uquery, sizeof(uquery),"DELETE FROM `rangeban` WHERE player='%s'", target);
-	    mysql_query(uquery);
-	    mysql_store_result();
-	    new string[200];
-	    format(string, sizeof(string),"You have unbanned %s", target);
-	    SendClientMessage(playerid, C_BLUE,string);
-	    CMDMessageToAdmins(playerid,"RUNBAN");
-	  }
-	  else if(!rows)
-	  {
-	    new str[128];
-	    format(str, sizeof(str),"[ERROR]: No ban was found on this name %s", target);
-	    SendClientMessage(playerid, C_RED, str);
-	    mysql_free_result();
-	  }
-  }
-else return SendClientMessage(playerid, C_RED,"You are not authorized to use this command!");
-return 1;
-}
-
-CMD:rsban(playerid, params[])// search for existing bans
-{
-  if(PlayerInfo[playerid][Level] >= 2)
-  {
-    new target[50], admin[50], player[50], reason[100], IP[16];
-    if(sscanf(params,"s[50]", target)) return SendClientMessage(playerid, C_RED,"USAGE: /sban [player name]");
-    new query[200];
-    format(query, sizeof(query),"SELECT admin,player,reason,IP FROM `rangeban` WHERE `player`='%s' AND `banned`=1 LIMIT 1", target);
-    mysql_query(query);
-    mysql_store_result();
-    CMDMessageToAdmins(playerid,"RSBAN");
-    new rows = mysql_num_rows();
-    if(rows == 1)
-    {
-      while(mysql_fetch_row(query))
-      {
-        mysql_fetch_field_row(admin, "admin");
-        mysql_fetch_field_row(player, "player");
-        mysql_fetch_field_row(IP, "IP");
-        mysql_fetch_field_row(reason, "reason");
-      }
-      new string[128];
-      format(string, sizeof(string),"Admin: %s  | Player:%s | Reason:%s | IP:%s " , admin, player, reason, IP);
-      SendClientMessage(playerid, C_RED, string);
-    }
-    if(!rows)
-    {
-      SendClientMessage(playerid, C_RED,"SERVER: No ban found on this name!");
-    }
-  }
-  else return SendClientMessage(playerid, C_RED,"You are not authorized to use this command!");
-  return 1;
-}
-
-
 CMD:sfile(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 2) {
@@ -17221,7 +16927,7 @@ CMD:getinfo(playerid,params[]) {
 
 			if(PlayerInfo[player1][Jailed] == 1) P1Jailed = "Yes"; else P1Jailed = "No";
 			if(PlayerInfo[player1][Frozen] == 1) P1Frozen = "Yes"; else P1Frozen = "No";
-			if(Logged[player1] == 1) P1Logged = "Yes"; else P1Logged = "No";
+			if(PlayerInfo[player1][LoggedIn] == 1) P1Logged = "Yes"; else P1Logged = "No";
 			if(fexist(file)) P1Register = "Yes"; else P1Register = "No";
 			if(dUserINT(PlayerName2(player1)).("LastOn")==0) tmp2 = "Never"; else tmp2 = dini_Get(file,"LastOn");
 			if(strlen(dini_Get(file,"RegisteredDate")) < 3) RegDate = "n/a"; else RegDate = dini_Get(file,"RegisteredDate");
@@ -17429,7 +17135,7 @@ CMD:vr(playerid,params[]) {
 }
 
 CMD:afix(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    if(PlayerInfo[playerid][Level] >= 1 || IsPlayerAdmin(playerid)) {
 	    if(isnull(params)) {
 		    if(IsPlayerInAnyVehicle(playerid)) {
 			RepairVehicle(GetPlayerVehicleID(playerid));
@@ -17456,7 +17162,7 @@ CMD:afix(playerid,params[]) {
 
 CMD:ltune(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if(IsPlayerInAnyVehicle(playerid)) {
         new LVehicleID = GetPlayerVehicleID(playerid), LModel = GetVehicleModel(LVehicleID);
         switch(LModel)
@@ -17474,7 +17180,7 @@ CMD:ltune(playerid,params[]) {
 
 CMD:lhy(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if(IsPlayerInAnyVehicle(playerid)) {
         new LVehicleID = GetPlayerVehicleID(playerid), LModel = GetVehicleModel(LVehicleID);
         switch(LModel)
@@ -17489,7 +17195,7 @@ CMD:lhy(playerid,params[]) {
 }
 CMD:lcar(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if (!IsPlayerInAnyVehicle(playerid)) {
 			CarSpawner(playerid,411);
 			CMDMessageToAdmins(playerid,"LCAR");
@@ -17559,7 +17265,7 @@ CMD:giveallscore(playerid,params[])
 }
 CMD:lbike(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if (!IsPlayerInAnyVehicle(playerid)) {
 			CarSpawner(playerid,522);
 			CMDMessageToAdmins(playerid,"LBIKE");
@@ -17569,7 +17275,7 @@ CMD:lbike(playerid,params[]) {
 }
 CMD:hydra(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 3) {
 		if (!IsPlayerInAnyVehicle(playerid)) {
 			CarSpawner(playerid,520);
 			CMDMessageToAdmins(playerid,"HYDRA");
@@ -17579,7 +17285,7 @@ CMD:hydra(playerid,params[]) {
 }
 CMD:hunter(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 3) {
 		if (!IsPlayerInAnyVehicle(playerid)) {
 			CarSpawner(playerid,425);
 			CMDMessageToAdmins(playerid,"HUNTER");
@@ -17589,7 +17295,7 @@ CMD:hunter(playerid,params[]) {
 }
 CMD:lheli(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if (!IsPlayerInAnyVehicle(playerid)) {
 			CarSpawner(playerid,487);
 			CMDMessageToAdmins(playerid,"LHELI");
@@ -17600,7 +17306,7 @@ CMD:lheli(playerid,params[]) {
 
 CMD:lboat(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if (!IsPlayerInAnyVehicle(playerid)) {
 			CarSpawner(playerid,493);
 			CMDMessageToAdmins(playerid,"LBOAT");
@@ -17611,7 +17317,7 @@ CMD:lboat(playerid,params[]) {
 
 CMD:lplane(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if (!IsPlayerInAnyVehicle(playerid)) {
 			CarSpawner(playerid,513);
 			CMDMessageToAdmins(playerid,"LPLANE");
@@ -17622,7 +17328,7 @@ CMD:lplane(playerid,params[]) {
 
 CMD:lnos(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 1) {
 		if(IsPlayerInAnyVehicle(playerid)) {
 	        switch(GetVehicleModel( GetPlayerVehicleID(playerid) )) {
 				case 448,461,462,463,468,471,509,510,521,522,523,581,586,449:
@@ -17635,7 +17341,7 @@ CMD:lnos(playerid,params[]) {
 }
 CMD:ltram(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 3) {
 		if (!IsPlayerInAnyVehicle(playerid)) {
 			CarSpawner(playerid,449);
 			CMDMessageToAdmins(playerid,"LCAR");
@@ -17687,7 +17393,7 @@ SendClientMessage(playerid, 0x33AA33AA, "Loaded Saved Position.");
 return 1;
 }
 CMD:car(playerid,params[]) {
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], tmp3[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index); tmp3 = strtok(params,Index);
 	    if(isnull(tmp)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/car [Modelid/Name] [colour1] [colour2]");
 		new car, colour1, colour2, string[128];
@@ -17755,7 +17461,7 @@ CMD:carcolour(playerid,params[]) {
 
 CMD:god(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 4 || IsPlayerAdmin(playerid)) {
     	if(PlayerInfo[playerid][God] == 0)	{
    	    	PlayerInfo[playerid][God] = 1;
     	    SetPlayerHealth(playerid,100000);
@@ -17774,7 +17480,7 @@ CMD:god(playerid,params[]) {
 
 CMD:sgod(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 6 || IsPlayerAdmin(playerid)) {
    		if(PlayerInfo[playerid][God] == 0)	{
         	PlayerInfo[playerid][God] = 1;
 	        SetPlayerHealth(playerid,100000);
@@ -17995,7 +17701,7 @@ CMD:lslowmo(playerid,params[]) {
 
 CMD:jetpack(playerid,params[]) {
     if(isnull(params))	{
-    	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    	if(PlayerInfo[playerid][OnDuty] >= 1 || IsPlayerAdmin(playerid)) {
 			SendClientMessage(playerid,blue,"Jetpack Spawned.");
 			CMDMessageToAdmins(playerid,"JETPACK");
 			return SetPlayerSpecialAction(playerid, 2);
@@ -18016,7 +17722,7 @@ CMD:jetpack(playerid,params[]) {
 }
 
 CMD:flip(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    if(PlayerInfo[playerid][OnDuty] >= 1 || IsPlayerAdmin(playerid)) {
 	    if(isnull(params)) {
 		    if(IsPlayerInAnyVehicle(playerid)) {
 			new VehicleID, Float:X, Float:Y, Float:Z, Float:Angle; GetPlayerPos(playerid, X, Y, Z); VehicleID = GetPlayerVehicleID(playerid);
@@ -18049,7 +17755,7 @@ CMD:destroycar(playerid,params[]) {
 }
 CMD:ltc(playerid,params[]) {
 	#pragma unused params
-	if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][OnDuty] == 1) {
 		if(!IsPlayerInAnyVehicle(playerid)) {
 			if(PlayerInfo[playerid][pCar] != -1) CarDeleter(PlayerInfo[playerid][pCar]);
 			new Float:X,Float:Y,Float:Z,Float:Angle,LVehicleIDt;	GetPlayerPos(playerid,X,Y,Z); GetPlayerFacingAngle(playerid,Angle);
@@ -18065,7 +17771,7 @@ CMD:ltc(playerid,params[]) {
 
 
 CMD:teleplayer(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    if(PlayerInfo[playerid][OnDuty] == 1 || IsPlayerAdmin(playerid)) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
 	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp) || !IsNumeric(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/teleplayer [playerid] to [playerid]");
 		new player1 = strval(tmp), player2 = strval(tmp2), string[128], Float:plocx,Float:plocy,Float:plocz;
@@ -18093,7 +17799,7 @@ CMD:teleplayer(playerid,params[]) {
 }
 
 CMD:goto(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    if(PlayerInfo[playerid][OnDuty] >= 1 || IsPlayerAdmin(playerid)) {
 	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/goto [playerid]");
 	    new player1, string[128];
 		if(!IsNumeric(params)) player1 = ReturnPlayerID(params);
@@ -18113,7 +17819,7 @@ CMD:goto(playerid,params[]) {
 }
 
 CMD:vgoto(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    if(PlayerInfo[playerid][Level] >= 2 || IsPlayerAdmin(playerid)) {
 	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/vgoto [vehicleid]");
 	    new player1, string[128];
 	    player1 = strval(params);
@@ -18130,7 +17836,7 @@ CMD:vgoto(playerid,params[]) {
 }
 
 CMD:vget(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    if(PlayerInfo[playerid][Level] >= 3 || IsPlayerAdmin(playerid)) {
 	    if(isnull(params)) return SendClientMessage(playerid,red,"iThe[XP-BOT]: Use like This:/vget [vehicleid]");
 	    new player1, string[128];
 	    player1 = strval(params);
@@ -18144,7 +17850,7 @@ CMD:vget(playerid,params[]) {
 }
 
 CMD:lgoto(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    if(PlayerInfo[playerid][Level] >= 2 || IsPlayerAdmin(playerid)) {
 		new Float:x, Float:y, Float:z;
         new tmp[256], tmp2[256], tmp3[256];
 		new string[128], Index;	tmp = strtok(params,Index); tmp2 = strtok(params,Index); tmp3 = strtok(params,Index);
@@ -18159,7 +17865,7 @@ CMD:lgoto(playerid,params[]) {
 
 
 CMD:get(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid)) {
 	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/get [playerid]");
     	new player1, string[128];
 		if(!IsNumeric(params)) player1 = ReturnPlayerID(params);
@@ -18182,7 +17888,7 @@ CMD:get(playerid,params[]) {
 }
 
 CMD:pget(playerid,params[]) {
-    if(PlayerInfo[playerid][OnDuty] >= 1|| IsPlayerAdmin(playerid) || PlayerInfo[playerid][Level] >= 8) {
+    if(PlayerInfo[playerid][Level] >= 2|| IsPlayerAdmin(playerid)) {
 	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/pget [playerid]");
     	new player1, string[128];
 		if(!IsNumeric(params)) player1 = ReturnPlayerID(params);
@@ -19426,7 +19132,7 @@ CMD:setlevel(playerid,params[]) {
 			level = strval(tmp2);
 
 			if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
-				if(Logged[player1] == 1) {
+				if(PlayerInfo[player1][LoggedIn] == 1) {
 					if(level > 10 ) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: Incorrect Level");
 					if(level == PlayerInfo[player1][Level]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: Player is already this level");
 	       			CMDMessageToAdmins(playerid,"SETLEVEL");
@@ -19462,7 +19168,7 @@ CMD:settemplevel(playerid,params[]) {
 			level = strval(tmp2);
 
 			if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
-				if(Logged[player1] == 1) {
+				if(PlayerInfo[player1][LoggedIn] == 1) {
 					if(level > 5 ) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: Incorrect Level");
 					if(level == PlayerInfo[player1][Level]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: Player is already this level");
 	       			CMDMessageToAdmins(playerid,"SETTEMPLEVEL");
@@ -19706,7 +19412,6 @@ CMD:rheal(playerid,params[]) // can i show u something? somwthing what?
  else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You must be logged in to use this commands");
 return 1;
 }
-/*
 CMD:rban(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1) {
 		if(PlayerInfo[playerid][Level] >= 10) {
@@ -19725,7 +19430,7 @@ CMD:rban(playerid,params[]) {
 				SendClientMessage(playerid,red,string);
 				SaveToFile("BanLog",string);
 				print(string);
-				if(udb_Exists(PlayerName2(player1)) && Logged[player1] == 1) dUserSetINT(PlayerName2(player1)).("banned",1);
+				if(udb_Exists(PlayerName2(player1)) && PlayerInfo[player1][LoggedIn] == 1) dUserSetINT(PlayerName2(player1)).("banned",1);
 				GetPlayerIp(player1,ip,sizeof(ip));
 	            strdel(ip,strlen(ip)-2,strlen(ip));
     	        format(ip,128,"%s**",ip);
@@ -19736,7 +19441,6 @@ CMD:rban(playerid,params[]) {
 		} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You are not a high enough level to use this command");
 	} else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You must be logged in to use this commands");
 }
-*/
 CMD:rangeweapon(playerid,params[]) {
 	if(PlayerInfo[playerid][Level] >= 4) {
     new Weap, ammo, name[128], string[128];
@@ -19996,7 +19700,7 @@ CMD:object(playerid,params[]) {
 //===================[ Move ]===================================================
 
 CMD:move(playerid,params[]) {
-	if(PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 3) {
 	    if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/move [up / down / +x / -x / +y / -y / off]");
 		new Float:X, Float:Y, Float:Z;
 		if(strcmp(params,"up",true) == 0)	{
@@ -20019,7 +19723,7 @@ CMD:move(playerid,params[]) {
 }
 
 CMD:moveplayer(playerid,params[]) {
-	if(PlayerInfo[playerid][Level] >= 8) {
+	if(PlayerInfo[playerid][Level] >= 3) {
 	    new tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
 	    if(isnull(tmp) || isnull(tmp2) || !IsNumeric(tmp)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/moveplayer [playerid] [up / down / +x / -x / +y / -y / off]");
 	    new Float:X, Float:Y, Float:Z, player1 = strval(tmp);
@@ -20072,7 +19776,7 @@ CMD:fakechat(playerid,params[]) {
 		new player1 = strval(tmp);
 		if(PlayerInfo[player1][Level] == ServerInfo[MaxAdminLevel] && PlayerInfo[playerid][Level] != ServerInfo[MaxAdminLevel]) return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: You cannot use this command on this admin");
         if(IsPlayerConnected(player1) && player1 != INVALID_PLAYER_ID) {
-	        //CMDMessageToAdmins(playerid,"FAKECHAT");
+	        CMDMessageToAdmins(playerid,"FAKECHAT");
 			SendPlayerMessageToAll(player1, params[strlen(tmp)+1]);
 			return SendClientMessage(playerid,blue,"Fake message sent");
 	    } else return SendClientMessage(playerid,red,"iThe[XP-INFO]Bot: Player is not connected");
@@ -20856,10 +20560,6 @@ CMD:stats2(playerid,params[]) {
 	return 1;
 }
 #endif
-//++++++++++++++++++++++++++++++++++++++++ DINI  DUMP________________________________
-
-/*
-
 CMD:register(playerid,params[])
 {
     if (PlayerInfo[playerid][LoggedIn] == 1) return SendClientMessage(playerid,red,"ACCOUNT: You are already registered and logged in.");
@@ -20929,29 +20629,6 @@ CMD:login(playerid,params[])
 	}
 }
 
-*/
-//++++++++++++++++++++++++++++++++++++++++++++++DINIDUMP********************************
-CMD:login(playerid,params[])
-{
-    if(!Logged[playerid]) //If the player isn't logged in and (s)he tries to spawn.
-    {
-        if(!IsRegistered[playerid])  //If the player isn't registered
-        {
-            ShowPlayerDialog(playerid, 15000, DIALOG_STYLE_INPUT, "Register","Your user is {FF0000}not{FFFFFF} registered! Please {0000FF}register{FFFFFF} with a password below!\n {FF0000}ERROR:You must register before spawning!","Register","Cancel"); //Shows our register dialog :).
-            return 0; //Prevents the player from spawning
-        }
-        if(IsRegistered[playerid] == 1) //Our handy variable comes into use now
-        {
-            ShowPlayerDialog(playerid, 15500, DIALOG_STYLE_INPUT, "Login","Your user is {FF0000}registered{FFFFFF}! Please {0000FF}login{FFFFFF} with your password below!\n{FF0000} You must login before you spawn!","Login","Cancel"); //Shows our login dialog :).
-            return 0; //Prevents the player from spawning
-        }
-    }
-	else SendClientMessage(playerid, 0xFFCC66, "You Are Already Logged IN!!! Use /register or /login");
-    return 1;
-
-}
-
-
 CMD:changepass(playerid,params[]) {
 	if(PlayerInfo[playerid][LoggedIn] == 1)	{
 		if(isnull(params)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/changepass [new password]");
@@ -20970,7 +20647,7 @@ CMD:setname(playerid, params[])
 		if(isnull(tmp) || isnull(tmp2)) return SendClientMessage(playerid, red, "iThe[XP-BOT]: Use like This:/setname [playerid] [new name]");
 		if (udb_Exists(tmp2)) return SendClientMessage(playerid,red,"This User Name Is Taken!");
 		new player1 = strval(tmp);
-		if(Logged[player1] == 0) return SendClientMessage(playerid,red,"Player Must Have Account!");
+		if(PlayerInfo[player1][LoggedIn] == 0) return SendClientMessage(playerid,red,"Player Must Have Account!");
 		new OldName[24],str[128];
 		GetPlayerName(player1,OldName,sizeof(OldName));
 		format(str,sizeof(str),"ladmin/users/%s.sav",OldName);
@@ -20982,7 +20659,6 @@ CMD:setname(playerid, params[])
 		return SendClientMessage(player1,yellow,string);
 	}   else return SendClientMessage(playerid,red, "iThe[XP-INFO]Bot: Only Level +5 can Use This Command");
 }
-/*
 CMD:changename(playerid, params[])
 {
         if(PlayerInfo[playerid][LoggedIn] == 1)	{
@@ -21004,7 +20680,6 @@ CMD:changename(playerid, params[])
 		return SendClientMessage(playerid,yellow,string);
 	} else return SendClientMessage(playerid,red, "iThe[XP-INFO]Bot: You must have an account to use this command");
 }
-*/
 CMD:setpass(playerid,params[]) {
     if(PlayerInfo[playerid][Level] >= 5) {
 	    new string[128], tmp[256], tmp2[256], Index; tmp = strtok(params,Index), tmp2 = strtok(params,Index);
@@ -21103,101 +20778,6 @@ public OnRconLoginAttempt(ip[], password[], success)
 	return 1;
 }
 
-//++++++++++++++++++++++++++++++++++++++Anti Speed hack by abhay
-public OnPlayerUpdate(playerid)
-{
-        //Anti SpeedHack
-    if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER)
-    {
-    	if(GetPlayerVehicleID(playerid) != 578 || GetPlayerVehicleID(playerid) != 520 || GetPlayerVehicleID(playerid) != 578 || 425)
-      	{
-           if(PlayerInfo[playerid][Level] < 9)
-           {
-         		if(GetVehicleSpeed(GetPlayerVehicleID(playerid), 0) > 250)
-          		{
-                    new Float:x, Float:y, Float:z;
-                    GetPlayerPos(playerid, x, y, z);
-//                    SetPlayerPos(playerid, x, y, z+5);
-                    SpeedHacking[playerid] =1;
-                    CheatsDetected(playerid);
-            		return 1;
-         		}
-   			}
-     	}
-    }
-    //OTHER CODES
-    return 1;
-}
-stock CheatsDetected(playerid)
-{
-   new string[128];
-   if(SpeedHacking[playerid] == 1)
-   {
-      new pName1[MAX_PLAYER_NAME];
-      GetPlayerName(playerid,pName1,MAX_PLAYER_NAME);
-      format(string,sizeof(string),"Warning: %s(%d). For Speed Hacks",pName1,playerid);
-      MessageToAdmins(red,string);
-      return 1;
-  }
- return 1;
-}
-stock GetVehicleSpeed(vehicleid, get3d)
-{
-        new Float:x, Float:y, Float:z;
-        GetVehicleVelocity(vehicleid, x, y, z);
-        return SpeedCheck(x, y, z, 100.0, get3d);
-}
-//+++++++++++++++++++++++++++++++++Anti crash By abhay
-public OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY, Float:fZ)
-{
-   if( hittype != BULLET_HIT_TYPE_NONE ) // Bullet Crashing uses just this hittype
-	{
-        if( !( -1000.0 <= fX <= 1000.0 ) || !( -1000.0 <= fY <= 1000.0 ) || !( -1000.0 <= fZ <= 1000.0 ) ) // a valid offset, it's impossible that a offset bigger than 1000 is legit (also less than -1000.0 is impossible, not used by this hack, but still, let's check for it, just for the future, who knows what hacks will appear). The object with biggest offset is having ~700-800 radius.
-		{       if(enablecrash==1)
-		        {
-			    Kick(playerid);
-				MessageToAdmins(red,"A Crasher Kicked");
-				}
-			
-			return 0; // let's desynchronize that bullet, so players won't crash
-		}
-	}
-
-    new rkickmes[128];
-	new pname[24];
-	GetPlayerName(playerid, pname, 24);
-	if(weaponid != 38)
- 	{
-                if((gettime() - shotTime[playerid]) < 1)
-                {
-                    shot[playerid]+=1;
-                }
-                else
-                {
-                    shot[playerid]=0;
-                }
-                if(shot[playerid] > 20)
-                {
-                        format(rkickmes, sizeof(rkickmes), "Warning: %s (%d) for Rapid fire hacks",pname,playerid);
-//						SendClientMessageToAll(0xC93CCE00,rkickmes);
-                        if(enablearf==1)
-                        {
-						MessageToAdmins(red,rkickmes);
-						}
-//						SendClientMessage(playerid, 0xFF0000FF, "You have been kicked by admin Dumbledore, for rapid fire hacks!");
-//	    				SetTimerEx("DelayedKick", 1000, false, "i", playerid);
-//                        Kick(playerid);
-                }
-                shotTime[playerid] = gettime();
-    }
-    
-  return 1;
-}
-stock BadFloat(Float:x)
-{
-    if(x >= 10.0 || x <= -10.0)return true;
-     return false;
-}
 //==============================================================================
 public OnPlayerCommandReceived(playerid, cmdtext[])
 {
@@ -21534,7 +21114,6 @@ public OnPlayerStateChange(playerid, newstate, oldstate) {
 			}
 		}
 	}
-/*
  	new vehicleidk;
     if(newstate == PLAYER_STATE_DRIVER)
     {
@@ -21563,7 +21142,7 @@ public OnPlayerStateChange(playerid, newstate, oldstate) {
             SendClientMessageToAll(0xC93CCE00,kk);
 			SendClientMessageToAll(0xC93CCE00,okk);
         }
-   	}*/
+   	}
 	if(newstate == PLAYER_STATE_DRIVER)
 	{
 	    SetPlayerArmedWeapon(playerid, 0);
@@ -21578,7 +21157,7 @@ public OnPlayerStateChange(playerid, newstate, oldstate) {
 //==============================================================================
 public OnPlayerExitVehicle(playerid, vehicleid)
 {
-/*    if(StealingA69Prot[playerid] == 1)
+    if(StealingA69Prot[playerid] == 1)
     {
     	RemovePlayerMapIcon(playerid,1);
     	SendClientMessage(playerid, 0x00BFFFAA, "You left the Area69 Prototype and the mission is failed!");
@@ -21590,7 +21169,7 @@ public OnPlayerExitVehicle(playerid, vehicleid)
     	format(kk, sizeof(kk), "** %s (%d) failed stealing Area69 Prototype!",pname,playerid);
 		SendClientMessageToAll(0xC93CCE00,kk);
 		SetPVarInt(playerid,"StealingTime",GetTickCount()+600000);
-    }*/
+    }
 	if(PlayerInfo[playerid][DoorsLocked] == 1) SetVehicleParamsForPlayer(GetPlayerVehicleID(playerid),playerid,false,false);
 
 	#if defined ENABLE_SPEC
@@ -21603,100 +21182,6 @@ public OnPlayerExitVehicle(playerid, vehicleid)
 	}
 	#endif
 	return 1;
-}
-//+++++++++++++++++++++++++New Ban system++++++++++++++++++++++++++++++++
-forward DelayedKick(playerid);
-public DelayedKick(playerid)
-{
-    Kick(playerid);
-    return 1;
-}
-// +++++++++++++++++++++++++++++My Sql Ban sys By abhay++++++++++++++++++++++
-//======================Ban system Stocks=====================================
-stock escpname(playerid)
-{
-    new escname[24], Pname[24];
-    GetPlayerName(playerid, Pname, 24);
-    mysql_real_escape_string(Pname, escname);
-    return escname;
-}
-stock PlayerName5(playerid)
-{
-  new name[MAX_PLAYER_NAME];
-  GetPlayerName(playerid, name, MAX_PLAYER_NAME);
-  return name;
-}
-stock MySQL_BanCheck(playerid)
-{
-  new query[200], admin[50], pname[50], IP[16], string1[100];
-  GetPlayerIp(playerid, IP, 16);
-  format(query, sizeof(query),"SELECT * FROM `bandata` WHERE(`player`='%s') AND `banned`=1 LIMIT 1", escpname(playerid), IP);
-  mysql_query(query);
-  mysql_query(query);
-  mysql_store_result();
-  if(mysql_num_rows() != 0)
-  {
-     while(mysql_fetch_row(query))
-     {
-       mysql_fetch_field_row(admin, "admin");
-       mysql_fetch_field_row(pname, "player");
-       mysql_fetch_field_row(string1, "reason");
-     }
-     new string[128];
-     new str[50], str1[100];
-     format(string, sizeof(string),"Admin: %s", admin);
-     format(str, sizeof(str),"Player: %s", pname);
-     format(str1, sizeof(str1),"Reason: %s", string1);
-     SendClientMessage(playerid, red,"You are banned from this server!");
-     SendClientMessage(playerid, red,"___________________");
-     SendClientMessage(playerid, red, str);
-     SendClientMessage(playerid, red, string);
-     SendClientMessage(playerid, red, str1);
-     SendClientMessage(playerid, red,"___________________");
-     SendClientMessage(playerid, red, "If you think that this BAN was a mistake, then post a screenshot(using F8) on our website");
-     SendClientMessage(playerid, red, "The current nick name has been banned you may join with a new name");
-	 SendClientMessage(playerid, red, "You have been banned from the server please make a unban application at our forum");
-	 SendClientMessage(playerid, red, "Forum  xpsamp.co.in");
-     SetTimerEx("DelayedKick", 1000, false, "i", playerid);
-  }
-  mysql_free_result();
-  return 1;
-}
-
-stock MySQL_BanCheck1(playerid)
-{
-  new query[200], admin[50], pname[50], IP[16], string1[100];
-  GetPlayerIp(playerid, IP, 16);
-  format(query, sizeof(query),"SELECT * FROM `rangeban` WHERE(`player`='%s' OR `IP`='%s') AND `banned`=1 LIMIT 1", escpname(playerid), IP);
-  mysql_query(query);
-  mysql_store_result();
-  if(mysql_num_rows() != 0)
-  {
-     while(mysql_fetch_row(query))
-     {
-       mysql_fetch_field_row(admin, "admin");
-       mysql_fetch_field_row(pname, "player");
-       mysql_fetch_field_row(string1, "reason");
-     }
-     new string[128];
-     new str[50], str1[100];
-     format(string, sizeof(string),"Admin: %s", admin);
-     format(str, sizeof(str),"Player: %s", pname);
-     format(str1, sizeof(str1),"Reason: %s", string1);
-     SendClientMessage(playerid, red,"Your IP are banned from this server!");
-     SendClientMessage(playerid, red,"___________________");
-     SendClientMessage(playerid, red, str);
-     SendClientMessage(playerid, red, string);
-     SendClientMessage(playerid, red, str1);
-     SendClientMessage(playerid, red,"___________________");
-     SendClientMessage(playerid, red, "If you think that this BAN was a mistake, then post a screenshot(using F8) on our website");
-     SendClientMessage(playerid, red, "The IP has Been Banned you wont be able to join unless u make an appeal");
-	 SendClientMessage(playerid, red, "Please make a unban application at our forum");
-	 SendClientMessage(playerid, red, "Forum  xpsamp.co.in");
-     SetTimerEx("DelayedKick", 1000, false, "i", playerid);
-  }
-  mysql_free_result();
-  return 1;
 }
 //=======================================Admin Area gates=======================================
 public MeetingGateClose(playerid)
@@ -21734,7 +21219,7 @@ public uselessnrg()
 		return 1;
 }
 //==============================Prototype=============================
-/*public OnPlayerEnterCheckpoint(playerid)
+public OnPlayerEnterCheckpoint(playerid)
 {
     if(StealingA69Prot[playerid] == 1)
         {
@@ -21758,7 +21243,6 @@ public uselessnrg()
     }
 	return 1;
 }
-*/
 //===============================Respawn u cars=================================
 stock IsVehicleOccupied(vid)
 {
@@ -21783,16 +21267,14 @@ stock MySQL_Register(playerid, passwordstring[])
     new query[200], pname[24], IP[16];
     GetPlayerName(playerid, pname, 24);
     GetPlayerIp(playerid, IP, 16);
-    format(query, sizeof(query), "INSERT INTO playerdata (user, password, score, money, IP) VALUES('%s', SHA1('%s'), 0, 0, '%s')", pname, passwordstring, IP);
-//    format(query, sizeof(query), "INSERT INTO playerdata (user, password, score, money, IP, adminlevel, oplevel, pkills, pdeaths, dlevel, phours, pminutes, pseconds) VALUES('%s', SHA1('%s'), 0, 0, '%s', 0, 0, 0, 0, 0, 0, 0, 0)", pname, passwordstring, IP);
+    format(query, sizeof(query), "INSERT INTO playerdata (user, password, score, money, IP, adminlevel, oplevel, pkills, pdeaths, dlevel, phours, pminutes, pseconds) VALUES('%s', SHA1('%s'), 0, 0, '%s', 0, 0, 0, 0, 0, 0, 0, 0)", pname, passwordstring, IP);
     mysql_query(query);
     //We do not need to store or free a result as it
     //is not a select statement. We can now send the
     //client a registration success message and set the
     //Login variable to 1.
     SendClientMessage(playerid, -1, "You have been registered on this server!");
-    Logged[playerid] = 1;
-	PlayerInfo[playerid][LoggedIn] = 1; //Sets the login variable
+    Logged[playerid] = 1; //Sets the login variable
     return 1;
 }
 
@@ -21827,8 +21309,7 @@ stock MySQL_Login(playerid)
     }
     mysql_free_result(); //We must always free a stored result
     SendClientMessage(playerid, -1, "You have been logged in!"); //Sends the client a message.
-    Logged[playerid] = 1;
-	PlayerInfo[playerid][LoggedIn] = 1; //Sets our logged in variable to one
+    Logged[playerid] = 1; //Sets our logged in variable to one
     return 1;
 }
 
@@ -23473,13 +22954,10 @@ stock CMDMessageToAdmins(playerid,command[])
 	if(ServerInfo[AdminCmdMsg] == 0) return 1;
 	new string[128]; GetPlayerName(playerid,string,sizeof(string));
 	format(string,sizeof(string),"[INFO] %s has used command %s",string,command);
-	return MessageToTwice(C_LBLUE,string);
+	return MessageToTwice(blue,string);
 }
 
 //==============================================================================
-
-//************************************** DINI DUMP BY ABHAY***********************
-/*
 SavePlayer(playerid)
 {
    	dUserSetINT(PlayerName2(playerid)).("money",GetPlayerMoney(playerid));
@@ -23532,28 +23010,6 @@ SavePlayer(playerid)
 	GetPlayerName(playerid,name,sizeof(name));
 	dini_Set(file,"Nick",name);
 }
-*/
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-SavePlayer(playerid)
-{
-if(Logged[playerid] == 1)
-{
-        //If the player disconnects before registering,
-        //we want to make sure it doesn't try update
-        //so we check if the player is logged in.
-        new score = GetPlayerScore(playerid); //Gets players score
-        new money = GetPlayerMoney(playerid); //Gets players money
-        new query[200], pname[24]; //Creates the variables
-        GetPlayerName(playerid, pname, 24); //Gets the players name.
-        new h, m, s; TotalGameTime(playerid, h, m, s);
-        format(query, sizeof(query), "UPDATE playerdata SET score=%d, money=%d, adminlevel=%d, oplevel=%d, pkills=%d, pdeaths=%d, dlevel=%d, phours=%d, pminutes=%d, pseconds=%d WHERE user='%s'", score, money, PlayerInfo[playerid][Level], PlayerInfo[playerid][Helper], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][dRank], h, m, s, pname);
-        mysql_query(query);
-        //No need to store a result for a update string
-}
-else SendClientMessage(playerid, 0xFFCC66, "You Are Not Registered or Logged IN!!! Use /register or /login");
-}
-
-
 
 //==============================================================================
 #if defined USE_MENUS
