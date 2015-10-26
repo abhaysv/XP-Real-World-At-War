@@ -71,10 +71,10 @@ ALTER TABLE playerdata ADD adminlevel INT(20), oplevel INT(20), pkills INT(20), 
 #define savefolderclan "/clan/%s.ini"
 #define savefolderclanname "/clannames/%s.ini"
 //+++++++++++++++++++++SQL SYSTEM++++++++++++++++++++++++++++++++++
-#define mysql_host "62.210.222.243" //Has to be a string
-#define mysql_user "samp_admin" //Has to be a string
-#define mysql_password "Ipconfigx@123" //There is none for wamp unless you set one.
-#define mysql_database "samp" //Has to be a string
+#define mysql_host "31.170.166.50" //Has to be a string
+#define mysql_user "u140882605_samp" //Has to be a string
+#define mysql_password "abhayrocks" //There is none for wamp unless you set one.
+#define mysql_database "u140882605_users" //Has to be a string
 
 //#define mysql_host "localhost" //Has to be a string
 //#define mysql_user "root" //Has to be a string

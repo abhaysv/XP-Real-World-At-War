@@ -1,5 +1,0 @@
-#define savefolderclan "/clan/%s.ini"
-#define savefolderclanname "/clannames/%s.ini"
-#define 	BanDir     		"/ladmin/bans/%s.ini"
-#define savefolder "/Users/%s.sav"
-#define PATH_1 "Dj/%s.ini"
