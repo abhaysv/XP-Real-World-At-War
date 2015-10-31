@@ -93,10 +93,8 @@ new TempAdmin[MAX_PLAYERS];
 new MinigunDM[MAX_PLAYERS];
 
 //++++++++++++++++++++++ANti Cheat By Perfect And Mex ++++++++++++++++++++++
-
-
-new shot[MAX_PLAYERS];
 new shotTime[MAX_PLAYERS];
+new shot[MAX_PLAYERS];
 
 new
 	enablearf = 1;
@@ -107,13 +105,6 @@ new SpeedHacking[MAX_PLAYERS];
 #define SpeedCheck(%0,%1,%2,%3,%4) floatround(floatsqroot(%4?(%0*%0+%1*%1+%2*%2):(%0*%0+%1*%1) ) *%3*1.6)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-//+++++++++++++++++++++++++++   BUG FIX TRYING INTRODUCING A NEW VAR+++++++++++++++++++++++
-
-new buggy[MAX_PLAYERS];
-
-//======================================================================================
     //Variables
 #define MAX_GROUPS 20 // Change this if you think you are going to ever have over 100 groups.
 
@@ -7370,10 +7361,8 @@ public OnPlayerRequestClass(playerid, classid)
 public OnPlayerConnect(playerid)
 {
 //+++++++++++++++++++++++++++++++++SQL++++++++++++++++
-
-	MySQL_BanCheck(playerid);
+    MySQL_BanCheck(playerid);
     MySQL_BanCheck1(playerid); //for ip ban
-    buggy[playerid] = 1;// set buggy login 0
     MoneyGiven[playerid] = -1; //Resets the variable that you will discover later in the tutorial.
     License[playerid] = 0;
     TempAdmin[playerid] = 0;
@@ -7402,13 +7391,11 @@ public OnPlayerConnect(playerid)
         if(strlen(IP[0]) != 0 && !strcmp(IP[0], IP[1], true)) //Checks that the MySQL IP has a value and that they are the same.
         {
             MySQL_Login(playerid);
-            buggy[playerid] = 0;
         }
         else if(!strlen(IP[0]) || strcmp(IP[0], IP[1], true))
         {
             ShowPlayerDialog(playerid, 15500, DIALOG_STYLE_INPUT, "Login","Your user is {FF0000}registered{FFFFFF}! Please {0000FF}login{FFFFFF} with your password below!","Login","Cancel"); //Shows our login dialog :).
             IsRegistered[playerid] = 1; //Sets the registered variable to 1 (Shows that the player is registered).
-            buggy[playerid] = 1;
         }
     }
     mysql_free_result();
@@ -8072,7 +8059,7 @@ public OnPlayerDisconnect(playerid, reason)
 PlayersOnline--;
 //StealingA69Prot[playerid] = 0;  //prototype
 //++++++++++++++++++++SQL+++++++++++++++++
-if(Logged[playerid] == 1 && buggy[playerid] == 0)
+if(Logged[playerid] == 1)
 {
         //If the player disconnects before registering,
         //we want to make sure it doesn't try update
@@ -8142,7 +8129,6 @@ format(byebye, sizeof(byebye), "[LEFT]%s has left the server! Total Players In S
  	License[playerid] = 0;
  	TempAdmin[playerid] = 0;
  	MinigunDM[playerid] = 0;
- 	buggy[playerid] = 1;
 
 
 	if(PlayerInfo[playerid][Jailed] == 1) KillTimer( JailTimer[playerid] );
@@ -12243,7 +12229,6 @@ if(dialogid == 15000) //If Dialog is our register dialog
                 new escpass[100];
                 mysql_real_escape_string(inputtext, escpass);
                 MySQL_Register(playerid, escpass);
-                buggy[playerid] = 0;
             }
             //If the password is between 1 and 100 characters then we will
             //call our MySQL_register function which will register the player.
@@ -12270,7 +12255,6 @@ if(dialogid == 15500) //Dialog login
             mysql_query(query);
             mysql_store_result();
             new numrows = mysql_num_rows();
-            buggy[playerid] = 0;
             if(numrows == 1) MySQL_Login(playerid);
             //This means that there is a user in the database with the same
             //password that we typed, we now proceed by using the login function.
@@ -22246,7 +22230,6 @@ stock MySQL_Register(playerid, passwordstring[])
     GetPlayerName(playerid, pname, 24);
     GetPlayerIp(playerid, IP, 16);
     format(query, sizeof(query), "INSERT INTO playerdata (user, password, score, money, IP) VALUES('%s', SHA1('%s'), 0, 0, '%s')", pname, passwordstring, IP);
-//    format(query, sizeof(query), "INSERT INTO playerdata (user, password, score, money, IP) VALUES('%s', SHA1('%s'), 0, 0, '%s')", pname, passwordstring, IP);
 //    format(query, sizeof(query), "INSERT INTO playerdata (user, password, score, money, IP, adminlevel, oplevel, pkills, pdeaths, dlevel, phours, pminutes, pseconds) VALUES('%s', SHA1('%s'), 0, 0, '%s', 0, 0, 0, 0, 0, 0, 0, 0)", pname, passwordstring, IP);
     mysql_query(query);
     //We do not need to store or free a result as it
